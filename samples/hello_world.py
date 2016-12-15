@@ -25,12 +25,12 @@ def send_message(name, message):
 
 
 @assistant.fill_slot(intent_name='0-SendMessage', next_param='given-name')
-def fill():
+def prompt_for_name():
     speech = 'Who should I send the message to dawg?'
     return _Response(speech)
 
 
-@assistant.fill_slot(intent_name='0-SendMessage', next_param='mesage')
+@assistant.fill_slot(intent_name='0-SendMessage', next_param='message')
 def prompt_for_message():
     speech = 'What should the message say, my brotha?'
     return _Response(speech)

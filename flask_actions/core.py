@@ -10,11 +10,11 @@ from . import logger
 from .response import _Response
 
 
-request = LocalProxy(lambda: current_app._app_ctx_stack.request)
-result = LocalProxy(lambda: current_app._app_ctx_stack.result)
-contexts = LocalProxy(lambda: current_app._app_ctx_stack.contexts)
-metadata = LocalProxy(lambda: current_app._app_ctx_stack.metadata)
-intent = LocalProxy(lambda: current_app._app_ctx_stack.intent)
+request = LocalProxy(lambda: current_app.ok.request)
+result = LocalProxy(lambda: current_app.ok.result)
+contexts = LocalProxy(lambda: current_app.ok.contexts)
+metadata = LocalProxy(lambda: current_app.ok.metadata)
+intent = LocalProxy(lambda: current_app.ok.intent)
 
 _converters = []
 
@@ -134,22 +134,14 @@ class Agent(object):
         return _api_request_payload
 
     def _flask_view_func(self, *args, **kwargs):
-        payload = self._api_request(verify=False)
-        # _dbgdump(payload)
-        pprint(payload)
-
-        self.request = payload
-
-        self.query = payload['result']['resolvedQuery']
-        self.action = payload['result']['action']
-        self.contexts = payload['result']['contexts']
-        self.metadata = payload['result']['metadata']
-        # self.slot_filling = self.request['result']['metadata']['webhookForSlotFillingUsed']
+        self.request = self._api_request(verify=False)
+        _dbgdump(self.request)
 
         result = None
-        intent_name = payload['result']['metadata']['intentName']
+        intent_name = self.request['result']['metadata']['intentName']
+        view_func = self._match_view_func(intent_name)
 
-        result = self._map_intent_to_view_func(intent_name)()
+        result = self._map_intent_to_view_func(intent_name, view_func)()
 
         if result is not None:
             if isinstance(result, _Response):
@@ -157,48 +149,31 @@ class Agent(object):
             return result
         return "", 400
 
-
-    def _map_intent_to_view_func(self, intent_name):
-
-        action_func = self._intent_action_funcs[intent_name]
-        missing_params = self._missing_params(intent_name)
-
-        # TODO: fill missing slot from default
-        if not missing_params:
-            # print('No missing params, trigger action\n')
-            action_func = self._intent_action_funcs[intent_name]
-            arg_names = inspect.getargspec(action_func).args
-            mapped_args = self._map_args(intent_name, arg_names)
-            arg_values = self._map_params_to_view_args(intent_name, arg_names)
-            return partial(action_func, *arg_values)
-
-        else:  # TODO priority ordering of prompts
-            # print('Missing parameters!\n')
-            for param in missing_params:
-                # print('missing {}'.format(param))
-                prompt_func = self._intent_prompts[intent_name].get(param)
-                # print('prompt function is {}!\n'.format(prompt_func))
-                if prompt_func:
-                    arg_names = inspect.getargspec(prompt_func).args
-                    mapped_args = self._map_args(intent_name, arg_names)
-                    arg_values = self._map_params_to_view_args(intent_name, arg_names)
-                    return partial(prompt_func, *arg_values)
-
-    def _map_args(self, intent_name, arg_names):
-        mapping = self._intent_mappings.get(intent_name)
-        mapped_names = []
-        for arg_name in arg_names:
-            mapped_names.append(mapping.get(arg_name, arg_name))
-
-        return mapped_names
-
-    def _missing_params(self, intent_name, use_default=True):
+    def _missing_params(self, intent_name, use_default=True):  # TODO: fill missing slot from default
         params = self.request['result']['parameters']
         missing = []
         for p_name in params:
             if params[p_name] == '':
                 missing.append(p_name)
+
         return missing
+
+    def _match_view_func(self, intent_name):
+        missing_params = self._missing_params(intent_name)
+
+        if not missing_params:
+            return self._intent_action_funcs[intent_name]
+
+        else:
+            param_choice = missing_params.pop()
+            return self._intent_prompts[intent_name].get(param_choice)
+
+    def _map_intent_to_view_func(self, intent_name, view_func):
+        argspec = inspect.getargspec(view_func)
+        arg_names = argspec.args
+        arg_values = self._map_params_to_view_args(intent_name, arg_names)
+        return partial(view_func, *arg_values)
+
 
     def _map_params_to_view_args(self, view_name, arg_names):
 
