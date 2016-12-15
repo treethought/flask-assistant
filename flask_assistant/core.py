@@ -19,7 +19,24 @@ _converters = []
 
 
 class Assistant(object):
-    """Central Interface for itneracting with the Google Actions via Api.ai"""
+    """Central Interface for interacting with Google Actions via Api.ai.
+
+    The Assitant object routes requests 
+
+    The construtor is passed a Flask App instance and a url enpoint.
+    Route provides the entry point for the skill, and must be provided if an app is given.
+
+    Keyword Arguments:
+            app {Flask object} -- App instance - created with Flask(__name__) (default: {None})
+            route {str} -- entry point to which initial Alexa Requests are forwarded (default: {None})
+
+
+    The assistant object maps requests recieved from an API.ai agent to Intent-specific view functions.
+    The view_functions can be properly matched depending on required parameters and contexts.
+    These requests originate from Google Actions and are sent to the Assitant object
+    after through API.ai's infrastrcutre
+
+    """
 
     def __init__(self, app=None, route='/'):
 
@@ -45,6 +62,7 @@ class Assistant(object):
 
     @property
     def request(self):
+        """Local Proxy refering to the request JSON recieved from API/Actions"""
         return getattr(_app_ctx_stack.top, '_assist_request', None)
 
     @request.setter
@@ -53,6 +71,7 @@ class Assistant(object):
 
     @property
     def contexts(self):
+        """Local Proxy refering to context objects contained within current session"""
         return getattr(_app_ctx_stack.top, '_assist_contexts', None)
 
     @contexts.setter
@@ -63,7 +82,27 @@ class Assistant(object):
     def session_id(self):
         return getattr(_app_ctx_stack.top, '_assist_session_id', None)
 
-    def action(self, intent_name, mapping={}, convert={}, default={}, in_context=False):
+    def action(self, intent_name, mapping={}, convert={}, default={}, with_context=None):
+        """Decorates an intent's Action view function.
+        
+        The wrapped function is called when a request with the
+        given intent_name is recieved along with all required parameters.
+        
+        Arguments:
+            intent_name {str} -- name of the intent the action belongs to
+        
+        Keyword Arguments:
+            mapping {dict} -- Maps function arguments to request parameters of a different name
+                                default: {}
+            convert {dict} -- Converts request parameter values to data types before assignment to function arguments.
+                                default: {}
+            default {dict} --  Provides default values for function arguments if Actions/API.ai request
+                                returns no corresponding parameter, or a slot with an empty value.
+                                Providing a default will over-ride any prompt functions for provided arguments
+                                default: {}
+            in_context {str} -- [Restricts execution of wrapped function to certain contexts] (default: {False})
+        
+        """
         def decorator(f):
             self._intent_action_funcs[intent_name] = f
             self._intent_mappings[intent_name] = mapping
@@ -77,6 +116,15 @@ class Assistant(object):
         return decorator
 
     def prompt_for(self, next_param, intent_name):
+        """Decorates a function to prompt for an action's required parameter.
+        
+        The wrapped function is called if next_param was not recieved with the given intent's
+        request and is required for the fulfillment of the intent's action.
+        
+        Arguments:
+            next_param {str} -- name of the parameter required for action function
+            intent_name {str} -- name of the intent the dependent action belongs to
+        """
 
         def decorator(f):
             prompts = self._intent_prompts.get(intent_name)
