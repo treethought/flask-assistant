@@ -38,7 +38,7 @@ if __name__ == '__main__':
 @assistant.action(intent_name='SayColorName, mapping={'name': 'given-name'})
 def send_message(name, color):
 """Action is carried out if both parameters are provided"""
-    speech = 'Your name is {}'.format(name)
+    speech = 'Your name is {} and your color is {}'.format(name, color)
     return statement(speech)
 ```
 
@@ -52,7 +52,7 @@ def prompt_for_name():
 @assistant.prompt_for(next_param='color')
 def prompt_for_color():
     speech = "I need your color"
-    return statement(color)
+    return statement(speech)
 ```
 
 
