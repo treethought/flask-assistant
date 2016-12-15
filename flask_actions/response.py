@@ -1,6 +1,7 @@
 from . import logger
 from flask import json, Response, make_response
 from xml.etree import ElementTree
+from pprint import pprint
 
 
 class _Response(object):
@@ -22,17 +23,16 @@ class _Response(object):
         return self
 
     def add_context(self, context_dict):
-        self._response['contextOut'] = context_dict
+        self._response['contextOut'].append(context_dict)
         return self
 
     def add_source(self, source):
         self._response['source'] = source
         return self
 
-
-
     def render_response(self):
-        _dbgdump(self._response)
+        # _dbgdump(self._response)
+        pprint(self._response)
         resp = json.dumps(self._response, indent=4)
         resp = make_response(resp)
         resp.headers['Content-Type'] = 'application/json'

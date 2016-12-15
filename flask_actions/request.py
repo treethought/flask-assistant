@@ -1,91 +1,90 @@
-    POST https:
-        //my - service.com / action
+# import aniso8601
 
-    Headers:
-    //user defined headers
-    Content - type:
-        application / json
+# class _Request(object):
+#     """When an intent is triggered,
+#     API.AI sends data to the service in the form of POST request with
+#    a body in the format of response to a query.
 
-    POST body:
+#    https://docs.api.ai/docs/webhook
 
-    {
-        "originalRequest": {
-            "data": {
-                "text": "shipping costs for asia",
-                "match": [
-                    "shipping costs for asia"
-                ],
-                "type": "message",
-                "event": "direct_message",
-                "team": "T0FJ03RMP",
-                "user": "U0FLW1N95",
-                "channel": "D4VTEALFP",
-                "ts": "1478131884.000006"
-            },
-            "source": "slack_testbot"
-        },
-        "timestamp": "2016-11-03T00:11:24.706Z",
-        "result": {
-            "speech": "",
-            "fulfillment": {
-                "speech": "Shipping cost varies for the location the item needs to be shipped to. We will show you the cost, when you form the order in your cart.",
-                "messages": [
-                    {
-                        "speech": "Shipping cost varies for the location the item needs to be shipped to. We will show you the cost, when you form the order in your cart.",
-                        "type": 0
-                    }
-                ]
-            },
-            "score": 1.0,
-            "source": "agent",
-            "action": "shipping.cost",
-            "resolvedQuery": "shipping costs for asia",
-            "actionIncomplete": false,
-            "contexts": [
-                {
-                    "name": "generic",
-                    "parameters": {
-                        "slack_channel": "D2VTEALFP",
-                        "shipping-zone.original": "Asia",
-                        "shipping-zone": "Asia",
-                        "slack_user_id": "U0FLW1N93"
-                    },
-                    "lifespan": 4
-                }
-            ],
-            "parameters": {
-                "shipping-zone": "Asia"
-            },
-            "metadata": {
-                "intentId": "e2eb1b9c-761d-4588-8b00-d7062128cb51",
-                "webhookUsed": "true",
-                "intentName": "shipping.cost"
-            }
-        },
-        "sessionId": "fa08b2f0-a0f3-11e6-9a45-ef317d100c6e",
-        "id": "cc8ca971-0eec-4a04-ab54-d2af01e4674e",
-        "status": {
-            "errorType": "success",
-            "code": 200
-        }
-    }
+#    format -> https://docs.api.ai/docs/query#response
+#     """
 
-    class _Request(object):
-        """When an intent is triggered,
-        API.AI sends data to the service in the form of POST request with
-       a body in the format of response to a query.
+#     def __init__(self, api_request_payload):
 
-       https://docs.api.ai/docs/webhook
+#         self._payload = api_request_payload
 
-       format -> https://docs.api.ai/docs/query#response
-        """
+#     @property
+#     def id(self):
+#         return self._payload['id']
 
-        def __init__(self, api_request_payload):
+#     @property
+#     def timestamp(self):
+#         return self._payload['timestamp']
 
-            self.payload = api_request_payload
-            
+#     @property
+#     def session_id(self):
+#         return self._payload['session_id']
+
+#     @property
+#     def status(self):
+#         return self._payload['status']
+
+#     @property
+#     def intent(self):
+#         return _Intent(self._payload['result'])
 
 
+# class _Field(dict):
+
+#     def __init__(self, request_json={}):
+#         super(_Field, self).__init__(request_json)
+#         for key, value in request_json.items():
+#             if isinstance(value, dict):
+#                 value = _Field(value)
+#             self[key] = value
+
+#     def __getattr__(self, attr):
+#         # converts timestamp str to datetime.datetime object
+#         if 'timestamp' in attr:
+#             return aniso8601.parse_datetime(self.get(attr))
+#         return self.get(attr)
+
+#     def __setattr__(self, key, value):
+#         self.__setitem__(key, value)
 
 
+# class _Intent(object):
+#     """Holds the currently matched Intent"""
 
+#     def __init__(self, result_json):
+#         self._payload = result_json
+
+#     @property
+#     def action(self):
+#         return self._payload['action']
+
+#     @property
+#     def query(self):
+#         return self._payload['resolvedQuery']
+
+#     @property
+#     def action_incomplete(self):
+#         return self._payload['actionIncomplete']
+
+#     @property
+#     def params(self):
+#         return self._payload['parameters']
+
+#     @property
+#     def contexts(self):
+#         contexts = (obj for obj in self._payload['contexts'])
+#         yield from contexts
+
+#     @property
+#     def name(self):
+#         return self._payload['metadata']['intentName']
+
+#     @property
+#     def id(self):
+#         return self._payload['metadata']['id']
