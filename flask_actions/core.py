@@ -1,6 +1,7 @@
 from flask import current_app, json, request as flask_request, _app_ctx_stack
 from werkzeug.local import LocalProxy
 
+import collections
 from functools import wraps, partial
 import inspect
 from pprint import pprint
@@ -16,12 +17,6 @@ metadata = LocalProxy(lambda: current_app._app_ctx_stack.metadata)
 intent = LocalProxy(lambda: current_app._app_ctx_stack.intent)
 
 _converters = []
-
-
-
-
-
-import collections
 
 
 class Agent(object):
