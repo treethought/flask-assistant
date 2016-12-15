@@ -7,8 +7,8 @@ if logger.level == logging.NOTSET:
 
 
 from .core import (
-    Agent
+    Assistant
 )
 
-from .response import _Response
+from .response import statement
 

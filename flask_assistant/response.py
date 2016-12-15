@@ -39,6 +39,15 @@ class _Response(object):
         return resp
 
 
+class statement(_Response):
+    def __init__(self, speech):
+        super(statement, self).__init__(speech)
+        self._response['data'] = {}
+        
+
+
+
+
 def _dbgdump(obj, indent=2, default=None, cls=None):
     msg = json.dumps(obj, indent=indent, default=default, cls=cls)
     logger.debug(msg)

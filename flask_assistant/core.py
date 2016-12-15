@@ -4,22 +4,21 @@ from werkzeug.local import LocalProxy
 import collections
 from functools import wraps, partial
 import inspect
-from pprint import pprint
 
 from . import logger
 from .response import _Response
 
 
-request = LocalProxy(lambda: current_app.ok.request)
-result = LocalProxy(lambda: current_app.ok.result)
-contexts = LocalProxy(lambda: current_app.ok.contexts)
-metadata = LocalProxy(lambda: current_app.ok.metadata)
-intent = LocalProxy(lambda: current_app.ok.intent)
+request = LocalProxy(lambda: current_app.assist.request)
+# result = LocalProxy(lambda: current_app.assistant.result)
+contexts = LocalProxy(lambda: current_app.assistant.contexts)
+# metadata = LocalProxy(lambda: current_app.assistant.metadata)
+# intent = LocalProxy(lambda: current_app.assistant.intent)
 
 _converters = []
 
 
-class Agent(object):
+class Assistant(object):
     """Central Interface for itneracting with the Google Actions via Api.ai"""
 
     def __init__(self, app=None, route='/'):
@@ -46,58 +45,25 @@ class Agent(object):
 
     @property
     def request(self):
-        return getattr(_app_ctx_stack.top, '_agent_request', None)
+        return getattr(_app_ctx_stack.top, '_assist_request', None)
 
     @request.setter
     def request(self, value):
-        _app_ctx_stack.top._agent_request = value
+        _app_ctx_stack.top._assist_request = value
 
     @property
-    def context(self):
-        return getattr(_app_ctx_stack.top, '_agent_context', None)
+    def contexts(self):
+        return getattr(_app_ctx_stack.top, '_assist_contexts', None)
 
-    @context.setter
-    def context(self, value):
-        _app_ctx_stack.top._agent_context = value
-
-    @property
-    def action(self):
-        return getattr(_app_ctx_stack.top, '_agent_action', None)
-
-    @action.setter
-    def action(self, value):
-        _app_ctx_stack.top._agent_action = value
-
-    @property
-    def params(self):
-        return getattr(_app_ctx_stack.top, '_agent_params', None)
-
-    @params.setter
-    def params(self, value):
-        _app_ctx_stack.top._agent_params = value
-
-    @property
-    def metadata(self):
-        return getattr(_app_ctx_stack.top, '_agent_metadata', None)
-
-    @metadata.setter
-    def metadata(self, value):
-        _app_ctx_stack.top._agent_metadata = value
-
-    @property
-    def _slot_filling(self):
-        return sef.metadata.get('webhookForSlotFillingUsed', None)
+    @contexts.setter
+    def contexts(self, value):
+        _app_ctx_stack.top._assist_contexts = value
 
     @property
     def session_id(self):
-        return getattr(_app_ctx_stack.top._agent_request, 'session_id', None)
+        return getattr(_app_ctx_stack.top, '_assist_session_id', None)
 
-    @property
-    def timestamp(self):
-        return getattr(_app_ctx_stack.top._agent_request, 'session_id', None)
-
-    def intent(self, intent_name, mapping={}, convert={}, default={}, in_context=False):
-
+    def action(self, intent_name, mapping={}, convert={}, default={}, in_context=False):
         def decorator(f):
             self._intent_action_funcs[intent_name] = f
             self._intent_mappings[intent_name] = mapping
@@ -110,7 +76,7 @@ class Agent(object):
             return f
         return decorator
 
-    def fill_slot(self, intent_name, next_param):
+    def prompt_for(self, next_param, intent_name):
 
         def decorator(f):
             prompts = self._intent_prompts.get(intent_name)
@@ -159,7 +125,10 @@ class Agent(object):
         return missing
 
     def _match_view_func(self, intent_name): # TODO: context conditional
-        missing_params = self._missing_params(intent_name)
+        missing_params = None
+
+        if self.request['result']['actionIncomplete']:
+            missing_params = self._missing_params(intent_name)
 
         if not missing_params:
             return self._intent_action_funcs[intent_name]
