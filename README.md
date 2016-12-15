@@ -19,7 +19,7 @@
 
 ```python
 from flask import Flask, request, Response, jsonify, json, make_response
-from flask_assistant import Assistant, _Response
+from flask_assistant import Assistant, statement
 
 app = Flask(__name__)
 assistant = Agent(app)
@@ -28,7 +28,7 @@ logging.getLogger('flask_assistant').setLevel(logging.DEBUG)
 @assistant.action(intent_name='Demo')
 def test():
     msg = 'Microphone check 1, 2 what is this?'
-    resp = _Response(msg)
+    resp = statement(msg)
     return resp
 
 if __name__ == '__main__':
@@ -41,7 +41,7 @@ if __name__ == '__main__':
 def send_message(name, color):
 """Action is carried out if both parameters are provided"""
     speech = 'Your name is {}'.format(name)
-    return _Response(speech)
+    return statement(speech)
 ```
 
 ##### Provide prompts for missing paremters required to carry out an action
@@ -49,13 +49,15 @@ def send_message(name, color):
 @assistant.prompt_for(next_param='name')
 def prompt_for_name():
     speech = "What is your name?"
-    return _Response(speech)
+    return statement(speech)
 
 @assistant.prompt_for(next_param='color')
 def prompt_for_color():
     speech = "I need your color"
-    return _Response(color)
+    return statement(color)
 ```
+
+
 
 
 
