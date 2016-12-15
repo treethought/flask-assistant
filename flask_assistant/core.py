@@ -158,7 +158,7 @@ class Agent(object):
 
         return missing
 
-    def _match_view_func(self, intent_name):
+    def _match_view_func(self, intent_name): # TODO: context conditional
         missing_params = self._missing_params(intent_name)
 
         if not missing_params:

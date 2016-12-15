@@ -1,13 +1,13 @@
 import logging
 
 from flask import Flask, request, Response, jsonify, json, make_response
-from flask_actions import Agent, _Response
+from flask_assistant import Agent, _Response
 
 
 
 app = Flask(__name__)
 assistant = Agent(app)
-logging.getLogger('flask_actions').setLevel(logging.DEBUG)
+logging.getLogger('flask_assistant').setLevel(logging.DEBUG)
 
 
 @assistant.intent('Demo')
