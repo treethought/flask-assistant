@@ -34,31 +34,25 @@
 #     def intent(self):
 #         return _Intent(self._payload['result'])
 
-
-# class _Field(dict):
-
-#     def __init__(self, request_json={}):
-#         super(_Field, self).__init__(request_json)
-#         for key, value in request_json.items():
-#             if isinstance(value, dict):
-#                 value = _Field(value)
-#             self[key] = value
-
-#     def __getattr__(self, attr):
-#         # converts timestamp str to datetime.datetime object
-#         if 'timestamp' in attr:
-#             return aniso8601.parse_datetime(self.get(attr))
-#         return self.get(attr)
-
-#     def __setattr__(self, key, value):
-#         self.__setitem__(key, value)
-
-
 # class _Intent(object):
 #     """Holds the currently matched Intent"""
-
 #     def __init__(self, result_json):
 #         self._payload = result_json
+
+#     @property
+#     def id(self):
+#         return self._payload['id']
+
+#     @property
+#     def name(self):
+#         return self._payload['name']
+
+
+
+#     @property
+#     def context_in(self):
+#         return self._payload['metadat']
+
 
 #     @property
 #     def action(self):
@@ -81,10 +75,23 @@
 #         contexts = (obj for obj in self._payload['contexts'])
 #         yield from contexts
 
-#     @property
-#     def name(self):
-#         return self._payload['metadata']['intentName']
 
-#     @property
-#     def id(self):
-#         return self._payload['metadata']['id']
+
+# class _Field(dict):
+
+#     def __init__(self, request_json={}):
+#         super(_Field, self).__init__(request_json)
+#         for key, value in request_json.items():
+#             if isinstance(value, dict):
+#                 value = _Field(value)
+#             self[key] = value
+
+#     def __getattr__(self, attr):
+#         # converts timestamp str to datetime.datetime object
+#         if 'timestamp' in attr:
+#             return aniso8601.parse_datetime(self.get(attr))
+#         return self.get(attr)
+
+#     def __setattr__(self, key, value):
+#         self.__setitem__(key, value)
+

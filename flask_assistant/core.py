@@ -109,6 +109,8 @@ class Assistant(object):
             self._intent_converts[intent_name] = convert
             self._intent_defaults[intent_name] = default
 
+            self._create_agent_intent()
+
             @wraps(f)
             def wrapper(*args, **kw):
                 self._flask_view_func(*args, **kw)
