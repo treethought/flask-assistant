@@ -47,6 +47,7 @@ class Assistant(object):
         self._intent_converts = {}
         self._intent_defaults = {}
         self._intent_prompts = {}
+        self._contexts = {}
 
         if app is not None:
             self.init_app(app)
@@ -140,6 +141,11 @@ class Assistant(object):
             return f
         return decorator
 
+    def context(self, context_name):
+
+        def decorator(f):
+            self._contexts[con]
+
 
     def _api_request(self, verify=True):
         raw_body = flask_request.data
@@ -151,7 +157,6 @@ class Assistant(object):
         self.request = self._api_request(verify=False)
         _dbgdump(self.request)
 
-        result = None
         intent_name = self.request['result']['metadata']['intentName']
         view_func = self._match_view_func(intent_name)
 
@@ -175,15 +180,23 @@ class Assistant(object):
     def _match_view_func(self, intent_name): # TODO: context conditional
         missing_params = None
 
-        if self.request['result']['actionIncomplete']:
-            missing_params = self._missing_params(intent_name)
-
-        if not missing_params:
+        if not self.request['result']['actionIncomplete']:
             return self._intent_action_funcs[intent_name]
 
         else:
+            missing_params = self._missing_params(intent_name)
             param_choice = missing_params.pop()
             return self._intent_prompts[intent_name].get(param_choice)
+
+        # if self.request['result']['actionIncomplete']:
+        #     missing_params = self._missing_params(intent_name)
+
+        # if not missing_params:
+        #     return self._intent_action_funcs[intent_name]
+
+        # else:
+        #     param_choice = missing_params.pop()
+        #     return self._intent_prompts[intent_name].get(param_choice)
 
     def _map_intent_to_view_func(self, intent_name, view_func):
         argspec = inspect.getargspec(view_func)
