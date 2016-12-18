@@ -6,8 +6,9 @@ from pprint import pprint
 
 class _Response(object):
     """docstring for _Response"""
+
     def __init__(self, speech):
-        
+
         self._json_default = None
         self._response = {
             'speech': speech,
@@ -22,7 +23,8 @@ class _Response(object):
         self._response['displayText'] = text
         return self
 
-    def add_context(self, context_dict):
+    def context_out(self, context_dict):
+        # obj = {"name": name, "lifespan": lifespan, "parameters": parameters}
         self._response['contextOut'].append(context_dict)
         return self
 
@@ -43,9 +45,6 @@ class statement(_Response):
     def __init__(self, speech):
         super(statement, self).__init__(speech)
         self._response['data'] = {}
-        
-
-
 
 
 def _dbgdump(obj, indent=2, default=None, cls=None):

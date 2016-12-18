@@ -7,6 +7,7 @@ import inspect
 
 from . import logger
 from .response import _Response
+from pprint import pprint
 
 
 request = LocalProxy(lambda: current_app.assist.request)
@@ -47,7 +48,7 @@ class Assistant(object):
         self._intent_converts = {}
         self._intent_defaults = {}
         self._intent_prompts = {}
-        self._contexts = {}
+        self._intent_contexts = {}
 
         if app is not None:
             self.init_app(app)
@@ -83,7 +84,7 @@ class Assistant(object):
     def session_id(self):
         return getattr(_app_ctx_stack.top, '_assist_session_id', None)
 
-    def action(self, intent_name, mapping={}, convert={}, default={}, with_context=None):
+    def action(self, intent_name, mapping={}, convert={}, default={}, in_context=None):
         """Decorates an intent's Action view function.
         
         The wrapped function is called when a request with the
@@ -110,11 +111,23 @@ class Assistant(object):
             self._intent_converts[intent_name] = convert
             self._intent_defaults[intent_name] = default
 
+            self._intent_contexts[intent_name] = in_context
+
             @wraps(f)
             def wrapper(*args, **kw):
                 self._flask_view_func(*args, **kw)
             return f
         return decorator
+
+    def register_context(self, intent_name, in_context):
+        contexts = self._intent_contexts.get(intent_name)
+        if contexts:
+            contexts.append(in_context)
+        else:
+            self._intent_contexts[intent_name] = []
+            self._intent_contexts[intent_name][next_param] = f
+
+
 
     def prompt_for(self, next_param, intent_name):
         """Decorates a function to prompt for an action's required parameter.
@@ -141,10 +154,11 @@ class Assistant(object):
             return f
         return decorator
 
-    def context(self, context_name):
+    # def context(self, context_name):
 
-        def decorator(f):
-            self._contexts[con]
+    #     def decorator(f):
+
+    #         self._contexts[con]
 
 
     def _api_request(self, verify=True):
@@ -156,6 +170,7 @@ class Assistant(object):
     def _flask_view_func(self, *args, **kwargs):
         self.request = self._api_request(verify=False)
         _dbgdump(self.request)
+        pprint(self.request)
 
         intent_name = self.request['result']['metadata']['intentName']
         view_func = self._match_view_func(intent_name)
@@ -168,17 +183,11 @@ class Assistant(object):
             return result
         return "", 400
 
-    def _missing_params(self, intent_name, use_default=True):  # TODO: fill missing slot from default
-        params = self.request['result']['parameters']
-        missing = []
-        for p_name in params:
-            if params[p_name] == '':
-                missing.append(p_name)
-
-        return missing
+    
 
     def _match_view_func(self, intent_name): # TODO: context conditional
-        missing_params = None
+
+        # missing_params = self._missing_params(intent_name)
 
         if not self.request['result']['actionIncomplete']:
             return self._intent_action_funcs[intent_name]
@@ -197,6 +206,16 @@ class Assistant(object):
         # else:
         #     param_choice = missing_params.pop()
         #     return self._intent_prompts[intent_name].get(param_choice)
+
+    
+    def _missing_params(self, intent_name, use_default=True):  # TODO: fill missing slot from default
+        params = self.request['result']['parameters']
+        missing = []
+        for p_name in params:
+            if params[p_name] == '':
+                missing.append(p_name)
+
+        return missing
 
     def _map_intent_to_view_func(self, intent_name, view_func):
         argspec = inspect.getargspec(view_func)
