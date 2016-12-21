@@ -1,9 +1,9 @@
 import logging
 
-logger = logging.getLogger('flask-assistant')
+logger = logging.getLogger('flask_assistant')
 logger.addHandler(logging.StreamHandler())
 if logger.level == logging.NOTSET:
-    logger.setLevel(logging.WARN)
+    logger.setLevel(logging.INFO)
 
 
 from .core import (

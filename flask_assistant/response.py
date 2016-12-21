@@ -1,4 +1,5 @@
 from . import logger
+from . import core
 from flask import json, Response, make_response
 from xml.etree import ElementTree
 from pprint import pprint
@@ -23,9 +24,11 @@ class _Response(object):
         self._response['displayText'] = text
         return self
 
-    def context_out(self, context_dict):
+    def add_context(self, context_dicts):
         # obj = {"name": name, "lifespan": lifespan, "parameters": parameters}
-        self._response['contextOut'].append(context_dict)
+        for context in context_dicts:
+            self._response['contextOut'].append(context.serialize)
+        # self._response['contextOut'].extend(*context_dicts)
         return self
 
     def add_source(self, source):
@@ -34,7 +37,7 @@ class _Response(object):
 
     def render_response(self):
         # _dbgdump(self._response)
-        pprint(self._response)
+        core._dbgdump(self._response)
         resp = json.dumps(self._response, indent=4)
         resp = make_response(resp)
         resp.headers['Content-Type'] = 'application/json'
@@ -47,6 +50,4 @@ class statement(_Response):
         self._response['data'] = {}
 
 
-def _dbgdump(obj, indent=2, default=None, cls=None):
-    msg = json.dumps(obj, indent=indent, default=default, cls=cls)
-    logger.debug(msg)
+
