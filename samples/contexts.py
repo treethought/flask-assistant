@@ -1,43 +1,49 @@
-import logging
 from flask import Flask, request, Response, jsonify, json, make_response
 from flask_assistant import Assistant, statement, Context
-
+import logging
 
 app = Flask(__name__)
 assist = Assistant(app)
 logging.getLogger('flask_assistant').setLevel(logging.DEBUG)
 
 
-@assist.action(intent_name='greetings')
+
+@assist.action(intent='greetings')
 def greetings():
-    speech = """We've got some bumpin pies up in this bitch!.
-                Would you like to order a Custom or Specialty pizza?"""
+
+    speech = """We've got some bumpin pies up in this bitch!. Would you like to order a Custom or Specialty pizza?"""
 
     return statement(speech)
 
 
-# @context('custom')
-@assist.action(intent_name="custom")
-def custom_size():
-    speech = "Ok, Do you want a small 8 or a large 16 inch custom pizza?"
-    out_context = Context('custom').serialize
+@assist.action(intent="custom")
+def begin_custom():
+    speech = "Ok, Do you want a small or a large inch custom pizza?"
+    custom = Context('custom')
+    return statement(speech).add_context([custom])
 
-    return statement(speech).context_out(out_context)
-
-@assist.action(intent_name='custom-toppings', in_context='custom')
-def choose_toppings(size):
+@assist.context(['custom', 'pizza'])
+@assist.action(intent='custom-size', with_context=['custom'])
+def toppings_for_size(size):
     num_toppings = 2
-    if size in 'large16sixteen':
+    if size in 'large':
         num_toppings = 4
 
-    speech = "Ok, the {} inch pizza comes with {} toppings. Which toppings would you like?".format(size, num_toppings)
-    out_context = Context('custom', parameters={'size': size, 'num_toppins': num_toppings})
+    speech = "Ok, the {}  pizza comes with {} toppings. What is your first topping?".format(size, num_toppings)
+    custom = Context('custom')
+    custom.set('size', size)
 
-    return statement(speech).context_out(out_context)
+    # out_context = Context('custom', parameters={'size': size, 'num_toppins': num_toppings})
 
+    return statement(speech).add_context([custom])
 
+@assist.action(intent='custom-add-topping', with_context=['custom'])
+def first_topping(topping):
+    speech = 'Added {} topping to custom pizza. Whats your second topping?'
+    custom = Context(custom)
+    custom.set('first_top', topping)
 
-
+    return statement(speech).add_context([custom])
 
 
 if __name__ == '__main__':

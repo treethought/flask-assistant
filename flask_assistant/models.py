@@ -1,3 +1,8 @@
+
+from flask import json
+
+
+
 class Context(object):
     """docstring for _Context"""
     def __init__(self, name, parameters={}, lifespan=5):
@@ -5,6 +10,13 @@ class Context(object):
         self.name = name
         self.parameters = parameters
         self.lifespan = lifespan
+
+    def set(self, param_name, value):
+        self.parameters[param_name] = value
+
+    def sync(self, context_json):
+        self.__dict__.update(context_json)
+
 
     @property
     def serialize(self):
