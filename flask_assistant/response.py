@@ -24,7 +24,7 @@ class _Response(object):
         self._response['displayText'] = text
         return self
 
-    def add_context(self, context_dicts):
+    def add_context(self, *context_dicts):
         # obj = {"name": name, "lifespan": lifespan, "parameters": parameters}
         for context in context_dicts:
             self._response['contextOut'].append(context.serialize)

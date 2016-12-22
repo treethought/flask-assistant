@@ -13,6 +13,7 @@ from copy import copy
 
 
 
+
 request = LocalProxy(lambda: current_app.assist.request)
 context_in = LocalProxy(lambda: current_app.assistant.contexts)
 
@@ -62,8 +63,8 @@ class Assistant(object):
             raise TypeError("route is a required argument when app is not None")
 
         app.agent = self
-
         app.add_url_rule(self._route, view_func=self._flask_view_func, methods=['POST'])
+
 
     @property
     def request(self):
@@ -107,7 +108,6 @@ class Assistant(object):
         def decorator(f):
             func_requires = self._func_contexts.get(f)
             
-
             if func_requires:
                 func_requires.extend(*context_names)
             else:
@@ -117,8 +117,6 @@ class Assistant(object):
                 f(with_context=context_names, *args, **kwargs)
 
             return wrapper
-            _dbgdump('in context decorator')
-            _dbgdump('{} requires {} context'.format(f, context_name))
         return decorator
 
     # def context(self, name):
@@ -164,8 +162,7 @@ class Assistant(object):
             self._intent_defaults[intent] = default
 
             self._register_context_to_func(intent, with_context)
-            _dbgdump('In action decorator')
-            _dbgdump('{} requires {} contexts'.format(f, with_context))
+            _dbgdump('{} func requires {} contexts'.format(f.__name__, with_context))
             _dbgdump('registered {} to {}'.format(self._required_contexts[intent], intent))
 
             @wraps(f)
@@ -204,9 +201,20 @@ class Assistant(object):
 
         return _api_request_payload
 
+    def _dump_view_info(self, view_func):
+        _infodump('Result: Matched {} intent to {} func'.format(self.intent, view_func.__name__))
+        _dbgdump({
+            'intent recieved': self.intent,
+            'recieved parameters': self.request['result']['parameters'],
+            'required args': self._func_args(view_func),
+            'conext_in': self.context_in,
+            'matched view_func': view_func.__name__
+            })
+
+
     def _flask_view_func(self, *args, **kwargs):
         self.request = self._api_request(verify=False)
-        _dbgdump(self.request)
+        # _dbgdump(self.request['result'])
 
         self.intent = self.request['result']['metadata']['intentName']
         self.context_in = self.request['result'].get('contexts', [])
@@ -236,22 +244,27 @@ class Assistant(object):
         #     return True
 
     def _match_view_func(self):  # TODO: context conditional
-        intent_name = self.intent
-
         if self.context_in:
             possible_views = self._match_context()
             for view_func in possible_views:
-                if view_func is self._intent_action_funcs[intent_name]:
+                if view_func is self._intent_action_funcs[self.intent]:
+                    _dbgdump('Matched {} intent to {} func using contexts'.format(self.intent, view_func.__name__))
                     return view_func
                 # if self._context_requirements_met and not self._missing_params:
                 #     pass
-        if not self._missing_params:
-            return self._intent_action_funcs[intent_name]
+
+        # Context Independent, use prompts for missing params
+        elif not self._missing_params:
+            view_func = self._intent_action_funcs[self.intent]
+            _dbgdump('Matched {} intent to {} func without context'.format(self.intent, view_func.__name__))
 
         else:
             param_choice = self._missing_params.pop()
-            return self._intent_prompts[intent_name].get(param_choice)
+            view_func = self._intent_prompts[self.intent].get(param_choice)
+            _dbgdump('Matched {} intent to {} func as {} prompt'.format(self.intent, view_func.__name, param_choice))
 
+        self._dump_view_info(view_func)
+        return view_func
 
     def _match_context(self):
         possible_views = []
@@ -262,16 +275,17 @@ class Assistant(object):
             for req_context in requires:
                 if req_context in recieved_contexts:
                     requires.remove(req_context)
-                    _dbgdump('{} requirement was met for {}'.format(req_context, func))
+                #     # _dbgdump('{} requirement was met for {} func'.format(req_context, func.__name__))
 
-                else:
-                    _dbgdump('{} missing {}'.format(func, req_context))
+                # else:
+                #     # _dbgdump('{} func missing {}'.format(func.__name, req_context))
 
             if not requires:
-                _dbgdump('requirements met for {}'.format(func))
+                _dbgdump('All context requirements met for {} func'.format(func.__name__))
                 possible_views.append(func)
 
-        _dbgdump('Matched {} as possible views for {}'.format(possible_views, recieved_contexts))
+        view_names = [v.__name__ for v in possible_views] # for logging
+        _dbgdump('Matched {} as possible views for {}'.format(view_names, recieved_contexts))
         return possible_views
 
 
@@ -356,6 +370,7 @@ class Assistant(object):
 
 def _dbgdump(obj, indent=2, default=None, cls=None):
     msg = json.dumps(obj, indent=indent, default=default, cls=cls)
+    # logger.debug('')
     logger.debug(msg)
 
 def _infodump(obj, indent=2, default=None, cls=None):
