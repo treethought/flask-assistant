@@ -11,9 +11,6 @@ from pprint import pprint
 from copy import copy
 
 
-
-
-
 request = LocalProxy(lambda: current_app.assist.request)
 context_in = LocalProxy(lambda: current_app.assistant.contexts)
 
@@ -53,7 +50,6 @@ class Assistant(object):
         self._context_funcs = {}
         self._func_contexts = {}
 
-
         if app is not None:
             self.init_app(app)
 
@@ -64,7 +60,6 @@ class Assistant(object):
 
         app.agent = self
         app.add_url_rule(self._route, view_func=self._flask_view_func, methods=['POST'])
-
 
     @property
     def request(self):
@@ -105,36 +100,22 @@ class Assistant(object):
             self._required_contexts[intent_name].extend(context)
 
     def context(self, *context_names):
+
         def decorator(f):
             func_requires = self._func_contexts.get(f)
-            
-            if func_requires:
-                func_requires.extend(*context_names)
-            else:
-                self._func_contexts[f] = [*context_names]
+
+            if not func_requires:
+                self._func_contexts[f] = []
+
+            self._func_contexts[f].extend(context_names)
 
             def wrapper(*args, **kw):
-                f(with_context=context_names, *args, **kwargs)
-
+                return f(*args, with_context=context_names, **kw)
             return wrapper
         return decorator
 
-    # def context(self, name):
 
-    #     def decorator(f):
-    #         context_funcs = self._context_funcs.get(name, None)
-    #         if context_funcs:
-    #             context_funcs.append(f)
-    #         else:
-    #             self._context_funcs[name] = [f]
-
-    #         @wraps(f)
-    #         def wrapper(*args, **kw):
-    #             print('in wrapper for context {}'.format(name))
-    #         return f
-    #     return decorator
-
-    def action(self, intent, mapping={}, convert={}, default={}, with_context=[], **kw):
+    def action(self, intent, mapping={}, convert={}, default={}, with_context=[], *args, **kw):
         """Decorates an intent's Action view function.
 
         The wrapped function is called when a request with the
@@ -155,15 +136,12 @@ class Assistant(object):
             in_context {str} -- [Restricts execution of wrapped function to certain contexts] (default: {False})
 
         """
+
         def decorator(f):
             self._intent_action_funcs[intent] = f
             self._intent_mappings[intent] = mapping
             self._intent_converts[intent] = convert
             self._intent_defaults[intent] = default
-
-            self._register_context_to_func(intent, with_context)
-            _dbgdump('{} func requires {} contexts'.format(f.__name__, with_context))
-            _dbgdump('registered {} to {}'.format(self._required_contexts[intent], intent))
 
             @wraps(f)
             def wrapper(*args, **kw):
@@ -201,7 +179,7 @@ class Assistant(object):
 
         return _api_request_payload
 
-    def _dump_view_info(self, view_func):
+    def _dump_view_info(self, view_func=lambda: None):
         _infodump('Result: Matched {} intent to {} func'.format(self.intent, view_func.__name__))
         _dbgdump({
             'intent recieved': self.intent,
@@ -209,12 +187,11 @@ class Assistant(object):
             'required args': self._func_args(view_func),
             'conext_in': self.context_in,
             'matched view_func': view_func.__name__
-            })
-
+        })
 
     def _flask_view_func(self, *args, **kwargs):
         self.request = self._api_request(verify=False)
-        # _dbgdump(self.request['result'])
+        _infodump(self.request['result'])
 
         self.intent = self.request['result']['metadata']['intentName']
         self.context_in = self.request['result'].get('contexts', [])
@@ -243,51 +220,48 @@ class Assistant(object):
         #     _dbgdump('requirements met')
         #     return True
 
-    def _match_view_func(self):  # TODO: context conditional
-        if self.context_in:
-            possible_views = self._match_context()
-            for view_func in possible_views:
-                if view_func is self._intent_action_funcs[self.intent]:
-                    _dbgdump('Matched {} intent to {} func using contexts'.format(self.intent, view_func.__name__))
-                    return view_func
-                # if self._context_requirements_met and not self._missing_params:
-                #     pass
+    def _match_view_func(self):
+        action_func = self._intent_action_funcs[self.intent]
+        view_func = None
 
-        # Context Independent, use prompts for missing params
-        elif not self._missing_params:
-            view_func = self._intent_action_funcs[self.intent]
-            _dbgdump('Matched {} intent to {} func without context'.format(self.intent, view_func.__name__))
+        if not self.context_in and not self._missing_params:
+            _dbgdump('Matched {} intent to {} func without context'.format(self.intent, action_func))
+            return action_func
 
-        else:
+        elif self.context_in and action_func in self._context_views:
+            view_func = action_func
+            _dbgdump('Matched {} intent to {} func via context'.format(self.intent, view_func.__name__))
+
+        elif self._missing_params:
             param_choice = self._missing_params.pop()
             view_func = self._intent_prompts[self.intent].get(param_choice)
             _dbgdump('Matched {} intent to {} func as {} prompt'.format(self.intent, view_func.__name, param_choice))
 
-        self._dump_view_info(view_func)
+        else:
+            return action_func
+
+        if not view_func:
+            _errordump('No view func matched for {}'.format(self.intent))
         return view_func
 
-    def _match_context(self):
+    @property
+    def _context_views(self):
         possible_views = []
         recieved_contexts = [c['name'] for c in self.context_in]
 
         for func in self._func_contexts:
             requires = copy(self._func_contexts[func])
+
             for req_context in requires:
                 if req_context in recieved_contexts:
                     requires.remove(req_context)
-                #     # _dbgdump('{} requirement was met for {} func'.format(req_context, func.__name__))
-
-                # else:
-                #     # _dbgdump('{} func missing {}'.format(func.__name, req_context))
 
             if not requires:
-                _dbgdump('All context requirements met for {} func'.format(func.__name__))
                 possible_views.append(func)
 
-        view_names = [v.__name__ for v in possible_views] # for logging
+        view_names = [f.__name__ for f in possible_views]  # for logging
         _dbgdump('Matched {} as possible views for {}'.format(view_names, recieved_contexts))
         return possible_views
-
 
     @property
     def _missing_params(self):  # TODO: fill missing slot from default
@@ -304,8 +278,6 @@ class Assistant(object):
         return argspec.args
 
     def _map_intent_to_view_func(self, view_func):
-        # argspec = inspect.getargspec(view_func)
-        # arg_names = argspec.args
         arg_names = self._func_args(view_func)
         arg_values = self._map_params_to_view_args(arg_names)
         return partial(view_func, *arg_values)
@@ -318,7 +290,7 @@ class Assistant(object):
         for arg_name in arg_names:
             mapped_name = mapping.get(arg_name, arg_name)
             value = params.get(mapped_name)  # params declared in GUI present in request
-            
+
             if not value:  # params not declared, so must look in contexts
                 value = self._map_arg_from_context(arg_name)
             arg_values.append(value)
@@ -331,48 +303,21 @@ class Assistant(object):
                 return context_obj['parameters'][arg_name]
 
 
-    # def _map_params_to_view_args(self, view_name, arg_names):
-
-    #     arg_values = []
-    #     convert = self._intent_converts.get(view_name)
-    #     default = self._intent_defaults.get(view_name)
-    #     mapping = self._intent_mappings.get(view_name)
-
-    #     convert_errors = {}
-
-    #     params = self.request['result']['parameters']
-
-    #     for arg_name in arg_names:
-    #         mapped_name = mapping.get(arg_name, arg_name)
-    #         arg_value = params.get(mapped_name)
-
-    #         if arg_value is None or arg_value == "":
-    #             if arg_name in default:
-    #                 default_value = default[arg_name]
-    #                 if isinstance(default_value, collections.Callable):
-    #                     default_value = default_value()
-    #                 arg_value = default_value
-    #         elif arg_name in convert:
-    #             shorthand_or_function = convert[arg_name]
-    #             if shorthand_or_function in _converters:
-    #                 shorthand = shorthand_or_function
-    #                 convert_func = _converters[shorthand]
-    #             else:
-    #                 convert_func = shorthand_or_function
-    #             try:
-    #                 arg_value = convert_func(arg_value)
-    #             except Exception as e:
-    #                 convert_errors[arg_name] = e
-    #         arg_values.append(arg_value)
-    #     self.convert_errors = convert_errors
-    #     return arg_values
-
-
 def _dbgdump(obj, indent=2, default=None, cls=None):
     msg = json.dumps(obj, indent=indent, default=default, cls=cls)
-    # logger.debug('')
     logger.debug(msg)
+
 
 def _infodump(obj, indent=2, default=None, cls=None):
     msg = json.dumps(obj, indent=indent, default=default, cls=cls)
     logger.info(msg)
+
+
+def _warndump(obj, indent=2, default=None, cls=None):
+    msg = json.dumps(obj, indent=indent, default=default, cls=cls)
+    logger.warn(msg)
+
+
+def _errordump(obj, indent=2, default=None, cls=None):
+    msg = json.dumps(obj, indent=indent, default=default, cls=cls)
+    logger.error(msg)
