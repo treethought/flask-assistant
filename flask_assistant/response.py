@@ -25,10 +25,8 @@ class _Response(object):
         return self
 
     def add_context(self, *context_dicts):
-        # obj = {"name": name, "lifespan": lifespan, "parameters": parameters}
         for context in context_dicts:
             self._response['contextOut'].append(context.serialize)
-        # self._response['contextOut'].extend(*context_dicts)
         return self
 
     def add_source(self, source):

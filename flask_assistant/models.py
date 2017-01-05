@@ -23,7 +23,6 @@ class Context(object):
         return {"name": self.name, "lifespan": self.lifespan, "parameters": self.parameters}
     
 
-
 class _Intent(object):
     """Holds the currently matched Intent"""
 
