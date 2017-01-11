@@ -10,6 +10,6 @@ from .core import (
     Assistant
 )
 
-from .response import statement
-from .models import Context
+from .response import ask, tell
+from .context_manager import Context
 

@@ -14,7 +14,13 @@ class _Response(object):
         self._response = {
             'speech': speech,
             'displayText': '',
-            'data': {},
+            'data': {
+                "google": {
+                    "expect_user_response": True,
+                    "is_ssml": True,
+                    "permissions_request": None,
+                }
+            },
             'contextOut': [],
             'source': 'webhook'
 
@@ -33,8 +39,18 @@ class _Response(object):
         self._response['source'] = source
         return self
 
+    def get_permission(self, permissions, reason=None):
+        if not reason:
+            reason = "I need permission to use your info from google."
+
+        self._response['data']["permissions_request"] = {
+            "opt_context": reason,
+            "permissions": permissions
+        },
+
+
     def render_response(self):
-        # _dbgdump(self._response)
+        core._dbgdump(self._response)
         core._dbgdump(self._response)
         resp = json.dumps(self._response, indent=4)
         resp = make_response(resp)
@@ -42,10 +58,16 @@ class _Response(object):
         return resp
 
 
-class statement(_Response):
+class tell(_Response):
     def __init__(self, speech):
-        super(statement, self).__init__(speech)
-        self._response['data'] = {}
+        super(tell, self).__init__(sepeech)
+        self._response['data']['google']['expect_user_response'] = False
 
 
+class ask(_Response):
+    def __init__(self, speech):
+        super(ask, self).__init__(speech)
+        self._response['data']['google']['expect_user_response'] = True
 
+    def reprompt(self, prompt):
+        self._response['data']['google']['no_input_prompts'] = [{'text_to_speech': prompt}]
