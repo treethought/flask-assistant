@@ -70,9 +70,9 @@ def method_reprompt():
 @assist.context("method")
 @assist.action('choose-order-method')
 def set_method(order_method):
-    order_method = Context(order_method, lifespan=10) 
     speech = "Did you say {}?".format(order_method)
-    return ask(speech).add_context(order_method) # provide a context-out to guide dialogue
+    context_manager.add(order_method, lifespan=10) # provide a context-out to guide dialogue
+    return ask(speech) 
 
 
 # The following actions will be matched depending
@@ -84,8 +84,8 @@ def confirm_pickup(answer):
         method_reprompt()
     else:
         speech = "Awesome, let's get your order started. Would you like a custom or specialty pizza?"
-        ready_to_build = Context("build")
-        return ask(speech).add_context(ready_to_build)
+        context_manager.add('build')
+        return ask(speech)
 
 
 @assist.context("delivery")
@@ -95,8 +95,8 @@ def confirm_delivery(answer):
         method_reprompt()
     else:
         speech = "Ok sounds good. Can I have your address?"
-        context_out = Context('delivery-info')
-        return ask(speech).add_context(context_out)
+        context_manager.add('delivery-info')
+        return ask(speech)
 ```
 
 

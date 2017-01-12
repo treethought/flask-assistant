@@ -1,6 +1,6 @@
 import logging
 from flask import Flask
-from flask_assistant import Assistant, ask, tell, Context, context_manager
+from flask_assistant import Assistant, ask, tell, context_manager
 
 
 app = Flask(__name__)
