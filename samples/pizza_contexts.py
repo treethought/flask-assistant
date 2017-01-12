@@ -114,7 +114,7 @@ def set_special_choice(specialty):
 
 @assist.context('build')
 @assist.action('set-size')
-def set_size(size, pizza_type, specialty=''):
+def set_size(size, pizza_type, specialty=' '):
     speech = 'Ok, so you want a {} {} {} pizza. Is this correct?'.format(size, specialty, pizza_type)
     size_chosen = Context('size-chosen', lifespan=1)  # set context for confirming order
     return ask(speech).add_context(size_chosen)

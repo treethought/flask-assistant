@@ -217,7 +217,6 @@ class Assistant(object):
         return "", 400
 
     def _match_view_func(self):
-        # action_funcs = self._intent_action_funcs[self.intent]
         view_func = None
 
         if self.context_in:
@@ -232,33 +231,15 @@ class Assistant(object):
 
         if not view_func:
             _errordump('No view func matched')
+            _errordump({
+                'intent recieved': self.intent,
+                'recieved parameters': self.request['result']['parameters'],
+                'required args': self._func_args(view_func),
+                'conext_in': self.context_in,
+                'matched view_func': view_func
+            })
 
         return view_func
-
-    # def _match_view_func(self):
-    #     action_func = self._intent_action_funcs[self.intent]
-    #     view_func = None
-
-    #     if not self.context_in and not self._missing_params:
-    #         _dbgdump('Matched {} intent to {} func without context'.format(self.intent, action_func))
-    #         return action_func
-
-    #     elif self.context_in and action_func in self._context_views:
-    #         self._choose_context_view()
-    #         view_func = action_func
-    #         _dbgdump('Matched {} intent to {} func via context'.format(self.intent, view_func.__name__))
-
-    #     elif self._missing_params:
-    #         param_choice = self._missing_params.pop()
-    #         view_func = self._intent_prompts[self.intent].get(param_choice)
-    #         _dbgdump('Matched {} intent to {} func as {} prompt'.format(self.intent, view_func.__name, param_choice))
-
-    #     else:
-    #         return action_func
-
-    #     if not view_func:
-    #         _errordump('No view func matched for {}'.format(self.intent))
-    #     return view_func
 
     @property
     def _context_views(self):
@@ -274,7 +255,7 @@ class Assistant(object):
                     met.append(req_context)
 
             if set(met) == set(requires) and len(requires) <= len(recieved_contexts):
-            # if not requires:
+                # if not requires:
                 # import ipdb; ipdb.set_trace()
                 possible_views.append(func)
 
@@ -288,11 +269,11 @@ class Assistant(object):
         if choice:
             return choice
         else:
-                _errordump('')
-                _errordump('No view matched for {} with context'.format(self.intent))
-                _errordump('intent: {}'.format(self.intent))
-                _errordump('possible biews: {}'.format(self._context_views))
-                _errordump('intent action funcs: {}'.format(self._intent_action_funcs[self.intent]))
+            _errordump('')
+            _errordump('No view matched for {} with context'.format(self.intent))
+            _errordump('intent: {}'.format(self.intent))
+            _errordump('possible biews: {}'.format(self._context_views))
+            _errordump('intent action funcs: {}'.format(self._intent_action_funcs[self.intent]))
 
     @property
     def _missing_params(self):  # TODO: fill missing slot from default
@@ -352,10 +333,3 @@ def _warndump(obj, indent=2, default=None, cls=None):
 def _errordump(obj, indent=2, default=None, cls=None):
     msg = json.dumps(obj, indent=indent, default=default, cls=cls)
     logger.error(msg)
-    logger.error({
-            'intent recieved': self.intent,
-            'recieved parameters': self.request['result']['parameters'],
-            'required args': self._func_args(view_func),
-            'conext_in': self.context_in,
-            'matched view_func': view_func
-        })

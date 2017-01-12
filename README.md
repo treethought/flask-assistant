@@ -12,12 +12,13 @@
 
 
 
+
 #### Getting Started
 ##### A Minimal Assistant
 
 ```python
-from flask import Flask, request, Response, jsonify, json, make_response
-from flask_assistant import Assistant, statement
+from flask import Flask
+from flask_assistant import Assistant, ask, tell
 
 app = Flask(__name__)
 assistant = Assistant(app)
@@ -26,8 +27,7 @@ logging.getLogger('flask_assistant').setLevel(logging.DEBUG)
 @assistant.action(intent_name='Demo')
 def test():
     speech = 'Microphone check 1, 2 what is this?'
-    response = statement(speech)
-    return response
+    return tell(speech)
 
 if __name__ == '__main__':
     app.run(debug=True)
@@ -35,11 +35,11 @@ if __name__ == '__main__':
 
 ##### Accepting parameters
 ```python
-@assistant.action(intent_name='SayColorName, mapping={'name': 'given-name'})
+@assistant.action(intent_name='SayColorName')
 def send_message(name, color):
 """Action is carried out if both parameters are provided"""
     speech = 'Your name is {} and your color is {}'.format(name, color)
-    return statement(speech)
+    return tell(speech)
 ```
 
 ##### Provide prompts for missing paremters required to carry out an action
@@ -47,12 +47,56 @@ def send_message(name, color):
 @assistant.prompt_for(next_param='name')
 def prompt_for_name():
     speech = "What is your name?"
-    return statement(speech)
+    return ask(speech)
 
 @assistant.prompt_for(next_param='color')
 def prompt_for_color():
     speech = "I need your color"
-    return statement(speech)
+    return ask(speech)
+```
+
+##### Use contexts to map intents to different actions to build a dialogue 
+```python
+@assistant.action('greetings')
+def greetings():
+    speech = """We've got some bumpin pies up in here!
+                Would you like to order for pickup or delivery?"""
+    return ask(speech)
+
+def method_reprompt():
+    return ask('Sorry, is this order for pickup or delivery?')
+
+# Represents branching of contexts -> delivery or pickup order method
+@assist.context("method")
+@assist.action('choose-order-method')
+def set_method(order_method):
+    order_method = Context(order_method, lifespan=10) 
+    speech = "Did you say {}?".format(order_method)
+    return ask(speech).add_context(order_method) # provide a context-out to guide dialogue
+
+
+# The following actions will be matched depending
+# on the order method context provided from the previous action
+@assist.context("pickup")
+@assist.action('confirm')
+def confirm_pickup(answer):
+    if 'n' in answer:
+        method_reprompt()
+    else:
+        speech = "Awesome, let's get your order started. Would you like a custom or specialty pizza?"
+        ready_to_build = Context("build")
+        return ask(speech).add_context(ready_to_build)
+
+
+@assist.context("delivery")
+@assist.action('confirm')
+def confirm_delivery(answer):
+    if 'n' in answer:
+        method_reprompt()
+    else:
+        speech = "Ok sounds good. Can I have your address?"
+        context_out = Context('delivery-info')
+        return ask(speech).add_context(context_out)
 ```
 
 
