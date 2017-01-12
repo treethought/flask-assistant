@@ -7,9 +7,9 @@ if logger.level == logging.NOTSET:
 
 
 from .core import (
-    Assistant
+    Assistant,
+    context_manager
 )
 
 from .response import ask, tell
-from .context_manager import Context
-
+from .manager import Context

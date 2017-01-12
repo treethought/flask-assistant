@@ -1,5 +1,5 @@
 from flask import current_app, json, request as flask_request, _app_ctx_stack
-from werkzeug.local import LocalProxy
+from werkzeug.local import LocalProxy, LocalStack
 
 import collections
 from functools import wraps, partial
@@ -7,13 +7,14 @@ import inspect
 
 from . import logger
 from .response import _Response
-from pprint import pprint
 from copy import copy
 
+from .manager import ContextManager
 
 request = LocalProxy(lambda: current_app.assist.request)
-context_in = LocalProxy(lambda: current_app.assistant.context_in)
-context_manager = LocalProxy(lambda: current_app.assistant.context_manager)
+context_in = LocalProxy(lambda: current_app.assist.context_in)
+context_manager = LocalProxy(lambda: current_app.assist.context_manager)
+# context_manager = LocalStack()
 
 _converters = []
 
@@ -59,7 +60,7 @@ class Assistant(object):
         if self._route is None:
             raise TypeError("route is a required argument when app is not None")
 
-        app.agent = self
+        app.assist = self
         app.add_url_rule(self._route, view_func=self._flask_view_func, methods=['POST'])
 
     @property
@@ -90,7 +91,7 @@ class Assistant(object):
 
     @property
     def context_manager(self):
-        return getattr(_app_ctx_stack.top, '_assist_context_manager')
+        return getattr(_app_ctx_stack.top, '_assist_context_manager', ContextManager())
 
     @context_manager.setter
     def context_manager(self, value):
@@ -205,6 +206,7 @@ class Assistant(object):
 
         self.intent = self.request['result']['metadata']['intentName']
         self.context_in = self.request['result'].get('contexts', [])
+        self._update_contexts()
 
         view_func = self._match_view_func()
         _dbgdump('Matched view func - {}'.format(self.intent, view_func))
@@ -215,6 +217,12 @@ class Assistant(object):
                 return result.render_response()
             return result
         return "", 400
+
+    def _update_contexts(self):
+        temp = self.context_manager
+        temp.update(self.context_in)
+        self.context_manager = temp
+
 
     def _match_view_func(self):
         view_func = None

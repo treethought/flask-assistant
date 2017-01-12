@@ -1,6 +1,6 @@
 import logging
 from flask import Flask
-from flask_assistant import Assistant, ask, tell, Context
+from flask_assistant import Assistant, ask, tell, Context, context_manager
 
 
 app = Flask(__name__)
@@ -12,8 +12,8 @@ logging.getLogger('flask_assistant').setLevel(logging.DEBUG)
 def greetings():
     speech = """We've got some bumpin pies up in here!.
                 Would you like to order for pickup or delivery?"""
-    select_method = Context('select-method', lifespan=1)
-    return ask(speech).add_context(select_method)
+    context_manager.add('select-method', lifespan=1)
+    return ask(speech)
 
 
 def reprompt_method():
@@ -24,9 +24,9 @@ def reprompt_method():
 @assist.context("select-method")
 @assist.action('choose-order-method')
 def make_sure(order_method):
-    method_context = Context(order_method)
+    context_manager.add(order_method)
     speech = "Did you say {}?".format(order_method)
-    return ask(speech).add_context(method_context)
+    return ask(speech)
 
 
 # Delivery context actions to gather address info
@@ -38,8 +38,8 @@ def confirm_delivery(answer):
         reprompt_method()
     else:
         speech = "Ok sounds good. Can I have your address?"
-        context_out = Context('delivery-info')
-        return ask(speech).add_context(context_out)
+        context_manager.add('delivery-info')
+        return ask(speech)
 
 
 @assist.context("delivery", "delivery-info")
@@ -47,10 +47,10 @@ def confirm_delivery(answer):
 def store_address(address):
     speech = "Ok, and can I have your name?"
 
-    info = Context('delivery-info', lifespan=10)  # keep alive for end of order
-    info.set('address', address)
+    context_manager.add('delivery-info', lifespan=10)
+    context_manager.set('delivery-info', 'address', address)
 
-    return ask(speech).add_context(info)
+    return ask(speech)
 
 
 @assist.context("delivery", "delivery-info")
@@ -60,12 +60,11 @@ def store_phone(name, address):  # address can be pulled from existing delivery-
         With your address being {}, delivery time should be about 20 minutes.
         So would you like a special or custom pizza?""".format(name, address)
 
-    info = Context('delivery-info', lifespan=10)  # keep alive for end of order
-    info.set('name', name)
+    context_manager.add('delivery-info', lifespan=10)
+    context_manager.set('delivery-info', 'name', name)
+    context_manager.add('build')
 
-    ready_to_build = Context('build')
-
-    return ask(speech).add_context(info, ready_to_build)
+    return ask(speech)
 
 
 @assist.context("pickup")
@@ -73,8 +72,8 @@ def store_phone(name, address):  # address can be pulled from existing delivery-
 def confirm_pickup(answer):
     if 'y' in answer:
         speech = "Awesome, let's get your order started. Would you like a custom or specialty pizza?"
-        ready_to_build = Context("build")
-        return ask(speech).add_context(ready_to_build)
+        context_manager.add('build')
+        return ask(speech)
     else:
         reprompt_method()
 
@@ -88,24 +87,20 @@ def begin_and_set_type(pizza_type):
         speech = 'We have Canadian bacon with pineapple, meat lovers, and vegetarian. Which one would you like?'
         pizza_type = 'special'
 
-    # Store pizza details throughout order
-    pizza = Context('pizza', lifespan=10)
-    pizza.set('type', pizza_type)
-
+    context_manager.add('pizza', lifespan=10).set('type', pizza_type)  # Store pizza details throughout order
     # Set context for which questions you will ask about the pizza
-    # either 'custom' or 'special'
-    type_context = Context(pizza_type)
-    return ask(speech).add_context(pizza, type_context)
+    context_manager.add(pizza_type)
+
+    return ask(speech)
 
 
 @assist.context('build', 'special')
 @assist.action('choose-special-type')
 def set_special_choice(specialty):
     speech = 'Cool, you chose a {} pizza. What size do you want?'.format(specialty)
-    special = Context('special')
-    special.set('specialty', specialty)
+    context_manager.add('special').set('specialty', specialty)
 
-    return ask(speech).add_context(special)
+    return ask(speech)
 
 # This action is matched for the set-size intent regardless of pizza-type context
 # action params are matched to the corresponding parameter within existing contexts
@@ -114,19 +109,21 @@ def set_special_choice(specialty):
 
 @assist.context('build')
 @assist.action('set-size')
-def set_size(size, pizza_type, specialty=' '):
+def set_size(size, pizza_type, specialty=None):
+    if not specialty:
+        specialty = ' '
     speech = 'Ok, so you want a {} {} {} pizza. Is this correct?'.format(size, specialty, pizza_type)
-    size_chosen = Context('size-chosen', lifespan=1)  # set context for confirming order
-    return ask(speech).add_context(size_chosen)
+    context_manager.add('size-chosen')  # set context for confirming order
+    return ask(speech)
 
 
-@assist.context('custom', 'size-chosen')
+@assist.context('build', 'custom', 'size-chosen')
 @assist.action('confirm')
 def confirm_and_continue(answer):
     if answer.lower() in 'yes':
-        speech = 'Awesome, what topping would you like to add first? We have pepperoni, bacon, and veggies.'
-        toppings = Context('toppings', lifespan=4)
-        return ask(speech).add_context(toppings)
+        speech = 'Awesome, what topping would you like to add? We have pepperoni, bacon, and veggies.'
+        context_manager.add('toppings', lifespan=4)
+        return ask(speech)
 
     else:
         return review_pizza()
@@ -136,11 +133,8 @@ def confirm_and_continue(answer):
 @assist.action('choose-toppings')
 def store_toppings(new_topping):
     speech = 'Ok, I added {} to your pizza. Add another?'.format(new_topping)
-    toppings = Context('toppings')
-    toppings.set('top1', new_topping)
-    return ask(speech).add_context(toppings)
-
-
+    context_manager.add('toppings').set('top1', new_topping)
+    return ask(speech)
 
 
 if __name__ == '__main__':

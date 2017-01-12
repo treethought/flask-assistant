@@ -2,7 +2,6 @@ from . import logger
 from . import core
 from flask import json, Response, make_response
 from xml.etree import ElementTree
-from pprint import pprint
 
 
 class _Response(object):
@@ -48,9 +47,13 @@ class _Response(object):
             "permissions": permissions
         },
 
+    def include_contexts(self):
+        for context in core.context_manager.active:
+            self._response['contextOut'].append(context.serialize)
+
 
     def render_response(self):
-        core._dbgdump(self._response)
+        self.include_contexts()
         core._dbgdump(self._response)
         resp = json.dumps(self._response, indent=4)
         resp = make_response(resp)
