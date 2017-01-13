@@ -14,6 +14,8 @@
 
 
 #### Getting Started
+`pip install flask-assistant`
+
 ##### A Minimal Assistant
 
 ```python
