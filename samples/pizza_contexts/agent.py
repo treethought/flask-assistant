@@ -121,7 +121,7 @@ def set_size(size, pizza_type, specialty=None):
 @assist.action('confirm')
 def confirm_and_continue(answer):
     if answer.lower() in 'yes':
-        speech = 'Awesome, what topping would you like to add? We have pepperoni, bacon, and veggies.'
+        speech = 'What topping would you like to add? We have pepperoni, bacon, and veggies.'
         context_manager.add('toppings', lifespan=4)
         return ask(speech)
 
@@ -133,8 +133,9 @@ def confirm_and_continue(answer):
 @assist.action('choose-toppings')
 def store_toppings(new_topping):
     speech = 'Ok, I added {} to your pizza. Add another?'.format(new_topping)
-    context_manager.add('toppings').set('top1', new_topping)
+    context_manager.get('pizza').set('top1', new_topping)
     return ask(speech)
+
 
 
 if __name__ == '__main__':
