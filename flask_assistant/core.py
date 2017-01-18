@@ -127,27 +127,10 @@ class Assistant(object):
     def action(self, intent, mapping={}, convert={}, default={}, with_context=[], *args, **kw):
         """Decorates an intent's Action view function.
 
-        The wrapped function is called when a request with the
-        given intent_name is recieved along with all required parameters.
-
-        Arguments:
-            intent_name {str} -- name of the intent the action belongs to
-
-        Keyword Arguments:
-            mapping {dict} -- Maps function arguments to request parameters of a different name
-                                default: {}
-            convert {dict} -- Converts request parameter values to data types before assignment to function arguments.
-                                default: {}
-            default {dict} --  Provides default values for function arguments if Actions/API.ai request
-                                returns no corresponding parameter, or a slot with an empty value.
-                                Providing a default will over-ride any prompt functions for provided arguments
-                                default: {}
-            in_context {str} -- [Restricts execution of wrapped function to certain contexts] (default: {False})
-
+            The wrapped function is called when a request with the
+            given intent_name is recieved along with all required parameters.
         """
-
         def decorator(f):
-
             action_funcs = self._intent_action_funcs.get(intent, [])
             action_funcs.append(f)
             self._intent_action_funcs[intent] = action_funcs
@@ -156,7 +139,7 @@ class Assistant(object):
             self._intent_converts[intent] = convert
             self._intent_defaults[intent] = default
 
-            self._create_agent_intent()
+            # self._create_agent_intent()
 
             @wraps(f)
             def wrapper(*args, **kw):

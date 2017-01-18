@@ -13,20 +13,20 @@ def test():
     return tell(msg)
 
 
-@assistant.action(intent_name='0-SendMessage', mapping={'name': 'given-name'})
+@assistant.action(intent='0-SendMessage', mapping={'name': 'given-name'})
 def send_message(name, message):
     """Builds a Message and confirms it if both parameters are provided"""
     speech = 'Sending {} to {}. Is that correct?'.format(message, name)
     return ask(speech)
 
 
-@assistant.prompt_for(next_param='given-name', intent_name='0-SendMessage')
+@assistant.prompt_for(next_param='given-name', intent='0-SendMessage')
 def prompt_for_name():
     speech = 'Who should I send the message to dawg?'
     return ask(speech)
 
 
-@assistant.prompt_for(next_param='message', intent_name='0-SendMessage')
+@assistant.prompt_for(next_param='message', intent='0-SendMessage')
 def prompt_for_message():
     speech = 'What should the message say, my brotha?'
     return ask(speech)
