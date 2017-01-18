@@ -9,13 +9,13 @@ from flask_assistant.core import _dbgdump
 
 
 class SchemaHandler(object):
-    """docstring for SchemaHandler"""
 
     def __init__(self, assist):
 
         self.assist = assist
         self.intents = []
-        self.api = ApiAi(self.assist, 'c0f228508a854ea59e3c6fde2005cf37')
+        self._dev_token = self.assist.app.config['DEV_ACCESS_TOKEN']
+        self.api = ApiAi(self.assist, self._dev_token)
 
     @property
     def schema_dir(self):
@@ -103,18 +103,3 @@ class SchemaHandler(object):
             schema.append(intent.__dict__)
         self.dump_schema(schema)
 
-    # def build_from_app(self):
-    #     intents_schema = []
-    #     for intent_name in self.assist._intent_action_funcs:
-    #         new_intent = generate_intent(intent_name)
-    #         intent_json = new_intent.serialize
-    #         post_response = register(assist, intent_json)
-    #         intents_schema.append(intent_json)
-
-
-if __name__ == '__main__':
-    from samples.pizza_contexts.agent import assist
-    from samples.reservation.agent import assist
-    schema = SchemaHandler(assist)
-    schema.generate()
-    # build_usersays(assist)
