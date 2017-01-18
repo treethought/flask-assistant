@@ -141,6 +141,8 @@ class Assistant(object):
 
             # self._create_agent_intent()
 
+            self._create_agent_intent()
+
             @wraps(f)
             def wrapper(*args, **kw):
                 self._flask_view_func(*args, **kw)
