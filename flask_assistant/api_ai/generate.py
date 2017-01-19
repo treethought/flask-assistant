@@ -2,8 +2,8 @@ import os
 import json
 import logging
 
-from schema_models import Intent
-from api_ai import ApiAi
+from .schema_models import Intent
+from . import ApiAi
 
 from flask_assistant.core import _dbgdump
 
@@ -19,11 +19,17 @@ class SchemaHandler(object):
 
     @property
     def schema_dir(self):
-        return os.path.join(self.assist.app.root_path, 'schema')
+        d = os.path.join(self.assist.app.root_path, 'schema')
+        if not os.path.isdir(d):
+            os.mkdir(d)
+        return d
 
     @property
     def intent_file(self):
-        return os.path.join(self.schema_dir, 'intents.json')
+        f = os.path.join(self.schema_dir, 'intents.json')
+        if not os.path.isfile(f):
+            open(f, 'w+').close()
+        return f
 
     @property
     def intent_schema(self):
