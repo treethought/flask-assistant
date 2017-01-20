@@ -45,7 +45,7 @@ Hello World
 Documentation
 --------------
 
-- Check out the :doc:`quick_start` to jump right in
+- Check out the `Quick Start <http://flask-assistant.readthedocs.io/en/latest/quick_start.html>`_ to jump right in
 - View the full `documentation <http://flask-assistant.readthedocs.io/en/latest/>`_
   
 
