@@ -48,9 +48,6 @@ Documentation
 - Check out the :doc:`quick_start` to jump right in
 - View the full `documentation <http://flask-assistant.readthedocs.io/en/latest/>`_
   
-Contributing
--------------
-Help improve flask_assistan by opening an issue
 
 .. _`Quick Start`:
 .. _`documentation`: http://flask-assistant.readthedocs.io/en/latest/>
