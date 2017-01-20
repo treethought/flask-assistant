@@ -26,6 +26,9 @@ setup(
         'aniso8601',
         'six',
     ],
+    entry_points = {
+        'console_scripts': ['schema=flask_assistant.cli:main'],
+    },
     classifiers=[
         'License :: OSI Approved :: Apache Software License',
         'Framework :: Flask',

@@ -1,15 +1,15 @@
+import os
+import inspect
+from copy import copy
+from functools import wraps, partial
+
 from flask import current_app, json, request as flask_request, _app_ctx_stack
 from werkzeug.local import LocalProxy, LocalStack
 
-import collections
-from functools import wraps, partial
-import inspect
-
 from . import logger
 from .response import _Response
-from copy import copy
-
 from .manager import ContextManager
+from .api_ai import ApiAi
 
 request = LocalProxy(lambda: current_app.assist.request)
 context_in = LocalProxy(lambda: current_app.assist.context_in)
@@ -22,7 +22,7 @@ _converters = []
 class Assistant(object):
     """Central Interface for interacting with Google Actions via Api.ai.
 
-    The Assitant object routes requests
+    The Assitant object routes requests to :func: `action` decorated functions.
 
     The construtor is passed a Flask App instance and a url enpoint.
     Route provides the entry point for the skill, and must be provided if an app is given.
@@ -65,7 +65,7 @@ class Assistant(object):
 
     @property
     def request(self):
-        """Local Proxy refering to the request JSON recieved from API/Actions"""
+        """Local Proxy refering to the request JSON recieved from API.AI"""
         return getattr(_app_ctx_stack.top, '_assist_request', None)
 
     @request.setter
@@ -74,6 +74,7 @@ class Assistant(object):
 
     @property
     def intent(self):
+        """Local Proxy refering to the name of the intent contained in the API.AI request"""
         return getattr(_app_ctx_stack.top, '_assist_intent', None)
 
     @intent.setter
@@ -91,6 +92,10 @@ class Assistant(object):
 
     @property
     def context_manager(self):
+        """LocalProxy refering to the app's instance of the  :class: `ContextManager`.
+
+        Interface for adding and accessing contexts and their parameters
+        """
         return getattr(_app_ctx_stack.top, '_assist_context_manager', ContextManager())
 
     @context_manager.setter
@@ -127,27 +132,10 @@ class Assistant(object):
     def action(self, intent, mapping={}, convert={}, default={}, with_context=[], *args, **kw):
         """Decorates an intent's Action view function.
 
-        The wrapped function is called when a request with the
-        given intent_name is recieved along with all required parameters.
-
-        Arguments:
-            intent_name {str} -- name of the intent the action belongs to
-
-        Keyword Arguments:
-            mapping {dict} -- Maps function arguments to request parameters of a different name
-                                default: {}
-            convert {dict} -- Converts request parameter values to data types before assignment to function arguments.
-                                default: {}
-            default {dict} --  Provides default values for function arguments if Actions/API.ai request
-                                returns no corresponding parameter, or a slot with an empty value.
-                                Providing a default will over-ride any prompt functions for provided arguments
-                                default: {}
-            in_context {str} -- [Restricts execution of wrapped function to certain contexts] (default: {False})
-
+            The wrapped function is called when a request with the
+            given intent_name is recieved along with all required parameters.
         """
-
         def decorator(f):
-
             action_funcs = self._intent_action_funcs.get(intent, [])
             action_funcs.append(f)
             self._intent_action_funcs[intent] = action_funcs

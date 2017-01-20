@@ -1,6 +1,6 @@
 from werkzeug.local import LocalStack
 
-class Context():
+class Context(dict):
     """docstring for _Context"""
     def __init__(self, name, parameters={}, lifespan=5):
 
@@ -8,8 +8,20 @@ class Context():
         self.parameters = parameters
         self.lifespan = lifespan
 
+    def __setitem__(self, param, val):
+        self.parameters[param] = val
+
+    def __getitem__(self, param):
+        if param in 'nameparameterslifespan':
+            return super().__getitem__(param)
+        return self.parameters[param]
+
+
     def set(self, param_name, value):
         self.parameters[param_name] = value
+
+    def get(self, param):
+        return self.parameters[param]
 
     def sync(self, context_json):
         self.__dict__.update(context_json)
