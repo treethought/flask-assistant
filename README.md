@@ -71,7 +71,7 @@ def set_method(order_method):
 
 
 # The following actions will be matched depending
-# on the order method context provided from the previous action
+# on the order_method context provided from the previous action
 @assist.context("pickup")
 @assist.action('confirm')
 def confirm_pickup(answer):
