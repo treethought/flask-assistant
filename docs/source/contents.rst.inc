@@ -8,4 +8,3 @@ Table Of Contents
    quick_start
    generate_schema
    code
-   genindex
