@@ -11,6 +11,8 @@ A flask extension serving as an `API.AI`_  SDK to provide an easy way to create 
 
 Flask-Assistant allow you to focus on building the fullfillment_ of actions invoked by the user and desgin a conversational flow to build contextual dialogues.
 
+ This project is heavily inspired and based on John Wheeler's `Flask-ask <https://github.com/johnwheeler/flask-ask>`_ for the Alexa Skills Kit.
+
 
 Features
 ---------
@@ -40,6 +42,12 @@ Hello World
 
     if __name__ == '__main__':
         app.run(debug=True)
+
+How-To:
+
+    1. Create an `Assistant` object with a Flask app and the route to your webhook URL.
+    2. Use `action` decorators to map the intents to the proper action function.
+    3. Use action view functions to return `ask` or `tell` responses.
 
 
 Documentation
