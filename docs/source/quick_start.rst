@@ -1,8 +1,7 @@
 
 Quick Start
 ===========================
-Let's walk through the creation of a basic Assistant app.This assistant will be asked to send a message to someone, and confirm before sending.
-    - It will only use the API.AI web interface for the absolute minimum, the rest will be done with Flask-Assistant :)
+Let's walk through the creation of a basic Assistant app. This assistant will be asked to send a message to someone, and confirm before sending.
 
 Installation
 ------------

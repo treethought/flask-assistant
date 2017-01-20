@@ -43,7 +43,8 @@ Hello World
     if __name__ == '__main__':
         app.run(debug=True)
 
-How-To:
+How-To
+-------
 
     1. Create an `Assistant` object with a Flask app and the route to your webhook URL.
     2. Use `action` decorators to map the intents to the proper action function.
