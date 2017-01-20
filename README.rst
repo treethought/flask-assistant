@@ -9,7 +9,7 @@ A flask extension serving as an `API.AI`_  SDK to provide an easy way to create 
 .. _`fullfillment`: https://developers.google.com/actions/develop/apiai/dialogs-and-fulfillment#overview
 .. _API.AI: https://docs.api.ai/
 
-Flask-Assistant allow you to focus on building the fullfillment_ of actions invoked by the user and desgin a conversational flow to build contextual dialogues.
+Flask-Assistant allow you to focus on building the webhook fullfillment_ of actions invoked by the user and desgin a conversational flow to build contextual dialogues.
 
  This project is heavily inspired and based on John Wheeler's `Flask-ask <https://github.com/johnwheeler/flask-ask>`_ for the Alexa Skills Kit.
 
