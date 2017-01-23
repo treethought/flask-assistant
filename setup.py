@@ -8,26 +8,26 @@ from setuptools import setup
 
 setup(
     name='Flask-Assistant',
-    version='0.1.0',
+    version='0.1.1',
     url='https://github.com/treethought/flask-assistant',
     license='Apache 2.0',
     author='Cam Sweeney',
     author_email='cpsweene@gmail.com',
     description='Flask extension for developing assistants for Google Home / Google Actions via API-AI',
     long_description=__doc__,
-    packages=['flask_assistant'],
+    packages=['flask_assistant', 'api_ai'],
     zip_safe=False,
     include_package_data=True,
     platforms='any',
     install_requires=[
         'Flask',
+        'requests',
         'pyOpenSSL',
         'PyYAML',
-        'aniso8601',
         'six',
     ],
     entry_points = {
-        'console_scripts': ['schema=flask_assistant.cli:main'],
+        'console_scripts': ['schema=api_ai.cli:main'],
     },
     classifiers=[
         'License :: OSI Approved :: Apache Software License',
