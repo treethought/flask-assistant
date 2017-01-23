@@ -14,8 +14,8 @@ class SchemaHandler(object):
 
         self.assist = assist
         self.intents = []
-        self._dev_token = self.assist.app.config['DEV_ACCESS_TOKEN']
-        self.api = ApiAi(self.assist, self._dev_token)
+        # self._dev_token = self.assist.app.config['DEV_ACCESS_TOKEN']
+        self.api = ApiAi(self.assist)
 
     @property
     def schema_dir(self):

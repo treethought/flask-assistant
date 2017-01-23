@@ -3,7 +3,8 @@ import sys
 import importlib
 
 from flask_assistant.core import Assistant
-from flask_assistant.api_ai.generate import SchemaHandler
+# from flask_assistant.api_ai.generate import SchemaHandler
+from .api_ai.generate import SchemaHandler
 
 
 def main():
