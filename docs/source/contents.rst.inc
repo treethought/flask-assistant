@@ -6,5 +6,6 @@ Table Of Contents
 
    index
    quick_start
+   contexts
    generate_schema
    code
