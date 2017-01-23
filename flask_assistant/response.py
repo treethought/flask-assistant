@@ -63,7 +63,7 @@ class _Response(object):
 
 class tell(_Response):
     def __init__(self, speech):
-        super(tell, self).__init__(sepeech)
+        super(tell, self).__init__(speech)
         self._response['data']['google']['expect_user_response'] = False
 
 
