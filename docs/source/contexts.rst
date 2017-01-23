@@ -67,13 +67,13 @@ Retrieve a declared context:
     my_context = context_manager.get('context-name')
 
 
-Set a parameter value directly on a context object...
+.. Set a parameter value directly on a context object...
 
-.. code-block:: python
+.. .. code-block:: python
 
-    my_context.set('foo', bar)
+..     my_context.set('foo', bar)
 
-Or via the context_manager:
+Set a parameter value:
 
 .. code-block:: python
 
@@ -117,71 +117,59 @@ For example:
 
 
 
-Example
-=======
+.. Example
+.. =======
 
-Let's edit the `choose-order-type` action function from the :doc:`quick_start` to set a context
-
-
-.. code-block:: python
-
-    from flask_assistant import context_manager
-
-    @assist.action('choose-order-type')
-    def set_order_context(order_type):
-        speech = "Did you say {}?".format(order_type)
-        context_manager.add(order_type)
-        return ask(speech) 
+.. Let's edit the `choose-order-type` action function from the :doc:`quick_start` to set a context
 
 
-Now we'll use the incoming context to match a single intent to one of two action functions depending on their required contexs.
-The following set of actions represent a branching of the dialogue into two seperate contexts: delivery or pickup
+.. .. code-block:: python
 
-.. The following confirm actions will then be matched depending on the order_type context provided from the previous action
+..     from flask_assistant import context_manager
 
-.. code-block:: python
-
-    # will be matched if user said 'pickup'
-    @assist.context("pickup")
-    @assist.action('confirm')
-    def confirm_pickup(answer):
-        if 'no' in answer:
-            order_type_prompt()
-        else:
-            speech = "Awesome, would you like to pick up a specialty or custom pizza?"
-            context_manager.add('build')
-            return ask(speech)
-
-A conversation specific to the 'pickup' context won't require any delivery address information, so the above action adds a 'build' context to transition to the next state of the dialogue: building the pizza
-
-However, the 'delivery' conversation will require this information, so it sets a 'delivery-info' context so that the assistant will prompt for the required delivery information before proceeding to building the pizza.
+..     @assist.action('choose-order-type')
+..     def set_order_context(order_type):
+..         speech = "Did you say {}?".format(order_type)
+..         context_manager.add(order_type)
+..         return ask(speech) 
 
 
-.. code-block:: python
+.. Now we'll use the incoming context to match a single intent to one of two action functions depending on their required contexs.
+.. The following set of actions represent a branching of the dialogue into two seperate contexts: delivery or pickup
 
-    # will be matched if user said 'delivery'
-    @assist.context("delivery")
-    @assist.action('confirm')
-    def confirm_delivery(answer):
-        if 'no' in answer:
-            order_type_prompt()
-        else:
-            speech = "Ok sounds good. Can I have your address?"
-            context_manager.add('delivery-info')
-            return ask(speech)
+.. .. The following confirm actions will then be matched depending on the order_type context provided from the previous action
+
+.. .. code-block:: python
+
+..     # will be matched if user said 'pickup'
+..     @assist.context("pickup")
+..     @assist.action('confirm')
+..     def confirm_pickup(answer):
+..         if 'no' in answer:
+..             order_type_prompt()
+..         else:
+..             speech = "Awesome, would you like to pick up a specialty or custom pizza?"
+..             context_manager.add('build')
+..             return ask(speech)
+
+.. A conversation specific to the 'pickup' context won't require any delivery address information, so the above action adds a 'build' context to transition to the next state of the dialogue: building the pizza
+
+.. However, the 'delivery' conversation will require this information, so it sets a 'delivery-info' context so that the assistant will prompt for the required delivery information before proceeding to building the pizza.
 
 
-.. tip:: There are a few ways to access and set contexts and their parameters.
+.. .. code-block:: python
 
+..     # will be matched if user said 'delivery'
+..     @assist.context("delivery")
+..     @assist.action('confirm')
+..     def confirm_delivery(answer):
+..         if 'no' in answer:
+..             order_type_prompt()
+..         else:
+..             speech = "Ok sounds good. Can I have your address?"
+..             context_manager.add('delivery-info')
+..             return ask(speech)
 
-
-    .. code-block:: python
-
-        # get a context object
-        my_context = contex_manager.get(context_name)
-
-        # set value directly onto context object
-        my_context.set('param1', )
 
 
 

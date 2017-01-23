@@ -37,9 +37,9 @@ API.AI Setup
 Step 5 is not required for test your app within the API.AI console, but is if you plan to test or deploy on Google Home
 
    
-.. note:: You can create new intents and provide information about their action and parameters
-        in the web interface and they will still be matched to your assistant's action function for the intent's name.
-        However, it may often be simpler to define your intents directly from your assistant as will be shown here.
+.. .. note:: You can create new intents and provide information about their action and parameters
+..         in the web interface and they will still be matched to your assistant's action function for the intent's name.
+..         However, it may often be simpler to define your intents directly from your assistant as will be shown here.
 
 
 Create your Assistant
