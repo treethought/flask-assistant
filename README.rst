@@ -16,7 +16,7 @@ Flask-Assistant allow you to focus on building the webhook fullfillment_ of acti
 
 Features
 ---------
-    - Automatic automatically map user-triggered Intents to action functions
+    - Mapping of user-triggered Intents to action functions
     - Context support for crafting dialogue dependent on the user's requests
     - Define prompts for missing parameters when they are not present in the users request or past active contexs
     - A convenient syntax resembling Flask's decoratored routing
