@@ -30,10 +30,11 @@ API.AI Setup
     - Provide the publically available URL to the flask app will receive requests at
     - This can be easily done using `ngrok`_
     - or `Flask-Live-Starter`_
-4. Create a new project in the `Google Developer Console`_
+4. Create an Intent, with the Action set to the same name as defined within your python file    
+5. Create a new project in the `Google Developer Console`_
    
 
-Step 4 is not required for test your app within the API.AI console, but is if you plan to test or deploy on Google Home
+Step 5 is not required for test your app within the API.AI console, but is if you plan to test or deploy on Google Home
 
    
 .. note:: You can create new intents and provide information about their action and parameters
