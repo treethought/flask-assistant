@@ -9,7 +9,6 @@ from werkzeug.local import LocalProxy, LocalStack
 from . import logger
 from .response import _Response
 from .manager import ContextManager
-from .api_ai import ApiAi
 
 request = LocalProxy(lambda: current_app.assist.request)
 context_in = LocalProxy(lambda: current_app.assist.context_in)
