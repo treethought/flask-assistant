@@ -1,11 +1,11 @@
-
+***********
 Quick Start
-===========================
-Let's walk through the creation of a basic Assistant app. This assistant will be asked to send a message to someone, and confirm before sending.
+***********
+
+This page will go over some of the key concepts of flask-assistant
 
 Installation
-------------
-
+============
 .. code-block:: bash
 
     pip install flask-assistant
@@ -23,7 +23,7 @@ Create a directory to serve as the app root (useful if auto-generating Intent sc
 ..  _api_setup:
 
 API.AI Setup
--------------------
+============
 1. Sign in to the `API.AI Console`_
 2. Create a new Agent_ named "Hello World" and click save.
 3. Click on Fullfillment in the left side menu and enable webhook
@@ -42,7 +42,7 @@ Step 4 is not required for test your app within the API.AI console, but is if yo
 
 
 Create your Assistant
-----------------------
+=====================
 
 
 .. code-block:: python
@@ -54,9 +54,9 @@ Create your Assistant
     assist = Assistant(app, '/')
 
 
-    @assist.action('send-message')
-    def send_message_action(given-name, message):
-        speech = 'Sending {} to {}. Is that correct?'.format(message, name)
+    @assist.action('greetings')
+    def greetings():
+        speech = """Hello, what is your favorite color?"""
         return ask(speech)
 
     if __name__ = '__main__':
@@ -65,35 +65,48 @@ Create your Assistant
 
 As you can see, structure of an Assistant app resembles the structure of a regular Flask.
 
-Explanation:
+Explanation
+-----------
 
 1. Initialized an :class:`Assistant <flask_assistant.Assistant>` object with a Flask app and the route to your webhook URL.
-2. Used the :meth:`action <flask_assistant.Assistant.action>` decorator to map the `send-message` intent to the proper action function.
+2. Used the :meth:`action <flask_assistant.Assistant.action>` decorator to map the `greetings` intent to the proper action function.
     - The action decorator accepts the name of an intent as a parameter
     - The decorated function serves as the action view function, called when an API.AI request sent on behalf of the `send-message` intent is received
 3. The action funtion returns an :class:`ask <flask_assistant.ask>` response containing text/speech which prompts the user for the next intent.
 
-Because the action view function requires two parameters, it will not be called if both parameters have not been provided.
-This is where :meth:`prompt_for` comes in handy.
+
+   
+Accepting Parameters
+====================
+Action functions can accept parameters, which will be parsed from the API.AI request
+
 
 .. code-block:: python
 
-    @assistant.prompt_for('given-name', intent='send-message')
-    def prompt_for_name():
-        speech = 'Who should I send the message to??'
+    @assist.action('give-color')
+    def echo_color(color):
+        speech = "Your favorite color is {}".format(color)
+        return tell(speech)
+
+
+Because the action view function requires a parameter, it will not be called if the color parameter
+is not provided by the user, or if it was not defined previously in an active :doc:`context contexts`
+This is where :meth:`prompt_for` comes in handy.
+
+
+
+Prompting for Parameters
+========================
+
+The :meth:`prompt_for <flask_assistant.assistant.prompt_for>` decorator is passed a parameter name and intent name, and is called if the intent's action function's parameters have not been supplied.
+
+.. code-block:: python
+
+    @assist.prompt_for('color', intent='give-color')
+    def prompt_color(color):
+        speech = "Sorry I didn't catch that. What color did you say?"
         return ask(speech)
-
-    @assistant.prompt_for('message', intent='send-message')
-    def prompt_for_message():
-        speech = 'What should the message say, my brotha?'
-        return ask(speech)
-
-The :meth:`prompt_for <flask_assistant.assistant.prompt_for>` decorator is passed a parameter and intent name, and is called if the intent's action function's parameters have not been supplied.
-
-
-
-
-
+        
 
 
 

@@ -4,11 +4,9 @@
    contain the root `toctree` directive.
 
 
-
-
-
+***************************
 Welcome to Flask-Assistant!
-===========================================
+***************************
 
 
 A flask extension serving as an `API.AI`_  SDK to provide an easy way to create virtual assistants which may be integrated with platforms such as `Google Actions`_ (Google Home).
@@ -21,7 +19,8 @@ Flask-Assistant allow you to focus on building the fullfillment_ of actions invo
 
 
 Features
----------
+========
+
     - Automatic automatically map user-triggered Intents to action functions
     - Context support for crafting dialogue dependent on the user's requests
     - Define prompts for missing parameters when they are not present in the users request or past active contexs
@@ -31,7 +30,7 @@ Features
 
 
 A Minimal Assistant
---------------------
+===================
 
 .. code-block:: python
 
@@ -55,6 +54,12 @@ Check out the :doc:`quick_start` to see how to quicky build an assistant
 
 .. include:: contents.rst.inc
 
+.. Indices
+.. ==================
+
+.. * :ref:`genindex`
+.. * :ref:`modindex`
+.. * :ref:`search`
 
 
   

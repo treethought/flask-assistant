@@ -1,7 +1,7 @@
 
-*************************************
-Create Dialogues with Context
-*************************************
+**************
+Using Context
+**************
 
 Overview
 ========
@@ -42,36 +42,93 @@ Context Manager
 
 
 
-The :any:`context_manager` is used to declare, access, and modify context objects.
+The :any:`context_manager` is used to declare, access, and modify context objects. It contains the input contexts recieved from the  API.AI request and appends any new or modified contexts to the flask-assistant response.
 
 
-Contexts are added to a session using the :meth:`context_manager`
+.. It is available as a `LocalProxy <http://werkzeug.pocoo.org/docs/0.11/local/#werkzeug.local.LocalProxy>`_ and
+
 
 .. code-block:: python
 
     from flask_assistant import context_manager
 
-    context_manager.add('my-context')
 
-Contexts
+Add a new context:
+
+.. code-block:: python
+
+    context_manager.add('context-name')
 
 
+Retrieve a declared context:
+
+.. code-block:: python
+
+    my_context = context_manager.get('context-name')
 
 
+Set a parameter value directly on a context object...
+
+.. code-block:: python
+
+    my_context.set('foo', bar)
+
+Or via the context_manager:
+
+.. code-block:: python
+
+    context_manager.set('context-name', 'param_name', value)
+
+
+context decorator
+==================
+
+The :any:`context` decorator restricts a wrapped action function to be matched only if the given contexts are active.
+
+While the :any:`context_manager` is used create and access context objects, the :any:`context` decorator is responsible for mapping an intent to one of possibly many context-dependent action functions.
+
+The basic :any:`action` intent-mapping in conjuction with :any:`context` action filtering allows
+a single intent to invoke an action appropriate to the current conversation.
+
+For example:
+
+.. code-block:: python
+
+    @assist.action('give-diet')
+    def set_user_diet(diet):
+        speech = 'Are you trying to make food or get food?'
+        context_manager.add(diet)
+        return ask(speech)
+
+    @assist.context('vegetarian')
+    @assist.action('get-food')
+    def suggest_food():
+        return tell("There's a farmers market tonight.")
+
+    @assist.context('carnivore')
+    @assist.action('get-food')
+    def suggest_food():
+        return tell("Bob's BBQ has some great tri tip")
+
+    @assist.context('broke')
+    @assist.action('get-food')
+    def suggest_food():
+        return tell("Del Taco is open late")
 
 
 
 Example
 =======
 
-Let's edit the `choose-order-type` action function from the :doc:`quick_start` to create a new context and ask for confirmation.
+Let's edit the `choose-order-type` action function from the :doc:`quick_start` to set a context
+
 
 .. code-block:: python
 
     from flask_assistant import context_manager
 
     @assist.action('choose-order-type')
-    def begin_order(order_type):
+    def set_order_context(order_type):
         speech = "Did you say {}?".format(order_type)
         context_manager.add(order_type)
         return ask(speech) 
@@ -128,44 +185,42 @@ However, the 'delivery' conversation will require this information, so it sets a
 
 
 
-Storing Paramater Values in Contexts
-====================================
+.. Storing Paramater Values in Contexts
+.. ====================================
 
-We can also use the `context_manager` to store and retrieve values required at later actions.
+.. We can also use the `context_manager` to store and retrieve values required at later actions.
 
-.. code-block:: python
+.. .. code-block:: python
     
-    # set the param directly using the context object
-    my_context = context_manager.get(context_name)
-    my_context.set(param_name, value)
+..     # set the param directly using the context object
+..     my_context = context_manager.get(context_name)
+..     my_context.set(param_name, value)
 
-    # or set the param through the context manager
-    context_manager.set(context_name, param_name, value)
-
-
-
-For example we can store a value for the number of toppings on a custom pizza.
-
-.. code-block:: python
-
-    @assist.context('custom')
-    @assist.action('add_toppings')
-    def store_value(num_toppings):
-        charge = (num_toppings * .75) / 100
-        context_manager.set('custom', 'num_toppings', num_toppings)
-        speech = '{} toppings will cost {}. Is that ok?'.format(num_toppings, charge)
-        return ask(speech)
-
-Later, we can retrieve the parameter value
-
-@assist.context('custom', 'checkout')
-@assist.action('finish-order')
-def give_total():
+..     # or set the param through the context manager
+..     context_manager.set(context_name, param_name, value)
 
 
-context_manager.get('finish=checkout')
+
+.. For example we can store a value for the number of toppings on a custom pizza.
+
+.. .. code-block:: python
+
+..     @assist.context('custom')
+..     @assist.action('add_toppings')
+..     def store_value(num_toppings):
+..         charge = (num_toppings * .75) / 100
+..         context_manager.set('custom', 'num_toppings', num_toppings)
+..         speech = '{} toppings will cost {}. Is that ok?'.format(num_toppings, charge)
+..         return ask(speech)
+
+.. Later, we can retrieve the parameter value
+
+.. @assist.context('custom', 'checkout')
+.. @assist.action('finish-order')
+.. def give_total():
 
 
+.. context_manager.get('finish=checkout')
 
 
 
@@ -174,18 +229,20 @@ context_manager.get('finish=checkout')
 
 
 
-Note that each action also added a new context, which can be used in conjuction with existing contexts to provide more precise intent mapping.
 
 
-For example, imagine that later in the dialogue we want give the user the total price of their pizza. This will depend on which contexts have been activated:
-    - pickup or delivery
-    - custom or specialty pizza
-    - number of toppings (only applicable to custom pizzas)
+.. Note that each action also added a new context, which can be used in conjuction with existing contexts to provide more precise intent mapping.
+
+
+.. For example, imagine that later in the dialogue we want give the user the total price of their pizza. This will depend on which contexts have been activated:
+..     - pickup or delivery
+..     - custom or specialty pizza
+..     - number of toppings (only applicable to custom pizzas)
       
-Calculating the price could be accomplished like this:
+.. Calculating the price could be accomplished like this:
 
-@assist.contex('pickup', 'custom' )
-@assist.action('get-price')
-def calc_price():
+.. @assist.contex('pickup', 'custom' )
+.. @assist.action('get-price')
+.. def calc_price():
 
 

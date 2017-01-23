@@ -1,4 +1,4 @@
-from werkzeug.local import LocalStack
+
 
 class Context(dict):
     """docstring for _Context"""
@@ -8,13 +8,12 @@ class Context(dict):
         self.parameters = parameters
         self.lifespan = lifespan
 
-    def __setitem__(self, param, val):
-        self.parameters[param] = val
 
-    def __getitem__(self, param):
-        if param in 'nameparameterslifespan':
-            return super().__getitem__(param)
-        return self.parameters[param]
+
+    # def __getattr__(self, param):
+    #     if param in ['name', 'parameters', 'lifespan']:
+    #         return getattr(self, param)
+    #     return self.parameters[param]
 
 
     def set(self, param_name, value):
@@ -53,8 +52,8 @@ class ContextManager():
         return context
 
 
-    def get_param(self, context, param):
-        return self._cache
+    def get_param(self, context_name, param):
+        return self._cache[context_name].parameters[param]
 
     def update(self, contexts_json):
         for obj in contexts_json:
@@ -79,9 +78,6 @@ class ContextManager():
     @property
     def expired(self):
         return [self._cache[c] for c in self._cache if self._cache[c].lifespan == 0]
-    
-
-
 
     
 
