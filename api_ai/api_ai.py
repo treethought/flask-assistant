@@ -1,9 +1,5 @@
 import os
 import requests
-import datetime
-from flask import make_response
-import json
-
 
 class ApiAi(object):
     """Interface for making and recieving API-AI requests.

@@ -1,9 +1,8 @@
 import os
 import json
-import logging
 
 from .schema_models import Intent
-from . import ApiAi
+from .api_ai import ApiAi
 
 from flask_assistant.core import _dbgdump
 
@@ -58,7 +57,7 @@ class SchemaHandler(object):
         return from_app
 
     def dump_schema(self, schema):
-        _dbgdump('Writing schema json to file')
+        print('Writing schema json to file')
         with open(self.intent_file, 'w') as f:
             json.dump(schema, f, indent=4)
 
@@ -73,24 +72,24 @@ class SchemaHandler(object):
     def push_intent(self, intent):
         """Registers or updates an intent and returns the intent_json with an ID"""
         if intent.id:
-            _dbgdump('Updating {} intent'.format(intent.name))
+            print('Updating {} intent'.format(intent.name))
             self.update(intent)
         else:
-            _dbgdump('Registering {} intent'.format(intent.name))
+            print('Registering {} intent'.format(intent.name))
             intent = self.register(intent)
         return intent
 
     def register(self, intent):
         """Registers a new intent and returns the Intent object with an ID"""
         response = self.api.post_intent(intent.serialize)
-        _dbgdump(response)
+        print(response)
         if response['status']['code'] == 200:
             intent.id = response['id']
         return intent
 
     def update(self, intent):
         response = self.api.put_intent(intent.id, intent.serialize)
-        _dbgdump(response)
+        print(response)
         if response['status']['code'] == 200:
             return response
 
@@ -101,7 +100,7 @@ class SchemaHandler(object):
                     return intent['id']
 
     def generate(self):
-        _dbgdump('Generating schema...')
+        print('Generating schema...')
         schema = []
         for intent in self.app_intents:
             intent.id = self.grab_id(intent.name)

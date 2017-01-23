@@ -131,7 +131,6 @@ class Intent():
 
     @property
     def serialize(self):
-        print(type(json.dumps(self.__dict__)))
         return json.dumps(self.__dict__)
 
     def update(self, intent_json):
