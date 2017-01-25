@@ -2,6 +2,10 @@
 Create Virtual Assistants with Python
 ===============================================
 
+.. image:: https://badges.gitter.im/flask-assistant/Lobby.svg
+   :alt: Join the chat at https://gitter.im/flask-assistant/Lobby
+   :target: https://gitter.im/flask-assistant/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
 
 A flask extension serving as an `API.AI`_  SDK to provide an easy way to create virtual assistants which may be integrated with platforms such as `Google Actions`_ (Google Home).
 
