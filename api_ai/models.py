@@ -111,34 +111,21 @@ class Intent():
     Intents are created internally using an Assistant app's action decorated view functions
     These objects provide the JSON schema for registering, updating, and removing intents in
     the API.AI develoepr console via JSON requests.
-
-    Attributes:
-        auto (bool): True if Mahcine Learning is on
-        contexts (list): List of input contexts required to trigger intent
-        fallback_intent (bool): True if intent is a fallback intent
-        name (str): Name of the intent
-        priority (int): Intent priority
-        templates (list): Templates that this intent will match
-        user_says (list): list of examples or template objects
-        webhookForSlotFilling (bool): enable webhook handling of intent required parameters
-        webhookUsed (bool): True if webhook enabled for intent (True when using flask-assitant)
     """
 
-    def __init__(self, name, auto=True, contexts=[],
-                 templates=[], user_says=[], responses=[], priority=500000,
-                 slot_filling=True, fallback_intent=False, events=[]):
+    def __init__(self, name, priority=500000, fallback_intent=False):
 
         self.name = name
-        self.auto = auto
-        self.contexts = contexts
-        self.templates = templates
-        self.userSays = user_says
-        self.responses = responses
+        self.auto = True
+        self.contexts = None
+        self.templates = []
+        self.userSays = []
+        self.responses = []
         self.priority = priority
         self.fallbackIntent = fallback_intent
         self.webhookUsed = True
-        self.webhookForSlotFilling = slot_filling
-        self.events = events
+        self.webhookForSlotFilling = True
+        self.events = []
         self.id = None
 
     def registered(self):

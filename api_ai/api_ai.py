@@ -25,6 +25,11 @@ class ApiAi(object):
             intent_id = '/' + intent_id
         return '{}intents{}?v={}'.format(self.base_url, intent_id, self.versioning)
 
+    def _entity_uri(self, entity_id=''):
+        if entity_id != '':
+            entity_id = '/' + entity_id
+        return '{}entities{}?v={}'.format(self.base_url, entity_id, self.versioning)
+
     def _get(self, endpoint):
         response = requests.get(endpoint, headers=self._dev_header)
         response.raise_for_status
@@ -39,6 +44,8 @@ class ApiAi(object):
         response = requests.put(endpoint, headers=self._dev_header, data=data)
         response.raise_for_status
         return response.json()
+
+    ## Intents ##
 
     @property
     def get_agent_intents(self):
@@ -61,4 +68,18 @@ class ApiAi(object):
         """Send a put request to update the intent with intent_id"""
         endpoint = self._intent_uri(intent_id)
         return self._put(endpoint, intent_json)
+
+    ## Entities ##
+
+    def get_entity(self, entity_id):
+        endpoint =self._entity_uri(entity_id=entity_id)
+        return self._get(endpoint)
+
+    def post_entity(self, entity_json):
+        endpoint = self._entity_uri()
+        return self._post(endpoint, data=entity_json)
+
+    def put_entity(self, entity_id, entity_json):
+        endpoint = self._entity_uri(entity_id)
+        return self._put(endpoint, data=entity_json)
         
