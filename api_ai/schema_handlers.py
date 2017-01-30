@@ -3,7 +3,7 @@ import inspect
 import json
 from ruamel import yaml
 
-from api_ai.schema_models import Intent, Entity
+from api_ai.models import Intent, Entity
 from api_ai.api_ai import ApiAi
 
 from flask_assistant.core import _dbgdump
