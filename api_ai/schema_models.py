@@ -17,61 +17,92 @@ class _Field(dict):
         self.__setitem__(key, value)
 
 
-class Entity(_Field):
+class Entity():
     """docstring for Entity"""
 
-    def __init__(self, name, entries=[]):
-        super(Entity, self).__init__()
+    def __init__(self, name):
         self.name = name
-        self.entries = entries
+        self.entries = []
 
     def add_entry(self, value, synonyms=[]):
-        self.entries[value] = synonyms
+        # import ipdb; ipdb.set_trace()
+        entry = {'value': value, 'synonyms': synonyms}
+        self.entries.append(entry)
+        # self.entries[value] = synonyms
 
     def add_synonyms(self, entry, synonyms):
         self.entries[entry].extend(synonyms)
+
+    @property
+    def serialize(self):
+        return json.dumps(self.__dict__)
 
     def __repr__(self):
         return '@' + self.name
 
 
-class Example(object):
-    """docstring for Example"""
+class ExampleBase(object):
+    """docstring for ExampleBase"""
 
-    def __init__(self, phrase, entity_map={}):
-        super(Example, self).__init__(isTemplate=False)
-        self._phrase = phrase
-        self._entity_map = entity_map
+    def __init__(self, phrase, user_defined=False, isTemplate=False):
 
-        if not _entity_map:
-            auto_annotate = {
-                'text': self._phrase,
-                'userDefined': False
-            }
-            self.data.append(auto_annotate)
-
-        else:
-            self.parse_speech()
+        self.text = phrase
+        self.userDefined = user_defined
+        self.isTemplate = isTemplate
+        self.data = []
 
     @property
-    def split_speech(self):
-        return self._phrase.split(' ')
-
-    def sub_phrase_obj(self, text):
+    def serialize(self):
         return {
-            'text': text,
+            'data': self.data,
+            'isTemplate': self.isTemplate,
+            'count': 0
         }
 
-    def parse_speech(self):
+
+class AutoAnnotedExamle(ExampleBase):
+
+    def __init__(self, phrase):
+        super(AutoAnnotedExamle, self).__init__(phrase)
+        self.text = phrase
+        self.data.append({'text': self.text, 'userDefined': False})
+
+
+class UserDefinedExample(ExampleBase):
+
+    def __init__(self, phrase, mapping):
+        super(UserDefinedExample, self).__init__(phrase, user_defined=True)
+        # import ipdb; ipdb.set_trace()
+        # self.phrase = phrase
+        self.mapping = mapping
+
+        self.parse_phrase()
+
+    def parse_phrase(self):
+        # import ipdb; ipdb.set_trace()
         annotated = {}
         sub_phrase = ''
-        for word in self.split_speech:
-            sub_phrase += '{} '.format(word)
 
-            if word in entity_map:
-                annotated['text'] = word
-                annotated['meta'] = '@' + entity_map[word]
-                annotated['alias'] = entity_map[word]
+        for word in self.text.split():
+            if word in self.mapping:
+                'mapping triggered for {}'.format(word)
+                self.data.append({'text': sub_phrase})  # add non-annotated, then deal with annotation
+                sub_phrase = ''
+                self.annotate(word)
+
+            else:
+                sub_phrase += '{} '.format(word)
+
+        if sub_phrase:
+            self.data.append({'text': sub_phrase})
+
+    def annotate(self, word):
+        annotation = {}
+        annotation['text'] = word
+        annotation['meta'] = '@' + self.mapping[word]
+        annotation['alias'] = self.mapping[word]
+        annotation['userDefined'] = True
+        self.data.append(annotation)
 
 
 class Intent():
@@ -110,24 +141,28 @@ class Intent():
         self.events = events
         self.id = None
 
-
     def registered(self):
         if self.id:
             return True
 
-    def add_user_example(self):
-        pass
 
-    def add_action(self, action_name):
+    def add_example(self, phrase, mapping=None):  # TODO
+        if mapping:
+            example = UserDefinedExample(phrase, mapping)
+        else:
+            example = AutoAnnotedExamle(phrase)
+
+        self.userSays.append(example.serialize)
+
+    def add_action(self, action_name, parameters=[]):
         self.responses = [{
             'action': action_name,
             'resetContexts': False,
             'affectedContexts': [],  # TODO: register context outs
-            'parameters': [],  # TODO: register parameters from action_funcs
+            'parameters': parameters,
             'messages': []  # TODO: possibly register action responses to call from intent object directly
         }]
         # self.responses.append(new_response)
-    
 
     @property
     def serialize(self):
@@ -136,4 +171,3 @@ class Intent():
     def update(self, intent_json):
         self.__dict__.update(json.loads(intent_json))
         return self._update
-    

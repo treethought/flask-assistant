@@ -3,8 +3,7 @@ import sys
 import importlib
 
 from flask_assistant.core import Assistant
-from .generate import SchemaHandler
-# from api_ai.generate import SchemaHandler
+from api_ai.schema_handlers import IntentGenerator, EntityGenerator
 
 
 def main():
@@ -16,9 +15,11 @@ def main():
     for name, obj in agent_module.__dict__.items():
         if isinstance(obj, Assistant):
             assist = obj
-            schema = SchemaHandler(assist)
-            schema.generate()
-            print('generating')
+            intents = IntentGenerator(assist)
+            entities = EntityGenerator(assist)
+
+            intents.generate()
+            entities.generate()
             break
 
 if __name__ == '__main__':
