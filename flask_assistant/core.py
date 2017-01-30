@@ -60,7 +60,7 @@ class Assistant(object):
             raise TypeError("route is a required argument when app is not None")
 
         app.assist = self
-        app.add_url_rule(self._route, view_func=self._flask_view_func, methods=['POST'])
+        app.add_url_rule(self._route, view_func=self._flask_assitant_view_func, methods=['POST'])
 
     @property
     def request(self):
@@ -145,7 +145,7 @@ class Assistant(object):
 
             @wraps(f)
             def wrapper(*args, **kw):
-                self._flask_view_func(*args, **kw)
+                self._flask_assitant_view_func(*args, **kw)
             return f
         return decorator
 
@@ -169,7 +169,7 @@ class Assistant(object):
 
             @wraps(f)
             def wrapper(*args, **kw):
-                self._flask_view_func(*args, **kw)
+                self._flask_assitant_view_func(*args, **kw)
             return f
         return decorator
 
@@ -187,7 +187,7 @@ class Assistant(object):
     def _dump_view_info(self, view_func=lambda: None):
         _infodump('Result: Matched {} intent to {} func'.format(self.intent, view_func.__name__))
 
-    def _flask_view_func(self, *args, **kwargs):
+    def _flask_assitant_view_func(self, *args, **kwargs):
         self.request = self._api_request(verify=False)
         _infodump(self.request['result'])
 
