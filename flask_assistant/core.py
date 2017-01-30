@@ -6,9 +6,9 @@ from functools import wraps, partial
 from flask import current_app, json, request as flask_request, _app_ctx_stack
 from werkzeug.local import LocalProxy, LocalStack
 
-from . import logger
-from .response import _Response
-from .manager import ContextManager
+from flask_assistant import logger
+from flask_assistant.response import _Response
+from flask_assistant.manager import ContextManager
 
 request = LocalProxy(lambda: current_app.assist.request)
 context_in = LocalProxy(lambda: current_app.assist.context_in)

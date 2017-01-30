@@ -1,5 +1,5 @@
-from . import logger
-from . import core
+from flask_assistant import logger
+from flask_assistant import core
 from flask import json, Response, make_response
 from xml.etree import ElementTree
 
