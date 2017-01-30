@@ -8,7 +8,7 @@ from setuptools import setup
 
 setup(
     name='Flask-Assistant',
-    version='0.1.1',
+    version='0.1.2',
     url='https://github.com/treethought/flask-assistant',
     license='Apache 2.0',
     author='Cam Sweeney',
@@ -25,6 +25,7 @@ setup(
         'pyOpenSSL',
         'PyYAML',
         'six',
+        'ruamel.yaml'
     ],
     entry_points = {
         'console_scripts': ['schema=api_ai.cli:main'],
