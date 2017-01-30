@@ -1,5 +1,4 @@
-from . import logger
-from . import core
+from flask_assistant import logger
 from flask import json, Response, make_response
 from xml.etree import ElementTree
 
@@ -48,11 +47,15 @@ class _Response(object):
         },
 
     def include_contexts(self):
+        from flask_assistant import core
+
         for context in core.context_manager.active:
             self._response['contextOut'].append(context.serialize)
 
 
     def render_response(self):
+        from flask_assistant import core
+
         self.include_contexts()
         core._dbgdump(self._response)
         resp = json.dumps(self._response, indent=4)
