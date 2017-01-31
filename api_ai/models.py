@@ -41,68 +41,6 @@ class Entity():
         return '@' + self.name
 
 
-class ExampleBase(object):
-    """docstring for ExampleBase"""
-
-    def __init__(self, phrase, user_defined=False, isTemplate=False):
-
-        self.text = phrase
-        self.userDefined = user_defined
-        self.isTemplate = isTemplate
-        self.data = []
-
-    @property
-    def serialize(self):
-        return {
-            'data': self.data,
-            'isTemplate': self.isTemplate,
-            'count': 0
-        }
-
-
-class AutoAnnotedExamle(ExampleBase):
-
-    def __init__(self, phrase):
-        super(AutoAnnotedExamle, self).__init__(phrase)
-        self.text = phrase
-        self.data.append({'text': self.text, 'userDefined': False})
-
-
-class UserDefinedExample(ExampleBase):
-
-    def __init__(self, phrase, mapping):
-        super(UserDefinedExample, self).__init__(phrase, user_defined=True)
-        # import ipdb; ipdb.set_trace()
-        # self.phrase = phrase
-        self.mapping = mapping
-
-        self.parse_phrase()
-
-    def parse_phrase(self):
-        # import ipdb; ipdb.set_trace()
-        annotated = {}
-        sub_phrase = ''
-
-        for word in self.text.split():
-            if word in self.mapping:
-                'mapping triggered for {}'.format(word)
-                self.data.append({'text': sub_phrase})  # add non-annotated, then deal with annotation
-                sub_phrase = ''
-                self.annotate(word)
-
-            else:
-                sub_phrase += '{} '.format(word)
-
-        if sub_phrase:
-            self.data.append({'text': sub_phrase})
-
-    def annotate(self, word):
-        annotation = {}
-        annotation['text'] = word
-        annotation['meta'] = '@' + self.mapping[word]
-        annotation['alias'] = self.mapping[word]
-        annotation['userDefined'] = True
-        self.data.append(annotation)
 
 
 class Intent():
@@ -133,9 +71,9 @@ class Intent():
             return True
 
 
-    def add_example(self, phrase, mapping=None):  # TODO
-        if mapping:
-            example = UserDefinedExample(phrase, mapping)
+    def add_example(self, phrase, templ_entity_map=None):  # TODO
+        if templ_entity_map:
+            example = UserDefinedExample(phrase, templ_entity_map)
         else:
             example = AutoAnnotedExamle(phrase)
 
@@ -158,3 +96,70 @@ class Intent():
     def update(self, intent_json):
         self.__dict__.update(json.loads(intent_json))
         return self._update
+
+
+class ExampleBase(object):
+    """docstring for ExampleBase"""
+
+    def __init__(self, phrase, user_defined=False, isTemplate=False):
+
+        self.text = phrase
+        self.userDefined = user_defined
+        self.isTemplate = isTemplate
+        self.data = []
+
+    @property
+    def serialize(self):
+        return {
+            'data': self.data,
+            'isTemplate': self.isTemplate,
+            'count': 0
+        }
+
+
+class AutoAnnotedExamle(ExampleBase):
+
+    def __init__(self, phrase):
+        super(AutoAnnotedExamle, self).__init__(phrase)
+        self.text = phrase
+        self.data.append({'text': self.text, 'userDefined': False})
+
+
+class UserDefinedExample(ExampleBase):
+
+    def __init__(self, phrase, entity_map):
+        super(UserDefinedExample, self).__init__(phrase, user_defined=True)
+        # import ipdb; ipdb.set_trace()
+        self.entity_map = entity_map
+
+        self.parse_phrase()
+
+    def parse_phrase(self):
+        # import ipdb; ipdb.set_trace()
+        annotated = {}
+        sub_phrase = ''
+
+        for word in self.text.split():
+            if word in self.entity_map:
+                self.data.append({'text': sub_phrase})  # add non-annotated, then deal with annotation
+                sub_phrase = ''
+                self.annotate_params(word)
+
+            else:
+                sub_phrase += '{} '.format(word)
+
+        if sub_phrase:
+            self.data.append({'text': sub_phrase})
+
+    def annotate_params(self, word):
+        """Annotates a given word for the UserSays data field of an Intent object.
+        
+        Annotations are created using the entity map within the user_says.yaml template.
+        """
+        annotation = {}
+        annotation['text'] = word
+        annotation['meta'] = '@' + self.entity_map[word]
+        annotation['alias'] = self.entity_map[word].strip('sys.')
+        annotation['userDefined'] = True
+        self.data.append(annotation)
+
