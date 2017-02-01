@@ -197,6 +197,7 @@ class IntentGenerator(SchemaHandler):
         """Registers a new intent and returns the Intent object with an ID"""
         response = self.api.post_intent(intent.serialize)
         print(response)
+        print()
         if response['status']['code'] == 200:
             intent.id = response['id']
         return intent
@@ -204,6 +205,7 @@ class IntentGenerator(SchemaHandler):
     def update(self, intent):
         response = self.api.put_intent(intent.id, intent.serialize)
         print(response)
+        print()
         if response['status']['code'] == 200:
             return response
 
@@ -211,7 +213,6 @@ class IntentGenerator(SchemaHandler):
         print('Generating intent schema...')
         schema = []
         for intent in self.app_intents:
-            print(intent)
             intent.id = self.grab_id(intent.name)
             intent = self.push_intent(intent)
             schema.append(intent.__dict__)
