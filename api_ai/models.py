@@ -1,22 +1,5 @@
 import json
 
-
-class _Field(dict):
-
-    def __init__(self, request_json={}):
-        super(_Field, self).__init__(request_json)
-        for key, value in request_json.items():
-            if isinstance(value, dict):
-                value = _Field(value)
-            self[key] = value
-
-    def __getattr__(self, attr):
-        return self.get(attr)
-
-    def __setattr__(self, key, value):
-        self.__setitem__(key, value)
-
-
 class Entity():
     """docstring for Entity"""
 
@@ -55,7 +38,7 @@ class Intent():
 
         self.name = name
         self.auto = True
-        self.contexts = None
+        self.contexts = []
         self.templates = []
         self.userSays = []
         self.responses = []
@@ -159,7 +142,7 @@ class UserDefinedExample(ExampleBase):
         annotation = {}
         annotation['text'] = word
         annotation['meta'] = '@' + self.entity_map[word]
-        annotation['alias'] = self.entity_map[word].strip('sys.')
+        annotation['alias'] = self.entity_map[word].replace('sys.', '')
         annotation['userDefined'] = True
         self.data.append(annotation)
 
