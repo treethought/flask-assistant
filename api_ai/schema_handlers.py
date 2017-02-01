@@ -150,8 +150,8 @@ class IntentGenerator(SchemaHandler):
             param_info = {}
 
             param_entity = param_entity_map.get(arg, arg)
-            param_name = param_entity.strip('sys.')
-
+            param_name = param_entity.replace('sys.', '')
+            # param_name = arg
 
             param_info['name'] = param_name
             param_info['value'] = '$' + param_entity
@@ -357,8 +357,6 @@ class TemplateCreator(SchemaHandler):
             entity_map = self.assist._intent_mappings.get(intent)
             action_func = self.assist._intent_action_funcs[intent][0]
             args = inspect.getargspec(action_func).args
-
-
 
             # dont add API 'sys' entities to the template
             if entity_map:

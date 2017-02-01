@@ -189,7 +189,7 @@ class Assistant(object):
 
     def _flask_assitant_view_func(self, *args, **kwargs):
         self.request = self._api_request(verify=False)
-        _infodump(self.request['result'])
+        _dbgdump(self.request['result'])
 
         self.intent = self.request['result']['metadata']['intentName']
         self.context_in = self.request['result'].get('contexts', [])
@@ -241,6 +241,8 @@ class Assistant(object):
         """Returns view functions for which the context requirements are met"""
         possible_views = []
         recieved_contexts = [c['name'] for c in self.context_in]
+        # recieved_contexts = [c['name'] for c in self.context_manager.active]
+
 
         for func in self._func_contexts:
             requires = list(self._func_contexts[func])
@@ -258,6 +260,9 @@ class Assistant(object):
 
     def _choose_context_view(self):
         choice = None
+        declared_contexts = self.context_manager.active
+
+
         for view in self._context_views:
             if view in self._intent_action_funcs[self.intent]:
                 choice = view
@@ -289,14 +294,19 @@ class Assistant(object):
         arg_values = self._map_params_to_view_args(arg_names)
         return partial(view_func, *arg_values)
 
-    def _map_params_to_view_args(self, arg_names):
+    def _map_params_to_view_args(self, arg_names): # TODO map to correct name
         arg_values = []
         mapping = self._intent_mappings.get(self.intent)
         params = self.request['result']['parameters']
 
         for arg_name in arg_names:
-            mapped_name = mapping.get(arg_name, arg_name)
-            value = params.get(mapped_name)  # params declared in GUI present in request
+            entity_mapping = mapping.get(arg_name, arg_name)
+            # param name cant have '.',
+            # so when registered, the sys. is stripped,
+            # and must be stripped when looking up in request
+            mapped_param_name = entity_mapping.replace('sys.', '') 
+
+            value = params.get(mapped_param_name)  # params declared in GUI present in request
 
             if not value:  # params not declared, so must look in contexts
                 value = self._map_arg_from_context(arg_name)
