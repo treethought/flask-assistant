@@ -358,6 +358,26 @@ You can now interact with your assistant using the `Try it now..` area on the ri
 
 
 
+Integrate with Actions on Google
+=================================
+
+With the webhook logic complete and the API.AI agent set up, you can now easily
+integrate with Actions on Google. This will allow you to preview and deploy your assistant on Google Home.
+
+To integrate with Actions on Google, follow this simple `guide <https://docs.api.ai/docs/actions-on-google-integration#overview>`_ from API.AI.
+
+More info on how to integrate your assistant with various platforms can be found `here <https://docs.api.ai/docs/integrations>`_.
+
+
+
+
+
+
+
+
+
+
+
 
 
 
