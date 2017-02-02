@@ -15,13 +15,13 @@ A flask extension serving as an `API.AI`_  SDK to provide an easy way to create 
 .. _`fullfillment`: https://developers.google.com/actions/develop/apiai/dialogs-and-fulfillment#overview
 .. _API.AI: https://docs.api.ai/
 
-Flask-Assistant allow you to focus on building the fullfillment_ of actions invoked by the user and desgin a conversational flow to build contextual dialogues.
+Flask-Assistant allow you to focus on building the webhook to provide fullfillment_ of actions invoked by the user and desgin a conversational flow to build contextual dialogues. 
 
 
 Features
 ========
 
-    - Automatic automatically map user-triggered Intents to action functions
+    - Maping of user-triggered Intents to action view functions
     - Context support for crafting dialogue dependent on the user's requests
     - Define prompts for missing parameters when they are not present in the users request or past active contexs
     - A convenient syntax resembling Flask's decoratored routing
@@ -47,6 +47,17 @@ A Minimal Assistant
 
     if __name__ == '__main__':
         app.run(debug=True)
+
+As you can see, structure of an Assistant app resembles the structure of a regular Flask app.
+
+Explanation
+-----------
+
+1. Initialized an :class:`Assistant <flask_assistant.Assistant>` object with a Flask app and the route to your webhook URL.
+2. Used the :meth:`action <flask_assistant.Assistant.action>` decorator to map the `greetings` intent to the proper action function.
+    - The action decorator accepts the name of an intent as a parameter
+    - The decorated function serves as the action view function, called when an API.AI request sent on behalf of the `send-message` intent is received
+3. The action funtion returns an :class:`ask <flask_assistant.ask>` response containing text/speech which prompts the user for the next intent.
 
 
 Check out the :doc:`quick_start` to see how to quicky build an assistant
