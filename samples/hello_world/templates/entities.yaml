@@ -1,20 +1,7 @@
-# Template file for entities
-
-#Format as below
-
-# entity_name:
-#  - entry1: list of synonyms 
-#  - entry2: list of synonyms 
-
-#For example:
-
-# drink:
-#  - water: ['aqua', 'h20'] 
-#  - coffee: ['joe', 'caffeine', 'espresso', 'late'] 
-#  - soda: ['pop', 'coke']
-
-
-
-gender:
- - male: ['man', 'boy', 'guy', 'dude']
- - female: ['woman', 'girl', 'gal']
+color:
+  - red
+  - blue
+  - green
+  - purple
+  - orange
+  

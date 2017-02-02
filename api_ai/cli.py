@@ -3,7 +3,7 @@ import sys
 import importlib
 
 from flask_assistant.core import Assistant
-from api_ai.schema_handlers import IntentGenerator, EntityGenerator, TemplateCreator
+from api_ai.schema_handlers import IntentGenerator, EntityGenerator
 
 
 def main():
@@ -17,7 +17,6 @@ def main():
             assist = obj
             intents = IntentGenerator(assist)
             entities = EntityGenerator(assist)
-            template_creator = TemplateCreator(assist)
 
             intents.generate()
             entities.generate()
