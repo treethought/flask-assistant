@@ -19,6 +19,7 @@ give-color:
   - Its blue
   - I like red
   - My favorite color is red
+  - blue
   
   Annotations:
   - blue: sys.color
