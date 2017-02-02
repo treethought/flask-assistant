@@ -85,6 +85,9 @@ concepts and serve as a powerful tool for extracting parameter values from natur
 
 In addition to the User Says template, an entities template is generated in the same `templates` directory.
 
+Entity Template
+---------------
+
 The basic skeleton will include only the names of your agent's entities, which are taken from action function parameters.
 
 Using the entities template, you can include:
