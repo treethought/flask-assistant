@@ -225,13 +225,14 @@ class Assistant(object):
             view_func = self._intent_action_funcs[self.intent][0]
 
         if not view_func:
+            view_func = self._intent_action_funcs[self.intent][0]
             _errordump('No view func matched')
             _errordump({
                 'intent recieved': self.intent,
                 'recieved parameters': self.request['result']['parameters'],
                 'required args': self._func_args(view_func),
                 'conext_in': self.context_in,
-                'matched view_func': view_func
+                'matched view_func': view_func.__name__
             })
 
         return view_func
@@ -260,9 +261,6 @@ class Assistant(object):
 
     def _choose_context_view(self):
         choice = None
-        declared_contexts = self.context_manager.active
-
-
         for view in self._context_views:
             if view in self._intent_action_funcs[self.intent]:
                 choice = view
@@ -305,9 +303,8 @@ class Assistant(object):
             # so when registered, the sys. is stripped,
             # and must be stripped when looking up in request
             mapped_param_name = entity_mapping.replace('sys.', '') 
-
             value = params.get(mapped_param_name)  # params declared in GUI present in request
-
+            
             if not value:  # params not declared, so must look in contexts
                 value = self._map_arg_from_context(arg_name)
             arg_values.append(value)
