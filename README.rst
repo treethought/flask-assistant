@@ -43,7 +43,7 @@ Features
 
 
 Hello World
-------------
+============
 
 .. code-block:: python
 
@@ -62,7 +62,7 @@ Hello World
         app.run(debug=True)
 
 How-To
--------
+=======
 
     1. Create an `Assistant` object with a Flask app and the route to your webhook URL.
     2. Use `action` decorators to map the intents to the proper action function.
@@ -70,10 +70,12 @@ How-To
 
 
 Documentation
---------------
+==============
 
 - Check out the `Quick Start <http://flask-assistant.readthedocs.io/en/latest/quick_start.html>`_ to jump right in
 - View the full `documentation <http://flask-assistant.readthedocs.io/en/latest/>`_
+
+
   
 
 
