@@ -1,6 +1,6 @@
-
+*************************************
 Create Virtual Assistants with Python
-===============================================
+*************************************
 
 .. image:: https://badges.gitter.im/flask-assistant/Lobby.svg
    :alt: Join the chat at https://gitter.im/flask-assistant/Lobby
@@ -13,11 +13,10 @@ A flask extension serving as an `API.AI`_  SDK to provide an easy way to create 
 .. _`fullfillment`: https://developers.google.com/actions/develop/apiai/dialogs-and-fulfillment#overview
 .. _API.AI: https://docs.api.ai/
 
-Flask-Assistant allows you to focus on building the core business logic of conversational user interfaces while utilizing API.AI's Natural Language Processing to interact with users. Anything you can code in python can be integrated into an assistant's capabilties!
+Flask-Assistant allows you to focus on building the core business logic of conversational user interfaces while utilizing API.AI's Natural Language Processing to interact with users.
 
+**Anything you can code in python can be integrated into an assistant's capabilties!**
 
-
-With Flask-Assistant, developers can create assistants to:
     - Perfom complicated actions in response to simple user commands
     - Integrate with platforms supported by API.AI (Actions on Google, Alexa, Slack, etc...)
     - Interact with external services and APIs
@@ -26,14 +25,18 @@ With Flask-Assistant, developers can create assistants to:
 
 
 
- This project is heavily inspired and based on John Wheeler's `Flask-ask <https://github.com/johnwheeler/flask-ask>`_ for the Alexa Skills Kit.
+
+
+
+This project is heavily inspired and based on John Wheeler's `Flask-ask <https://github.com/johnwheeler/flask-ask>`_ for the Alexa Skills Kit.
 
 
 Features
----------
+========
+
     - Mapping of user-triggered Intents to action functions
     - Context support for crafting dialogue dependent on the user's requests
-    - Define prompts for missing parameters when they are not present in the users request or past active contexs
+    - Define prompts for missing parameters when they are not present in the users request or past active contexts
     - A convenient syntax resembling Flask's decoratored routing
     - Internal API.AI schema generation and registration
       
