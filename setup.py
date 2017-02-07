@@ -1,7 +1,7 @@
 """
 Flask-Assistant
 -------------
-Easy Alexa Skills Kit integration for Flask
+Framework for Building Virtual Assistants with API.AI
 """
 from setuptools import setup
 
@@ -13,7 +13,7 @@ setup(
     license='Apache 2.0',
     author='Cam Sweeney',
     author_email='cpsweene@gmail.com',
-    description='Flask extension for developing assistants for Google Home / Google Actions via API-AI',
+    description='Framework for Building Virtual Assistants with API.AI',
     long_description=__doc__,
     packages=['flask_assistant', 'api_ai'],
     zip_safe=False,
