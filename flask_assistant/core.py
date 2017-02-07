@@ -1,6 +1,5 @@
 import os
 import inspect
-from copy import copy
 from functools import wraps, partial
 
 from flask import current_app, json, request as flask_request, _app_ctx_stack
@@ -21,20 +20,18 @@ _converters = []
 class Assistant(object):
     """Central Interface for interacting with Google Actions via Api.ai.
 
-    The Assitant object routes requests to :func: `action` decorated functions.
-
-    The construtor is passed a Flask App instance and a url enpoint.
-    Route provides the entry point for the skill, and must be provided if an app is given.
-
-    Keyword Arguments:
-            app {Flask object} -- App instance - created with Flask(__name__) (default: {None})
-            route {str} -- entry point to which initial Alexa Requests are forwarded (default: {None})
-
+    The Assitant object routes requests to :func:`action` decorated functions.
 
     The assistant object maps requests recieved from an API.ai agent to Intent-specific view functions.
     The view_functions can be properly matched depending on required parameters and contexts.
     These requests originate from Google Actions and are sent to the Assitant object
     after through API.ai's infrastrcutre
+
+
+    Keyword Arguments:
+            app {Flask object} -- App instance - created with Flask(__name__) (default: {None})
+            route {str} -- entry point to which initial Alexa Requests are forwarded (default: {None})
+
 
     """
 
