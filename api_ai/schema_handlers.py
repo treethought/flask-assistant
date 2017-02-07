@@ -246,6 +246,7 @@ class EntityGenerator(SchemaHandler):
         """Registers a new entity and returns the entity object with an ID"""
         response = self.api.post_entity(entity.serialize)
         print(response)
+        print()
         if response['status']['code'] == 200:
             entity.id = response['id']
         return entity
@@ -253,6 +254,7 @@ class EntityGenerator(SchemaHandler):
     def update(self, entity):
         response = self.api.put_entity(entity.id, entity.serialize)
         print(response)
+        print()
         if response['status']['code'] == 200:
             return response
 

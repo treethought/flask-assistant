@@ -8,14 +8,22 @@
 Welcome to Flask-Assistant!
 ***************************
 
-
-A flask extension serving as an `API.AI`_  SDK to provide an easy way to create virtual assistants which may be integrated with platforms such as `Google Actions`_ (Google Home).
-
 .. _`Google Actions`: https://developers.google.com/actions/develop/apiai/ 
 .. _`fullfillment`: https://developers.google.com/actions/develop/apiai/dialogs-and-fulfillment#overview
 .. _API.AI: https://docs.api.ai/
 
-Flask-Assistant allow you to focus on building the webhook to provide fullfillment_ of actions invoked by the user and desgin a conversational flow to build contextual dialogues. 
+A flask extension serving as an `API.AI`_  SDK to provide an easy way to create virtual assistants which may be integrated with platforms such as `Google Actions`_ (Google Home).
+
+Flask-Assistant allows you to focus on building the core business logic of conversational user interfaces while utilizing API.AI's Natural Language Processing to interact with users.
+
+
+.. This framework provides the ability to:
+.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..     - Quickly create fullfillment_ webhooks
+..     - Define and register API.AI schema
+..     - Design a conversational flow to build contextual dialogues with API.AI's concept of contexts
+
+
 
 
 Features
