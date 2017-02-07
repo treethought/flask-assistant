@@ -43,7 +43,7 @@ def confirm_delivery(answer):
 
 
 @assist.context("delivery", "delivery-info")
-@assist.action('store-address')
+@assist.action('store-address', mapping={'address': 'sys.address'})
 def store_address(address):
     speech = "Ok, and can I have your name?"
 
@@ -54,7 +54,7 @@ def store_address(address):
 
 
 @assist.context("delivery", "delivery-info")
-@assist.action('store-name')
+@assist.action('store-name', mapping={'name': 'sys.given-name'})
 def store_phone(name, address):  # address can be pulled from existing delivery-info context
     speech = """Thanks, {} ... Ok, that's all I need for your delivery info.
         With your address being {}, delivery time should be about 20 minutes.
