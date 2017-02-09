@@ -1,0 +1,37 @@
+# Template file for entities
+
+#Format as below
+
+# entity_name:
+#  - entry1: list of synonyms 
+#  - entry2: list of synonyms 
+
+#For example:
+
+# drink:
+#  - water: ['aqua', 'h20'] 
+#  - coffee: ['joe', 'caffeine', 'espresso', 'late'] 
+#  - soda: ['pop', 'coke']
+
+
+
+light:
+- hue_white_lamp_1: ['fan', 'fan light', 'main light']
+- hue_white_lamp_2: ['lamp', 'desk lamp']
+
+group:
+- media: ['music', 'media players']
+- lights: ['all lights']
+- room: ['everything']
+
+script:
+- flash_lights: ['flash', 'flash lights', 'strobe']
+
+brightness:
+- 100
+- 50
+- 255
+
+switch:
+- playstation4: ['playstation', 'ps4']
+

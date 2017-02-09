@@ -1,0 +1,452 @@
+[
+    {
+        "auto": true,
+        "contexts": [],
+        "priority": 500000,
+        "webhookForSlotFilling": true,
+        "webhookUsed": true,
+        "events": [],
+        "name": "get-light-states",
+        "templates": [],
+        "fallbackIntent": false,
+        "responses": [
+            {
+                "parameters": [],
+                "messages": [],
+                "action": "light_report",
+                "affectedContexts": [],
+                "resetContexts": false
+            }
+        ],
+        "id": "2eed24fe-99b6-42c2-93c1-6140707a5b9c",
+        "userSays": [
+            {
+                "data": [
+                    {
+                        "text": "are the lights on?",
+                        "userDefined": false
+                    }
+                ],
+                "isTemplate": false,
+                "count": 0
+            },
+            {
+                "data": [
+                    {
+                        "text": "are the lights off?",
+                        "userDefined": false
+                    }
+                ],
+                "isTemplate": false,
+                "count": 0
+            },
+            {
+                "data": [
+                    {
+                        "text": "which lights are on?",
+                        "userDefined": false
+                    }
+                ],
+                "isTemplate": false,
+                "count": 0
+            },
+            {
+                "data": [
+                    {
+                        "text": "whats the light status",
+                        "userDefined": false
+                    }
+                ],
+                "isTemplate": false,
+                "count": 0
+            }
+        ]
+    },
+    {
+        "auto": true,
+        "contexts": [],
+        "priority": 500000,
+        "webhookForSlotFilling": true,
+        "webhookUsed": true,
+        "events": [],
+        "name": "greeting",
+        "templates": [],
+        "fallbackIntent": false,
+        "responses": [
+            {
+                "parameters": [],
+                "messages": [],
+                "action": "welcome",
+                "affectedContexts": [],
+                "resetContexts": false
+            }
+        ],
+        "id": "c1d81235-fc08-4910-80ac-f3221c6bf1d0",
+        "userSays": [
+            {
+                "data": [
+                    {
+                        "text": "hi",
+                        "userDefined": false
+                    }
+                ],
+                "isTemplate": false,
+                "count": 0
+            },
+            {
+                "data": [
+                    {
+                        "text": "hello",
+                        "userDefined": false
+                    }
+                ],
+                "isTemplate": false,
+                "count": 0
+            }
+        ]
+    },
+    {
+        "auto": true,
+        "contexts": [],
+        "priority": 500000,
+        "webhookForSlotFilling": true,
+        "webhookUsed": true,
+        "events": [],
+        "name": "turn-on-group",
+        "templates": [],
+        "fallbackIntent": false,
+        "responses": [
+            {
+                "parameters": [
+                    {
+                        "isList": false,
+                        "value": "$group",
+                        "defaultValue": "",
+                        "required": true,
+                        "name": "group",
+                        "dataType": "@group"
+                    },
+                    {
+                        "isList": false,
+                        "value": "$brightness",
+                        "defaultValue": 255,
+                        "required": false,
+                        "name": "brightness",
+                        "dataType": "@brightness"
+                    }
+                ],
+                "messages": [],
+                "action": "turn_on_group",
+                "affectedContexts": [],
+                "resetContexts": false
+            }
+        ],
+        "id": "5c5a08dd-05bc-42e1-805d-ad3339e3eaca",
+        "userSays": [
+            {
+                "data": [
+                    {
+                        "text": "turn on the "
+                    },
+                    {
+                        "text": "room",
+                        "alias": "group",
+                        "meta": "@group",
+                        "userDefined": true
+                    }
+                ],
+                "isTemplate": false,
+                "count": 0
+            },
+            {
+                "data": [
+                    {
+                        "text": "turn on all lights "
+                    }
+                ],
+                "isTemplate": false,
+                "count": 0
+            }
+        ]
+    },
+    {
+        "auto": true,
+        "contexts": [],
+        "priority": 500000,
+        "webhookForSlotFilling": true,
+        "webhookUsed": true,
+        "events": [],
+        "name": "turn-off-light",
+        "templates": [],
+        "fallbackIntent": false,
+        "responses": [
+            {
+                "parameters": [
+                    {
+                        "isList": false,
+                        "value": "$light",
+                        "defaultValue": "",
+                        "required": true,
+                        "name": "light",
+                        "dataType": "@light"
+                    }
+                ],
+                "messages": [],
+                "action": "turn_off_light",
+                "affectedContexts": [],
+                "resetContexts": false
+            }
+        ],
+        "id": "886fefe3-29c3-4709-8623-b1cc7b933aa0",
+        "userSays": [
+            {
+                "data": [
+                    {
+                        "text": "turn off the "
+                    },
+                    {
+                        "text": "fan",
+                        "alias": "light",
+                        "meta": "@light",
+                        "userDefined": true
+                    }
+                ],
+                "isTemplate": false,
+                "count": 0
+            },
+            {
+                "data": [
+                    {
+                        "text": "turn off the "
+                    },
+                    {
+                        "text": "lamp",
+                        "alias": "light",
+                        "meta": "@light",
+                        "userDefined": true
+                    }
+                ],
+                "isTemplate": false,
+                "count": 0
+            },
+            {
+                "data": [
+                    {
+                        "text": "turn off "
+                    },
+                    {
+                        "text": "fan",
+                        "alias": "light",
+                        "meta": "@light",
+                        "userDefined": true
+                    }
+                ],
+                "isTemplate": false,
+                "count": 0
+            }
+        ]
+    },
+    {
+        "auto": true,
+        "contexts": [],
+        "priority": 500000,
+        "webhookForSlotFilling": true,
+        "webhookUsed": true,
+        "events": [],
+        "name": "turn-on-light",
+        "templates": [],
+        "fallbackIntent": false,
+        "responses": [
+            {
+                "parameters": [
+                    {
+                        "isList": false,
+                        "value": "$light",
+                        "defaultValue": "",
+                        "required": true,
+                        "name": "light",
+                        "dataType": "@light"
+                    },
+                    {
+                        "isList": false,
+                        "value": "$brightness",
+                        "defaultValue": 255,
+                        "required": false,
+                        "name": "brightness",
+                        "dataType": "@brightness"
+                    }
+                ],
+                "messages": [],
+                "action": "turn_on_light",
+                "affectedContexts": [],
+                "resetContexts": false
+            }
+        ],
+        "id": "7524a2ca-ffa1-49ab-be29-30650e13c699",
+        "userSays": [
+            {
+                "data": [
+                    {
+                        "text": "turn on the "
+                    },
+                    {
+                        "text": "fan",
+                        "alias": "light",
+                        "meta": "@light",
+                        "userDefined": true
+                    }
+                ],
+                "isTemplate": false,
+                "count": 0
+            },
+            {
+                "data": [
+                    {
+                        "text": "turn on the "
+                    },
+                    {
+                        "text": "lamp",
+                        "alias": "light",
+                        "meta": "@light",
+                        "userDefined": true
+                    },
+                    {
+                        "text": "to 100 percent "
+                    }
+                ],
+                "isTemplate": false,
+                "count": 0
+            },
+            {
+                "data": [
+                    {
+                        "text": "turn on "
+                    },
+                    {
+                        "text": "fan",
+                        "alias": "light",
+                        "meta": "@light",
+                        "userDefined": true
+                    },
+                    {
+                        "text": "to 50 brightness "
+                    }
+                ],
+                "isTemplate": false,
+                "count": 0
+            }
+        ]
+    },
+    {
+        "auto": true,
+        "contexts": [],
+        "priority": 500000,
+        "webhookForSlotFilling": true,
+        "webhookUsed": true,
+        "events": [],
+        "name": "start-script",
+        "templates": [],
+        "fallbackIntent": false,
+        "responses": [
+            {
+                "parameters": [
+                    {
+                        "isList": false,
+                        "value": "$script",
+                        "defaultValue": "",
+                        "required": true,
+                        "name": "script",
+                        "dataType": "@script"
+                    }
+                ],
+                "messages": [],
+                "action": "run_script",
+                "affectedContexts": [],
+                "resetContexts": false
+            }
+        ],
+        "id": "73de41f4-3af7-4fb0-a825-ab8689eb2c42",
+        "userSays": [
+            {
+                "data": [
+                    {
+                        "text": ""
+                    },
+                    {
+                        "text": "flash",
+                        "alias": "script",
+                        "meta": "@script",
+                        "userDefined": true
+                    },
+                    {
+                        "text": "the lights "
+                    }
+                ],
+                "isTemplate": false,
+                "count": 0
+            },
+            {
+                "data": [
+                    {
+                        "text": ""
+                    },
+                    {
+                        "text": "flash",
+                        "alias": "script",
+                        "meta": "@script",
+                        "userDefined": true
+                    }
+                ],
+                "isTemplate": false,
+                "count": 0
+            }
+        ]
+    },
+    {
+        "auto": true,
+        "contexts": [],
+        "priority": 500000,
+        "webhookForSlotFilling": true,
+        "webhookUsed": true,
+        "events": [],
+        "name": "toggle-switch",
+        "templates": [],
+        "fallbackIntent": false,
+        "responses": [
+            {
+                "parameters": [
+                    {
+                        "isList": false,
+                        "value": "$switch",
+                        "defaultValue": "",
+                        "required": true,
+                        "name": "switch",
+                        "dataType": "@switch"
+                    }
+                ],
+                "messages": [],
+                "action": "switch",
+                "affectedContexts": [],
+                "resetContexts": false
+            }
+        ],
+        "id": "1beb9c87-161d-4ecc-a2d0-2fc0113dae79",
+        "userSays": [
+            {
+                "data": [
+                    {
+                        "text": "toggle the "
+                    },
+                    {
+                        "text": "ps4",
+                        "alias": "switch",
+                        "meta": "@switch",
+                        "userDefined": true
+                    }
+                ],
+                "isTemplate": false,
+                "count": 0
+            }
+        ]
+    }
+]

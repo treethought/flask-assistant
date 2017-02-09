@@ -8,8 +8,10 @@ if logger.level == logging.NOTSET:
 
 from flask_assistant.core import (
     Assistant,
-    context_manager
+    context_manager,
 )
 
 from flask_assistant.response import ask, tell
 from flask_assistant.manager import Context
+
+from flask_assistant.hass_wrapper import HomeAssistant

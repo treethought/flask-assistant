@@ -1,0 +1,67 @@
+# Template for defining UserSays examples
+
+# give-color-intent:
+
+#  UserSays:
+#    - My color is blue
+#    - red is my favorite color
+
+#  Annotations:
+#    - blue: sys.color     # maps param value -> entity
+#    - red: sys.color
+
+get-light-states:
+  UserSays:
+    - are the lights on?
+    - are the lights off?
+    - which lights are on?
+    - whats the light status
+
+turn-on-light:
+  UserSays:
+  - turn on the fan
+  - turn on the lamp to 100 percent
+  - turn on fan to 50 brightness
+  Annotations:
+  - fan: light
+  - lamp: light
+  - 100: brightness
+  - 50: brightness
+
+turn-off-light:
+  UserSays:
+  - turn off the fan
+  - turn off the lamp 
+  - turn off fan
+  Annotations:
+  - fan: light
+  - lamp: light
+
+
+greeting:
+  UserSays:
+  - hi
+  - hello
+
+turn-on-group:
+  UserSays:
+  - turn on the room
+  - turn on all lights
+  Annotations:
+  - room: group
+  - all lights: group
+
+toggle-switch:
+  UserSays:
+  - toggle the ps4
+  - 
+  Annotations:
+  - ps4: switch
+  - 
+start-script:
+  UserSays:
+  - flash the lights
+  - flash
+  Annotations:
+  - flash: script
+  - 
