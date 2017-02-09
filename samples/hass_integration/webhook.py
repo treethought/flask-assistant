@@ -4,7 +4,7 @@ from flask_assistant import Assistant, tell, HomeAssistant
 
 app = Flask(__name__)
 assist = Assistant(app)
-hass = HomeAssistant(assist, 'YOUR HOME ASSISTANT PASSWORD')
+hass = HomeAssistant(assist, 'YOUR HOME Assistant PASSWORD')
 logging.getLogger('flask_assistant').setLevel(logging.DEBUG)
 
 
@@ -12,7 +12,7 @@ logging.getLogger('flask_assistant').setLevel(logging.DEBUG)
 @assist.action('greeting')
 def welcome():
     speech = 'Heres an exmaple of Home Assistant integration'
-    hass.call_service('script', 'flash_lights' )
+    hass.call_service('script', 'flash_lights')
     return tell(speech)
 
 @assist.action('get-light-states')
@@ -51,6 +51,7 @@ def turn_on_group(group, brightness=255):
 @assist.action('start-script')
 def run_script(script):
     speech = 'Running {}'.format('script.{}'.format(script))
+    hass.start_script(script)
     return tell(speech)
 
 
