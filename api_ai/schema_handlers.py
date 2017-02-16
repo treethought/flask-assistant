@@ -154,7 +154,7 @@ class IntentGenerator(SchemaHandler):
             # param_name = arg
 
             param_info['name'] = param_name
-            param_info['value'] = '$' + param_entity
+            param_info['value'] = '$' + param_name
             param_info['dataType'] = '@' + param_entity
 
             param_info['defaultValue'] = default_map.get(arg, '') # grabs default from view func, not from action decorator
@@ -363,7 +363,7 @@ class TemplateCreator(SchemaHandler):
 
             # dont add API 'sys' entities to the template
             if entity_map:
-                args = [a for a in args if 'sys.' not in entity_map.get(a)[:4]]
+                args = [a for a in args if 'sys.' not in entity_map.get(a, [])]
 
             for param in [p for p in args if p not in skeleton]:
                 skeleton[param] = [None, None]
