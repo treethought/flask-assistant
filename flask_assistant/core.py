@@ -215,8 +215,10 @@ class Assistant(object):
             view_func = self._choose_context_view()
 
         elif self._missing_params:
-            param_choice = self._missing_params.pop()
-            view_func = self._intent_prompts[self.intent].get(param_choice)
+            prompts = self._intent_prompts.get(self.intent)
+            if prompts:
+                param_choice = self._missing_params.pop()
+                view_func = prompts.get(param_choice)
 
         elif len(self._intent_action_funcs[self.intent]) == 1:
             view_func = self._intent_action_funcs[self.intent][0]
