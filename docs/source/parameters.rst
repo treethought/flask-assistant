@@ -18,7 +18,7 @@ Each entity is composed of entries, which represent a mapping between a referenc
 
 
 Parameters for Custom Entities
-=============================
+===============================
 
 Given an entity ``color`` defined with the following template:
 

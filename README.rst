@@ -1,3 +1,4 @@
+
 *************************************
 Create Virtual Assistants with Python
 *************************************
@@ -8,6 +9,9 @@ Create Virtual Assistants with Python
 
 
 A flask extension serving as an `API.AI`_  SDK to provide an easy way to create virtual assistants which may be integrated with platforms such as `Google Actions`_ (Google Home).
+
+Now providing convenient `Home Assistant <https://home-assistant.io/>`_ Integration! Check out the `docs <http://flask-assistant.readthedocs.io/en/latest/hass.html>`_ 
+
 
 .. _`Google Actions`: https://developers.google.com/actions/develop/apiai/ 
 .. _`fullfillment`: https://developers.google.com/actions/develop/apiai/dialogs-and-fulfillment#overview

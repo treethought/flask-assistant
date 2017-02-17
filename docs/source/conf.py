@@ -107,7 +107,9 @@ html_theme_options = {
     'logo': 'logo-xs.png',
     'logo_name': 'true',
     'description': 'Virtual Assistants with Python',
-    'sidebar_width': '280px'
+    'sidebar_width': '280px',
+    'extra_nav_links': 'true',
+    'page_width': '1020px'
 
 }
 

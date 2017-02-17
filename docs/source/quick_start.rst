@@ -218,6 +218,7 @@ With regards to the intent registration:
 Navigate to your agent's Intents section within the `API.AI Console`_. You will now see that the ``greeting``, ``user-gender`` and ``user-color`` intents have been registered.
 
 However, if you click on the ``user-gender`` intent, you'll see an error pop-up message that the `gender` entity hasn't been created. This is expected from the ``schema`` output message for the entities registration:
+
 ::
     Generating entity schema...
 
