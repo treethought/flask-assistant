@@ -1,10 +1,10 @@
 import logging
 from flask import Flask
-from flask_assistant import Assistant, tell, HomeAssistant
+from flask_assistant import Assistant, tell, HassRemote
 
 app = Flask(__name__)
 assist = Assistant(app)
-hass = HomeAssistant(assist, 'YOUR HOME Assistant PASSWORD')
+hass = HassRemote(assist, 'YOUR Home Assistant PASSWORD')
 logging.getLogger('flask_assistant').setLevel(logging.DEBUG)
 
 
@@ -52,6 +52,12 @@ def turn_on_group(group, brightness=255):
 def run_script(script):
     speech = 'Running {}'.format('script.{}'.format(script))
     hass.start_script(script)
+    return tell(speech)
+
+@assist.action('run-command')
+def run(shell_command):
+    speech = 'Running the {} command shel command'.format(shell_command)
+    hass.command(shell_command)
     return tell(speech)
 
 

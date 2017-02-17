@@ -57,11 +57,23 @@ toggle-switch:
   - 
   Annotations:
   - ps4: switch
-  - 
+
 start-script:
   UserSays:
   - flash the lights
   - flash
   Annotations:
   - flash: script
-  - 
+
+
+run-command:
+  UserSays:
+    - turn on ps4
+    - start netflix
+    - open hulu
+  Annotations:
+    - ps4: shell_command
+    - netflix: shell_command
+    - open hulu: shell_command
+
+

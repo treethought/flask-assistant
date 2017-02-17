@@ -35,3 +35,10 @@ brightness:
 switch:
 - playstation4: ['playstation', 'ps4']
 
+shell_command:
+  - playstationvue_start: [vue]
+  - playstation_netflix_start: [netflix]
+  - playstation_overwatch_start: [overwatch]
+  - playstation_gtav_start: [gta five, gta]
+  - playstation_hulu_start: [hulu]
+
