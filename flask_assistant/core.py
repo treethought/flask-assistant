@@ -4,7 +4,6 @@ from functools import wraps, partial
 from flask import current_app, json, request as flask_request, _app_ctx_stack
 from werkzeug.local import LocalProxy
 
-
 from flask_assistant import logger
 from flask_assistant.response import _Response
 from flask_assistant.manager import ContextManager
@@ -95,11 +94,9 @@ class Assistant(object):
     def context_manager(self, value):
         _app_ctx_stack.top._assist_context_manager = value
 
-
     @property
     def session_id(self):
         return getattr(_app_ctx_stack.top, '_assist_session_id', None)
-    
 
     def _register_context_to_func(self, intent_name, context=[]):
         required = self._required_contexts.get(intent_name)
