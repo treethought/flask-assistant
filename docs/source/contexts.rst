@@ -83,11 +83,11 @@ Set a parameter value:
 context decorator
 ==================
 
-The :any:`context` decorator restricts a wrapped action function to be matched only if the given contexts are active.
+The :meth:`context` decorator restricts a wrapped action function to be matched only if the given contexts are active.
 
-While the :any:`context_manager` is used create and access context objects, the :any:`context` decorator is responsible for mapping an intent to one of possibly many context-dependent action functions.
+While the :meth:`context_manager` is used create and access context objects, the :meth:`context` decorator is responsible for mapping an intent to one of possibly many context-dependent action functions.
 
-The basic :any:`action` intent-mapping in conjuction with :any:`context` action filtering allows
+The basic :meth:`action` intent-mapping in conjuction with :meth:`context` action filtering allows
 a single intent to invoke an action appropriate to the current conversation.
 
 For example:
