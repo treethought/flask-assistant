@@ -1,6 +1,8 @@
-homeassistant
+
 pygments
 werkzeug
 ipdb
 requests
 flask
+homeassistant
+async-timeout==1.1.0
