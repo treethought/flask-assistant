@@ -1,10 +1,7 @@
 import homeassistant.remote as remote
-# from homeassistant.const import STATE_ON
 
-
-
-class HomeAssistant(object):
-    """docstring for HomeAssistant"""
+class HassRemote(object):
+    """Wrapper around homeassistant.remote to make requests to HA's REST api"""
 
     def __init__(self, assist, password):
         self.assist = assist
@@ -64,8 +61,6 @@ class HomeAssistant(object):
     def sensors(self):
         return [i for i in self._states if i.domain == 'sensor']
     
-
-
     # Shortcut service calls
     def switch(self, switch_name, service='toggle'):
         data = {'entity_id': 'script.{}'.format(switch_name)}
@@ -80,5 +75,8 @@ class HomeAssistant(object):
         return remote.call_service(self.api, 'light', 'turn_on', service_data=data)
 
     def start_script(self, script_name):
-        data = {'entity_id': 'script.{}'.format(script_name)}
+        # data = {'entity_id': 'script.{}'.format(script_name)}
         return remote.call_service(self.api, 'script', 'script_name')
+
+    def command(self, shell_command):
+        return remote.call_service(self.api, 'shell_command', shell_command, timeout=10)
