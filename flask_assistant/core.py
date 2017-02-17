@@ -1,24 +1,17 @@
-import os
 import inspect
 from functools import wraps, partial
 
 from flask import current_app, json, request as flask_request, _app_ctx_stack
-from werkzeug.local import LocalProxy, LocalStack
+from werkzeug.local import LocalProxy
 
-import homeassistant.remote as remote
 
 from flask_assistant import logger
 from flask_assistant.response import _Response
 from flask_assistant.manager import ContextManager
-from flask_assistant.hass_wrapper import HomeAssistant
 
 request = LocalProxy(lambda: current_app.assist.request)
 context_in = LocalProxy(lambda: current_app.assist.context_in)
 context_manager = LocalProxy(lambda: current_app.assist.context_manager)
-
-
-
-_converters = []
 
 
 class Assistant(object):
@@ -39,7 +32,7 @@ class Assistant(object):
 
     """
 
-    def __init__(self, app=None, route='/', hass_pw=None):
+    def __init__(self, app=None, route='/'):
 
         self.app = app
         self._route = route
@@ -54,10 +47,6 @@ class Assistant(object):
 
         if app is not None:
             self.init_app(app)
-
-        if hass_pw is not None:
-            self.hass = HomeAssistant(self, hass_pw)
-
 
     def init_app(self, app):
 
