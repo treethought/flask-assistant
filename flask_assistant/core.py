@@ -1,9 +1,8 @@
-import os
 import inspect
 from functools import wraps, partial
 
 from flask import current_app, json, request as flask_request, _app_ctx_stack
-from werkzeug.local import LocalProxy, LocalStack
+from werkzeug.local import LocalProxy
 
 from flask_assistant import logger
 from flask_assistant.response import _Response
@@ -12,9 +11,6 @@ from flask_assistant.manager import ContextManager
 request = LocalProxy(lambda: current_app.assist.request)
 context_in = LocalProxy(lambda: current_app.assist.context_in)
 context_manager = LocalProxy(lambda: current_app.assist.context_manager)
-# context_manager = LocalStack()
-
-_converters = []
 
 
 class Assistant(object):
