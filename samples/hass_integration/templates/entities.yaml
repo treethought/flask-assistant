@@ -18,11 +18,8 @@
 light:
 - hue_white_lamp_1: ['fan', 'fan light', 'main light']
 - hue_white_lamp_2: ['lamp', 'desk lamp']
+- room: ['all lights', 'lights', 'room'] # a group within home assistant
 
-group:
-- media: ['music', 'media players']
-- lights: ['all lights']
-- room: ['everything']
 
 script:
 - flash_lights: ['flash', 'flash lights', 'strobe']

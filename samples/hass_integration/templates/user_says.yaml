@@ -25,6 +25,7 @@ turn-on-light:
   Annotations:
   - fan: light
   - lamp: light
+  - lights: light
   - 100: brightness
   - 50: brightness
 
@@ -33,23 +34,17 @@ turn-off-light:
   - turn off the fan
   - turn off the lamp 
   - turn off fan
+  - turn out the lights in the room
   Annotations:
   - fan: light
   - lamp: light
+  - room: light # room is a light group - light.room
 
 
 greeting:
   UserSays:
   - hi
   - hello
-
-turn-on-group:
-  UserSays:
-  - turn on the room
-  - turn on all lights
-  Annotations:
-  - room: group
-  - all lights: group
 
 toggle-switch:
   UserSays:

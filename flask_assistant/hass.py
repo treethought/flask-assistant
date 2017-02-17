@@ -3,17 +3,18 @@ import homeassistant.remote as remote
 class HassRemote(object):
     """Wrapper around homeassistant.remote to make requests to HA's REST api"""
 
-    def __init__(self, assist, password):
-        self.assist = assist
+    def __init__(self, password, ip_address='127.0.0.1'):
         self.password = password
+        self.ip_address = ip_address
         self.api = None
-        # self.assist.home = self
+
         self.connect()
 
     def connect(self):
-        self.api = remote.API('127.0.0.1', self.password)
+        self.api = remote.API(self.ip_address, self.password)
         print('Connecting to Home Assistant instance...')
         print(remote.validate_api(self.api))
+
 
     @property
     def _config(self):
@@ -43,9 +44,11 @@ class HassRemote(object):
         return remote.get_state(self.api, entity_id)
 
     def set_state(self, entity_id, new_state, **kwargs):
+        "Updates or creates the current state of an entity."
         return remote.set_state(self.api, new_state, **kwargs)
 
     def is_state(self, entity_id, state):
+        """Checks if the entity has the given state"""
         return remote.is_state(self.api, entity_id, state)
 
     def call_service(self, domain, service, service_data={}, timeout=5):
@@ -72,7 +75,16 @@ class HassRemote(object):
 
     def turn_on_light(self, light_name, brightness=255):
         data = {'entity_id': 'light.{}'.format(light_name), 'brightness': brightness}
-        return remote.call_service(self.api, 'light', 'turn_on', service_data=data)
+        return remote.call_service (self.api, 'light', 'turn_on', service_data=data)
+
+    # def turn_on_group(self, group_name, **kwargs):
+    #     data = {'entity_id': 'group.{}'.format(group_name)}
+    #     data.update(kwargs)
+    #     return remote.call_service(self.api, 'homeassistant', 'turn_on', service_data=data)
+
+    # def turn_off_group(self, group_name):
+    #     data = {'entity_id': 'group.{}'.format(group_name)}
+    #     return remote.call_service(self.api, 'homeassistant', 'turn_off', service_data=data)
 
     def start_script(self, script_name):
         # data = {'entity_id': 'script.{}'.format(script_name)}
@@ -80,3 +92,4 @@ class HassRemote(object):
 
     def command(self, shell_command):
         return remote.call_service(self.api, 'shell_command', shell_command, timeout=10)
+
