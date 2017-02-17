@@ -141,15 +141,15 @@ Template Examples
 A Group of Lights:
 ^^^^^^^^^^^^^^^^^^
 
-    .. code-block:: yaml
-    
-        light:
-          - lamp_1: ['ceiling light', 'fan light', 'main light']
-          - lamp_2: ['lamp', 'desk lamp']
-          - lamp_3: ['bedroom light', 'room light', 'bedroom']
-          - room: ['all lights', 'lights', 'room'] # a group within home assistant
-            
-        Within Home Assistant lamp_2 would be identified as light.lamp_2 and room as light.room
+.. code-block:: yaml
+
+    light:
+      - lamp_1: ['ceiling light', 'fan light', 'main light']
+      - lamp_2: ['lamp', 'desk lamp']
+      - lamp_3: ['bedroom light', 'room light', 'bedroom']
+      - room: ['all lights', 'lights', 'room'] # a group within home assistant
+        
+    Within Home Assistant lamp_2 would be identified as light.lamp_2 and room as light.room
         
 
 Switches
