@@ -11,5 +11,6 @@ from flask_assistant.core import (
     context_manager
 )
 
+
 from flask_assistant.response import ask, tell, event
 from flask_assistant.manager import Context
