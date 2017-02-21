@@ -11,12 +11,14 @@ logging.getLogger('flask_assistant').setLevel(logging.DEBUG)
 @bot.action('None')
 def no_match():
     speech = 'Sorry what was that?'
-    return bot.connector.reply(speech')
+    return bot.connector.reply(speech)
 
 
-@bot.action('GetMeasure')
-def measure():
-    return  bot.connector.reply('Getting Measure')
+@bot.action('GetMeasure', mapping={'column': 'Column', 'datetime': 'builtin.datetime'})
+def measure(column, Filter=None, Status=None, datetime=None, Calculation=None, ):
+
+    speech = 'Measuring {} for {} {} {} {}'.format(Calculation, column, Filter, Status, datetime) # {} with datetime {}'.format(column, datetime)
+    return  bot.connector.reply(speech)
 
 
 @bot.action('Select')

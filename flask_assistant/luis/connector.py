@@ -8,7 +8,8 @@ from pprint import pprint
 
 SERVICE_ENDPOINTS = {
     'emulator': 'https://eb5755dd.ngrok.io/v3/',
-    'botframework': 'https://api.botframework.com/v3/'
+    'botframework': 'https://api.botframework.com/v3/',
+    'skype': 'https://smba.trafficmanager.net/apis/v3/'
 }
 
 
@@ -77,7 +78,7 @@ class BotConnector():
     def build_reply_from_request(self):
 
         self._activity['channelId'] = request['channelId']
-        self._activity['channelData'] = request['channelData']
+        self._activity['channelData'] = request.get('channelData')
         self._activity['conversation'] = request['conversation']
         self._activity['from'] = request['recipient']
         self._activity['locale'] = request.get('locale')
