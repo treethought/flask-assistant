@@ -20,6 +20,8 @@ LUIS_ENDPOINT = 'https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/{}?su
 
 connector = LocalProxy(lambda: current_app.assist.connector)
 
+_converters = {''}
+
 
 class Bot(Assistant):
     """The Bot object serves as the interface for manning requests from the
@@ -93,18 +95,16 @@ class Bot(Assistant):
 
     def _bot_framework_request(self, verify=False):
         raw_body = flask_request.data
-        # self.log_id = flask_request.headers['X-Correlating-OperationId']
-        pprint(flask_request)
         if verify:
             self.connector.verify(flask_request)
-        _dbgdump(json.loads(raw_body), indent=3)
+        # _dbgdump(json.loads(raw_body), indent=3)
         return json.loads(raw_body)
 
 
     def _query_luis(self, message, *args, **kwargs):
         query = LUIS_ENDPOINT + '&q={}&timezoneOffset=0.0&verbose=true'.format(message)
         result = requests.get(query).text
-        _dbgdump(json.loads(result))
+        # _dbgdump(json.loads(result))
         return json.loads(result)
 
     def _flask_assitant_view_func(self, *args, **kwargs):
@@ -134,9 +134,11 @@ class Bot(Assistant):
 
     def _map_intent_to_view_func(self, view_func):
         arg_names = self._func_args(view_func)
+        print('***ARGSS ISSSS')
+        print(arg_names)
         arg_values = self._map_params_to_view_args(arg_names)
-        _dbgdump(arg_values)
-        return partial(view_func, *arg_values)
+        # _dbgdump(arg_values)
+        return partial(view_func, **arg_values)
 
     def _map_params_to_view_args(self, arg_names):  # TODO map to correct name
         arg_values = {}
@@ -145,13 +147,31 @@ class Bot(Assistant):
         for arg_name in arg_names:
             arg_values[arg_name] = []  # may recieve multiple entities of the same type
             mapped_name = intent_map.get(arg_name, arg_name)
+            print(mapped_name)
 
             for entity in self.entities:
-                if entity['type'] == mapped_name:
+                entity_type = entity['type']
+                child = None
+                if '::' in entity['type']:
+                    entity_type, child = entity['type'].split('::')
+                    # entity_type, child = parent_child[0], parent_child[1]
+
+                if mapped_name in entity_type:
+                    if 'resolution' in entity.keys():
+                        value = entity['resolution']
+                        arg_values[arg_name].append(value)
+                        continue
+                    if child:
+                        arg_values[arg_name].append(child)
+                        continue
                     value = entity['entity']
                     arg_values[arg_name].append(value)
 
+        _dbgdump(arg_values)
         return arg_values
+
+    # def map_datetime(self, entity_object):
+
 
 
 def _dbgdump(obj, indent=2, default=None, cls=None):
