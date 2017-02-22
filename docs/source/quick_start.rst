@@ -193,7 +193,7 @@ Run the schema command
     .. code-block:: bash
     
         cd my_assistant
-        export DEV_ACCES_TOKEN='YOUR ACCESS TOKEN'
+        export DEV_ACCESS_TOKEN='YOUR ACCESS TOKEN'
 
 3. Run the `schema` command
     .. code-block:: bash
