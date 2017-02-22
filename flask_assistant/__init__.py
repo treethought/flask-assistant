@@ -13,5 +13,3 @@ from flask_assistant.core import (
 
 from flask_assistant.response import ask, tell
 from flask_assistant.manager import Context
-
-from flask_assistant.hass import HassRemote

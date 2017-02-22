@@ -18,7 +18,8 @@ First import and create an instance of the HassRemote.
 .. code-block:: python
 
     from flask import Flask
-    from flask_assistant import Assistant, tell, HassRemote
+    from flask_assistant import Assistant, tell
+    from flask_assistant.hass import HassRemote
 
     app = Flask(__name__)
     assist = Assistant(app)

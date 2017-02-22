@@ -8,7 +8,7 @@ from setuptools import setup
 
 setup(
     name='Flask-Assistant',
-    version='0.1.4',
+    version='0.1.5',
     url='https://github.com/treethought/flask-assistant',
     license='Apache 2.0',
     author='Cam Sweeney',
@@ -27,6 +27,9 @@ setup(
         'six',
         'ruamel.yaml'
     ],
+    extras_require={
+        'HassRemote': ["homeassistant>=0.37.1"]
+    },
     entry_points = {
         'console_scripts': ['schema=api_ai.cli:main'],
     },
