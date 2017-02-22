@@ -3,15 +3,17 @@ import homeassistant.remote as remote
 class HassRemote(object):
     """Wrapper around homeassistant.remote to make requests to HA's REST api"""
 
-    def __init__(self, password, ip_address='127.0.0.1'):
+    def __init__(self, password, host='127.0.0.1', port=8123, use_ssl=False):
         self.password = password
-        self.ip_address = ip_address
+        self.host = host
+        self.port = port
+        self.use_ssl = use_ssl
         self.api = None
 
         self.connect()
 
     def connect(self):
-        self.api = remote.API(self.ip_address, self.password)
+        self.api = remote.API(self.host, api_password=self.password, port=self.port, use_ssl=self.use_ssl)
         print('Connecting to Home Assistant instance...')
         print(remote.validate_api(self.api))
 
