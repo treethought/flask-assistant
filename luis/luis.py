@@ -6,7 +6,7 @@ import os
 from functools import wraps, partial
 from flask_assistant import logger
 from flask_assistant.core import Assistant
-from flask_assistant.luis.connector import BotConnector
+from luis.connector import BotConnector
 
 
 from pprint import pprint
@@ -39,8 +39,6 @@ class Bot(Assistant):
         self.init_app(app)
         self.connector = BotConnector()
 
-        
-
     def init_app(self, app):
 
         if self._route is None:
@@ -48,7 +46,6 @@ class Bot(Assistant):
 
         app.assist = self
         app.add_url_rule(self._route, view_func=self._flask_assitant_view_func, methods=['POST'])
-
 
     def action(self, intent, mapping={}, convert={}, default={}, with_context=[], *args, **kw):
         """Decorates an intent's Action view function.
@@ -71,7 +68,6 @@ class Bot(Assistant):
             return f
         return decorator
 
-
     @property
     def _report(self):
         _dbgdump({
@@ -88,7 +84,6 @@ class Bot(Assistant):
             self.connector.verify(flask_request)
         _dbgdump(json.loads(raw_body), indent=3)
         return json.loads(raw_body)
-
 
     def _query_luis(self, message, *args, **kwargs):
         query = LUIS_ENDPOINT + '&q={}&timezoneOffset=0.0&verbose=true'.format(message)
@@ -113,7 +108,6 @@ class Bot(Assistant):
 
         self.intent = self.result['topScoringIntent']['intent']
         self.entities = self.result['entities']
-
 
         view_func = self._intent_action_funcs[self.intent]
         # self._report()
@@ -155,7 +149,7 @@ class Bot(Assistant):
                     # append child as the value instead of 'entity' property allows
                     # per day or per work flow to be passed as PerDay or PerWorkFlow
                     # This may not be necessary, if not using children
-                    if child: 
+                    if child:
                         arg_values[arg_name].append(child)
                         continue
                     value = entity['entity']
@@ -164,10 +158,7 @@ class Bot(Assistant):
         # _dbgdump(arg_values)
         return arg_values
 
-
-
     # def map_datetime(self, entity_object):
-
 
 
 def _dbgdump(obj, indent=2, default=None, cls=None):
