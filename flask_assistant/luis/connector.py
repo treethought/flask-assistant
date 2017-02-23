@@ -2,7 +2,7 @@ import requests
 from flask import request as flask_request, json, make_response
 import os
 
-from flask_assistant.core import request
+from flask_assistant.core import request, _dbgdump
 
 from pprint import pprint
 
@@ -94,7 +94,7 @@ class BotConnector():
         endpoint = self.conversation_uri + self.conversation_id + '/activities/' + self.activity_id
         resp = requests.post(endpoint, data=self.activity_data, headers=self.auth_header)
         resp.raise_for_status
-        pprint(resp)
+        _dbgdump(resp.text)
         return (resp.text, resp.status_code, resp.headers.items())
 
     def render_response(self):

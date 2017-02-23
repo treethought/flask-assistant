@@ -85,26 +85,26 @@ class Bot(Assistant):
 
     @property
     def _report(self):
-        return {
+        _dbgdump({
             'User Message': self.request,
             'LUIS result': self.result,
             'Matched Intent': self.intent,
             'View Func': self._intent_action_funcs[self.intent].__name__,
             'Entities': self.entities
-        }
+        })
 
     def _bot_framework_request(self, verify=False):
         raw_body = flask_request.data
         if verify:
             self.connector.verify(flask_request)
-        # _dbgdump(json.loads(raw_body), indent=3)
+        _dbgdump(json.loads(raw_body), indent=3)
         return json.loads(raw_body)
 
 
     def _query_luis(self, message, *args, **kwargs):
         query = LUIS_ENDPOINT + '&q={}&timezoneOffset=0.0&verbose=true'.format(message)
         result = requests.get(query).text
-        # _dbgdump(json.loads(result))
+        _dbgdump(json.loads(result))
         return json.loads(result)
 
     def _flask_assitant_view_func(self, *args, **kwargs):
@@ -112,7 +112,7 @@ class Bot(Assistant):
         self.request = self._bot_framework_request(verify=False)
 
         if self.request['type'] == 'ping':
-            return 'Connection Successful', 200
+            return 'Connection Successful!!!', 200
 
         if self.request['type'] != 'message':
             print(self.request['type'])
@@ -127,15 +127,13 @@ class Bot(Assistant):
 
 
         view_func = self._intent_action_funcs[self.intent]
-        _dbgdump(self._report)
+        # self._report()
 
         result = self._map_intent_to_view_func(view_func)()
         return result
 
     def _map_intent_to_view_func(self, view_func):
         arg_names = self._func_args(view_func)
-        print('***ARGSS ISSSS')
-        print(arg_names)
         arg_values = self._map_params_to_view_args(arg_names)
         # _dbgdump(arg_values)
         return partial(view_func, **arg_values)
@@ -147,11 +145,11 @@ class Bot(Assistant):
         for arg_name in arg_names:
             arg_values[arg_name] = []  # may recieve multiple entities of the same type
             mapped_name = intent_map.get(arg_name, arg_name)
-            print(mapped_name)
 
             for entity in self.entities:
                 entity_type = entity['type']
                 child = None
+                value = None
                 if '::' in entity['type']:
                     entity_type, child = entity['type'].split('::')
                     # entity_type, child = parent_child[0], parent_child[1]
@@ -167,7 +165,7 @@ class Bot(Assistant):
                     value = entity['entity']
                     arg_values[arg_name].append(value)
 
-        _dbgdump(arg_values)
+        # _dbgdump(arg_values)
         return arg_values
 
     # def map_datetime(self, entity_object):

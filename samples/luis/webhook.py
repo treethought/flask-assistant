@@ -17,12 +17,13 @@ def no_match():
 @bot.action('GetMeasure', mapping={'column': 'Column', 'datetime': 'builtin.datetime'})
 def measure(column, Filter=None, Status=None, datetime=None, Calculation=None, ):
 
-    speech = 'Measuring {} for {} {} {} {}'.format(Calculation, column, Filter, Status, datetime) # {} with datetime {}'.format(column, datetime)
+    speech = 'Measuring {} for column:{} filter:{} status:{} datetime:{}'.format(Calculation, column, Filter, Status, datetime) # {} with datetime {}'.format(column, datetime)
     return  bot.connector.reply(speech)
 
 
 @bot.action('Select')
-def select():
+def select(Column, Filter=None, Status=None, datetime=None):
+    speech = 'Getting {} {}s filtered by {} {}'.format(Status, Column, Filter, datetime=None)
     return  bot.connector.reply('Selecting...')
 
 if __name__ == '__main__':
