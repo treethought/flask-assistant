@@ -18,7 +18,7 @@ LUIS_ENDPOINT_KEY = os.getenv('LUIS_ENDPOINT_KEY')
 LUIS_ENDPOINT = 'https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/{}?subscription-key={}'.format(
     LUIS_APP_ID, LUIS_ENDPOINT_KEY)
 
-connector = LocalProxy(lambda: current_app.assist.connector)
+# connector = LocalProxy(lambda: current_app.assist.connector)
 
 _converters = {''}
 
@@ -48,17 +48,6 @@ class Bot(Assistant):
 
         app.assist = self
         app.add_url_rule(self._route, view_func=self._flask_assitant_view_func, methods=['POST'])
-
-
-    # @property
-    # def connector(self):
-    #     """Local Proxy refering to context objects contained within current session"""
-    #     return getattr(_app_ctx_stack.top, '_assist_connector', BotConnector())
-
-    # @connector.setter
-    # def connector(self, value):
-    #     setattr(_app_ctx_stack.top, '_assist_connector', value)
-    #     # _app_ctx_stack.top._bot_connector = value
 
 
     def action(self, intent, mapping={}, convert={}, default={}, with_context=[], *args, **kw):
@@ -130,6 +119,8 @@ class Bot(Assistant):
         # self._report()
 
         result = self._map_intent_to_view_func(view_func)()
+        if isinstance(result, BotConnector):
+            return result.send()
         return result
 
     def _map_intent_to_view_func(self, view_func):
@@ -155,11 +146,16 @@ class Bot(Assistant):
                     # entity_type, child = parent_child[0], parent_child[1]
 
                 if mapped_name in entity_type:
+                    # for built-in entities like datetime
                     if 'resolution' in entity.keys():
                         value = entity['resolution']
                         arg_values[arg_name].append(value)
                         continue
-                    if child:
+                    # right now, child entities represent a consistant form of the entitiy
+                    # append child as the value instead of 'entity' property allows
+                    # per day or per work flow to be passed as PerDay or PerWorkFlow
+                    # This may not be necessary, if not using children
+                    if child: 
                         arg_values[arg_name].append(child)
                         continue
                     value = entity['entity']
@@ -167,6 +163,8 @@ class Bot(Assistant):
 
         # _dbgdump(arg_values)
         return arg_values
+
+
 
     # def map_datetime(self, entity_object):
 

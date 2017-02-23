@@ -25,6 +25,8 @@ class BotConnector():
         self._token = None
         self._activity = {}
 
+        # self.build_reply_from_request()
+
     @property
     def token(self):
         if not self._token:
@@ -57,16 +59,22 @@ class BotConnector():
         return SERVICE_ENDPOINTS[self._service]
 
     @property
-    def conversation_uri(self):
-        return self.base_url + 'conversations/'
-
-    @property
     def conversation_id(self):
         return request['conversation']['id']
 
     @property
     def activity_id(self):
         return request.get('replyToId', '')
+
+    @property
+    def conversations_uri(self):
+        return self.base_url + 'conversations/'
+
+    @property
+    def foo(self):
+        return self._foo
+    
+
 
     def authorize_ping(self):
         return 202
@@ -87,15 +95,23 @@ class BotConnector():
         self._activity['type'] = 'message'
         return self._activity
 
-    def reply(self, message):
 
-        self._activity['text'] = message
+    # for basic attachments, not rich cards
+    # rich cards would have a content property and no url
+    def add_attachment(self, content_url, name=None, thumbnail_url=None):
 
-        endpoint = self.conversation_uri + self.conversation_id + '/activities/' + self.activity_id
-        resp = requests.post(endpoint, data=self.activity_data, headers=self.auth_header)
-        resp.raise_for_status
-        _dbgdump(resp.text)
-        return (resp.text, resp.status_code, resp.headers.items())
+        attachment = {
+            'contentType': 'image',
+            'contentUrl': content_url,
+            'name': name,
+            'thumbnailUrl': thumbnail_url
+        }
+
+        if not self._activity.get('attachments'):
+            self._activity['attachments'] = []
+        self._activity['attachments'].append(attachment)
+        return self
+
 
     def render_response(self):
 
@@ -104,4 +120,25 @@ class BotConnector():
         resp.headers['Authorization'] = self.token
         pprint(resp.data, indent=3)
         return resp
+
+
+class reply(BotConnector):
+    """Sends a message type Activity in response to an Activity the bot received"""
+
+    def __init__(self, message):
+        super().__init__()
+
+        self.build_reply_from_request()
+        
+        self._activity['text'] = message
+
+    def send(self):
+        endpoint = self.conversations_uri + self.conversation_id + '/activities/' + self.activity_id
+        resp = requests.post(endpoint, data=self.activity_data, headers=self.auth_header)
+        resp.raise_for_status
+        # _dbgdump(resp.text)
+        return (resp.text, resp.status_code, resp.headers.items())
+
+
+
 
