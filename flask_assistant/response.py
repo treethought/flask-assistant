@@ -77,3 +77,18 @@ class ask(_Response):
 
     def reprompt(self, prompt):
         self._response['data']['google']['no_input_prompts'] = [{'text_to_speech': prompt}]
+
+
+class event(_Response):
+    """Triggers an event to invoke it's respective intent.
+
+    When an event is triggered, speech, displayText and services' data will be ignored.
+    """
+    def __init__(self, event_name, **kwargs):
+        super(event, self).__init__(speech=None)
+
+        self._response['followupEvent'] = {
+
+            "name": event_name,
+            "data": kwargs
+        }
