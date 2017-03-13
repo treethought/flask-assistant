@@ -3,8 +3,8 @@ import inspect
 import json
 from ruamel import yaml
 
-from api_ai.models import Intent, Entity
-from api_ai.api_ai import ApiAi
+from .models import Intent, Entity
+from .api_ai import ApiAi
 
 
 
@@ -222,7 +222,7 @@ class IntentGenerator(SchemaHandler):
 class EntityGenerator(SchemaHandler):
 
     def __init__(self, assist):
-        super().__init__(assist, object_type='entities')
+        super(EntityGenerator, self).__init__(assist, object_type='entities')
 
     def build_entities(self):
         raw_temp = self.entity_yaml()
@@ -282,7 +282,7 @@ class EntityGenerator(SchemaHandler):
 class TemplateCreator(SchemaHandler):
     
     def __init__(self, assist):
-        super().__init__(assist)
+        super(TemplateCreator, self).__init__(assist)
 
         self.assist = assist
 
