@@ -15,7 +15,7 @@ class SchemaHandler(object):
 
         self.assist = assist
         self.intents = []
-        self.api = ApiAi(self.assist)
+        self.api = ApiAi()
         self.object_type = object_type
 
     # File set up
@@ -235,11 +235,12 @@ class EntityGenerator(SchemaHandler):
     def build_entries(self, entity, temp_dict):
         entries = temp_dict.get(entity.name, [])
         for entry in entries:
-            if isinstance(entry, dict):
+            if isinstance(entry, dict):  # mapping
                 (value, synyms), = entry.items()
-            else:
+            else:  # enum/composite
+                entity.isEnum = True
                 value = entry
-                synyms = []
+                synyms = [entry]
             entity.add_entry(value, synyms)
 
     def register(self, entity):

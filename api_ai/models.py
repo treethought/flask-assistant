@@ -6,12 +6,20 @@ class Entity():
     def __init__(self, name):
         self.name = name
         self.entries = []
+        self.isEnum = None
+
+    # def add_entry(self, value, synonyms):
+    #     if synonyms is None: # empty val for mapping
+    #         synonyms = []
+    #     entry = {'value': value, 'synonyms': synonyms}
+    #     self.entries.append(entry)
 
     def add_entry(self, value, synonyms=[]):
-        # import ipdb; ipdb.set_trace()
+        if self.isEnum:
+            entry = {'value': value, 'synonyms': value}
         entry = {'value': value, 'synonyms': synonyms}
         self.entries.append(entry)
-        # self.entries[value] = synonyms
+
 
     def add_synonyms(self, entry, synonyms):
         self.entries[entry].extend(synonyms)
