@@ -156,10 +156,13 @@ class IntentGenerator(SchemaHandler):
             param_info['name'] = param_name
             param_info['value'] = '$' + param_name
             param_info['dataType'] = '@' + param_entity
-
-            param_info['defaultValue'] = default_map.get(arg, '') # grabs default from view func, not from action decorator
+            param_info['prompts'] = []  # TODO: fill in provided prompts
             param_info['required'] = arg not in default_map
-            param_info['isList'] = False
+            param_info['isList'] = isinstance(default_map.get(arg), list)
+            if param_info['isList']:
+                param_info['defaultValue'] = ''
+            else:
+                param_info['defaultValue'] = default_map.get(arg, '')
 
             params.append(param_info)
         return params
