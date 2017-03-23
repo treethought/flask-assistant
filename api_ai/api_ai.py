@@ -1,6 +1,5 @@
 import os
 import requests
-from pprint import pprint
 import json
 
 class ApiAi(object):

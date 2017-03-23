@@ -8,12 +8,6 @@ class Entity():
         self.entries = []
         self.isEnum = None
 
-    # def add_entry(self, value, synonyms):
-    #     if synonyms is None: # empty val for mapping
-    #         synonyms = []
-    #     entry = {'value': value, 'synonyms': synonyms}
-    #     self.entries.append(entry)
-
     def add_entry(self, value, synonyms=[]):
         if self.isEnum:
             entry = {'value': value, 'synonyms': value}
