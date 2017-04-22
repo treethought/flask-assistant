@@ -15,7 +15,7 @@ setup(
     author_email='cpsweene@gmail.com',
     description='Framework for Building Virtual Assistants with API.AI',
     long_description=__doc__,
-    packages=['flask_assistant', 'api_ai', 'luis'],
+    packages=['flask_assistant', 'api_ai', 'bot_framework'],
     zip_safe=False,
     include_package_data=True,
     platforms='any',
