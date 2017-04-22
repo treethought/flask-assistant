@@ -11,7 +11,8 @@ from flask_assistant.core import (
     context_manager
 )
 
-from luis import Bot, reply
+from bot_framework.bot import Bot
+from bot_framework.connector import reply
 
 
 from flask_assistant.response import ask, tell, event

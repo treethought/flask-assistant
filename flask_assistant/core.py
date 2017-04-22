@@ -34,6 +34,7 @@ class Assistant(object):
     def __init__(self, app=None, route='/'):
 
         self.app = app
+        self._nlp = None
         self._route = route
         self._intent_action_funcs = {}
         self._intent_mappings = {}
@@ -203,9 +204,17 @@ class Assistant(object):
         temp.update(self.context_in)
         self.context_manager = temp
 
+    def get_params(self):
+        if self._nlp:
+            return self._nlp_result['result']['parameters']
+        else:
+            return self.request['result']['parameters']
 
     def _match_view_func(self):
         view_func = None
+
+        if 'luis' in self._nlp:  # TODO self._missping_params w/ luis
+            return self._intent_action_funcs[self.intent][0]
 
         if self.context_in:
             view_func = self._choose_context_view()
@@ -224,7 +233,7 @@ class Assistant(object):
             _errordump('No view func matched')
             _errordump({
                 'intent recieved': self.intent,
-                'recieved parameters': self.request['result']['parameters'],
+                'recieved parameters': self.get_params(),
                 'required args': self._func_args(view_func),
                 'conext_in': self.context_in,
                 'matched view_func': view_func.__name__
@@ -239,7 +248,6 @@ class Assistant(object):
         recieved_contexts = [c['name'] for c in self.context_in]
         # recieved_contexts = [c['name'] for c in self.context_manager.active]
 
-
         for func in self._func_contexts:
             requires = list(self._func_contexts[func])
             met = []
@@ -248,8 +256,6 @@ class Assistant(object):
                     met.append(req_context)
 
             if set(met) == set(requires) and len(requires) <= len(recieved_contexts):
-                # if not requires:
-                # import ipdb; ipdb.set_trace()
                 possible_views.append(func)
 
         return possible_views
@@ -270,7 +276,7 @@ class Assistant(object):
 
     @property
     def _missing_params(self):  # TODO: fill missing slot from default
-        params = self.request['result']['parameters']
+        params = self.get_params()
         missing = []
         for p_name in params:
             if params[p_name] == '':
@@ -287,19 +293,20 @@ class Assistant(object):
         arg_values = self._map_params_to_view_args(arg_names)
         return partial(view_func, *arg_values)
 
-    def _map_params_to_view_args(self, arg_names): # TODO map to correct name
+    def _map_params_to_view_args(self, arg_names):  # TODO map to correct name
         arg_values = []
         mapping = self._intent_mappings.get(self.intent)
-        params = self.request['result']['parameters']
+
+        params = self.get_params()
 
         for arg_name in arg_names:
             entity_mapping = mapping.get(arg_name, arg_name)
             # param name cant have '.',
             # so when registered, the sys. is stripped,
             # and must be stripped when looking up in request
-            mapped_param_name = entity_mapping.replace('sys.', '') 
+            mapped_param_name = entity_mapping.replace('sys.', '')
             value = params.get(mapped_param_name)  # params declared in GUI present in request
-            
+
             if not value:  # params not declared, so must look in contexts
                 value = self._map_arg_from_context(arg_name)
             arg_values.append(value)
