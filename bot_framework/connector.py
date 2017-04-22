@@ -1,13 +1,14 @@
-import requests
-from flask import request as flask_request, json, make_response
 import os
+import requests
+
+from flask import json, make_response
+
 
 from flask_assistant.core import request, _dbgdump
 
-from pprint import pprint
 
 SERVICE_ENDPOINTS = {
-    'emulator': 'https://eb5755dd.ngrok.io/v3/',
+    'emulator': os.getenv('EMULATOR_URL', default='https://4bf26eac.ngrok.io/v3/'),
     'botframework': 'https://api.botframework.com/v3/',
     'skype': 'https://smba.trafficmanager.net/apis/v3/'
 }
@@ -25,8 +26,6 @@ class BotConnector():
         self._token = None
         self._activity = {}
 
-        # self.build_reply_from_request()
-
     @property
     def token(self):
         if not self._token:
@@ -43,7 +42,7 @@ class BotConnector():
             'grant_type': 'client_credentials',
             'client_id': self._app_id,
             'client_secret': self._app_pw,
-            'scope': 'https://graph.microsoft.com/.default'
+            'scope': 'https://api.botframework.com/.default'
         }
         print('getting access token')
         resp = requests.post(self._token_url, data=body)
@@ -64,17 +63,11 @@ class BotConnector():
 
     @property
     def activity_id(self):
-        return request.get('replyToId', '')
+        return request['id']
 
     @property
     def conversations_uri(self):
         return self.base_url + 'conversations/'
-
-    @property
-    def foo(self):
-        return self._foo
-    
-
 
     def authorize_ping(self):
         return 202
@@ -95,7 +88,6 @@ class BotConnector():
         self._activity['type'] = 'message'
         return self._activity
 
-
     # for basic attachments, not rich cards
     # rich cards would have a content property and no url
     def add_attachment(self, content_url, name=None, thumbnail_url=None):
@@ -113,15 +105,6 @@ class BotConnector():
         return self
 
 
-    def render_response(self):
-
-        resp = make_response(self._activity.serialize())
-        resp.headers['Content-Type'] = 'application/json'
-        resp.headers['Authorization'] = self.token
-        pprint(resp.data, indent=3)
-        return resp
-
-
 class reply(BotConnector):
     """Sends a message type Activity in response to an Activity the bot received"""
 
@@ -129,16 +112,16 @@ class reply(BotConnector):
         super().__init__()
 
         self.build_reply_from_request()
-        
+
         self._activity['text'] = message
 
     def send(self):
         endpoint = self.conversations_uri + self.conversation_id + '/activities/' + self.activity_id
+        _dbgdump('Sending Activity:')
+        _dbgdump(self._activity)
+
         resp = requests.post(endpoint, data=self.activity_data, headers=self.auth_header)
         resp.raise_for_status
-        # _dbgdump(resp.text)
+        _dbgdump(resp.status_code)
+
         return (resp.text, resp.status_code, resp.headers.items())
-
-
-
-
