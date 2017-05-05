@@ -8,7 +8,7 @@ from setuptools import setup
 
 setup(
     name='Flask-Assistant',
-    version='0.2.2',
+    version='0.2.3',
     url='https://github.com/treethought/flask-assistant',
     license='Apache 2.0',
     author='Cam Sweeney',
@@ -33,7 +33,8 @@ setup(
                             'query=api_ai.cli:query',
                             'gen_templates=api_ai.cli:gen_templates',
                             'entities=api_ai.cli:entities',
-                            'intents=api_ai.cli:intents']
+                            'intents=api_ai.cli:intents',
+                            'check=api_ai.cli:check']
     },
     classifiers=[
         'License :: OSI Approved :: Apache Software License',

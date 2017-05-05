@@ -59,7 +59,6 @@ class Assistant(object):
         app.assist = self
         app.add_url_rule(self._route, view_func=self._flask_assitant_view_func, methods=['POST'])
 
-
     @property
     def request(self):
         """Local Proxy refering to the request JSON recieved from API.AI"""

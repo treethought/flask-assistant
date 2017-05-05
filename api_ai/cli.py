@@ -2,7 +2,6 @@ from __future__ import absolute_import
 import os
 import sys
 import logging
-import json
 from flask_assistant.core import Assistant
 from .schema_handlers import IntentGenerator, EntityGenerator, TemplateCreator
 from .api import ApiAi
@@ -10,7 +9,6 @@ from api_ai import logger
 from multiprocessing import Process
 
 logger.setLevel(logging.INFO)
-
 
 api = ApiAi()
 
@@ -21,9 +19,11 @@ def import_with_3(module_name, path):
     spec.loader.exec_module(module)
     return module
 
+
 def import_with_2(module_name, path):
     import imp
     return imp.load_source(module_name, path)
+
 
 def get_assistant():
     if len(sys.argv) < 2:
@@ -40,10 +40,12 @@ def get_assistant():
         if isinstance(obj, Assistant):
             return obj
 
+
 def gen_templates():
     assist = get_assistant()
     templates = TemplateCreator(assist)
     templates.generate()
+
 
 def intents():
     logger.info('Getting Registered Intents...')
@@ -51,6 +53,7 @@ def intents():
     for i in intents:
         logger.info(i.name)
     return intents
+
 
 def entities():
     logger.info('Getting Registered Entities...')
@@ -84,15 +87,18 @@ def check():
         print('\nThe following Intents are registered but not mapped to an action function:')
         print(extra_reg)
         print()
+    else:
+        print('\n All registered intents are mapped\n')
 
     if extra_map != set():
         print('\nThe Following Intents are mapped to an action fucntion, but not registered: ')
         print(extra_map)
         print()
+    else:
+        print('\n All mapped intents are regitsered\n')
 
     print('Registered Entities:')
     print([i.name for i in assist.api.agent_entities])
-
 
 
 def query():
@@ -111,5 +117,3 @@ def query():
         except KeyError:
             logger.error('Error:')
             logger.error(resp['status'])
-
-
