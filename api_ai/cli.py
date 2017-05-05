@@ -1,12 +1,15 @@
 from __future__ import absolute_import
 import os
 import sys
-
+import logging
+import json
 from flask_assistant.core import Assistant
 from .schema_handlers import IntentGenerator, EntityGenerator, TemplateCreator
-from .api_ai import ApiAi
+from .api import ApiAi
+from api_ai import logger
 from multiprocessing import Process
 
+logging.getLogger('api_ai').setLevel(logging.DEBUG)
 
 def import_with_3(module_name, path):
     import importlib.util
@@ -34,17 +37,33 @@ def get_assistant():
 
 def gen_templates():
     assist = get_assistant()
-    TemplateCreator(assist)
+    templates = TemplateCreator(assist)
+    templates.generate()
+
+def intents():
+    api = ApiAi()
+    logger.info('Getting Registered Intents...')
+    intents = api.agent_intents
+    logger.info(json.dumps(intents, indent=3))
+    return intents
+
+def entities():
+    api = ApiAi()
+    logger.info('Getting Registered Entities...')
+    ents = api.agent_entities
+    logger.info(json.dumps(ents, indent=3))
+    return ents
 
 
 def schema():
     assist = get_assistant()
     intents = IntentGenerator(assist)
     entities = EntityGenerator(assist)
-    template_creator = TemplateCreator(assist)
+    templates = TemplateCreator(assist)
 
     intents.generate()
     entities.generate()
+    templates.generate()
 
 def query():
     assist = get_assistant()
@@ -60,5 +79,3 @@ def query():
         print(resp['result']['fulfillment']['speech'])
 
 
-if __name__ == '__main__':
-    main()

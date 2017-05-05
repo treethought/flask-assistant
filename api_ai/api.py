@@ -67,8 +67,7 @@ class ApiAi(object):
         """Returns a list of intent json objects"""
         endpoint = self._intent_uri()
         intents = self._get(endpoint)
-
-        return [intents]
+        return intents
 
     def get_intent(self, intent_id):
         """Returns the intent object with the given intent_id"""

@@ -4,7 +4,7 @@ import json
 from ruamel import yaml
 
 from .models import Intent, Entity
-from .api_ai import ApiAi
+from .api import ApiAi
 
 
 
@@ -290,6 +290,7 @@ class TemplateCreator(SchemaHandler):
 
         self.assist = assist
 
+    def generate(self):
         if not self.user_says_yaml():
             self.create_user_says_skeleton()
         if not self.entity_yaml():
