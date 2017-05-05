@@ -36,20 +36,30 @@ class Intent():
     the API.AI develoepr console via JSON requests.
     """
 
-    def __init__(self, name, priority=500000, fallback_intent=False):
+    def __init__(self, name=None, priority=500000, fallback_intent=False, intent_json=None):
 
-        self.name = name
-        self.auto = True
-        self.contexts = []
-        self.templates = []
-        self.userSays = []
-        self.responses = []
-        self.priority = priority
-        self.fallbackIntent = fallback_intent
-        self.webhookUsed = True
-        self.webhookForSlotFilling = True
-        self.events = []
-        self.id = None
+        if name and not intent_json:
+            self.name = name
+            self.auto = True
+            self.contexts = []
+            self.templates = []
+            self.userSays = []
+            self.responses = []
+            self.priority = priority
+            self.fallbackIntent = fallback_intent
+            self.webhookUsed = True
+            self.webhookForSlotFilling = True
+            self.events = []
+            self.id = None
+
+        elif intent_json:
+            self.update(intent_json)
+
+        else:
+            raise TypeError('Must provide a "name" argument if no json given')
+
+    def __repr__(self):
+        return "<Intent: {}>".format(self.name)
 
     def registered(self):
         if self.id:
@@ -79,8 +89,11 @@ class Intent():
         return json.dumps(self.__dict__)
 
     def update(self, intent_json):
-        self.__dict__.update(json.loads(intent_json))
-        return self._update
+        try:
+            self.__dict__.update(intent_json)
+        except TypeError:
+            self.__dict__.update(json.loads(intent_json))
+
 
 
 class ExampleBase(object):
