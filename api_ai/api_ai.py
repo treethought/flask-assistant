@@ -2,6 +2,10 @@ import os
 import requests
 import json
 
+from api_ai import logger
+# from api_ai.models import Intent
+
+
 class ApiAi(object):
     """Interface for making and recieving API-AI requests.
 
@@ -43,6 +47,7 @@ class ApiAi(object):
     def _get(self, endpoint):
         response = requests.get(endpoint, headers=self._dev_header)
         response.raise_for_status
+        logger.debug('Response from {}: {}'.format(endpoint, response))
         return response.json()
 
     def _post(self, endpoint, data):
@@ -58,11 +63,12 @@ class ApiAi(object):
     ## Intents ##
 
     @property
-    def get_agent_intents(self):
+    def agent_intents(self):
         """Returns a list of intent json objects"""
         endpoint = self._intent_uri()
-        intents = [_Field(i) for i in self._get(endpoint)]
-        return intents
+        intents = self._get(endpoint)
+
+        return [intents]
 
     def get_intent(self, intent_id):
         """Returns the intent object with the given intent_id"""
@@ -80,6 +86,13 @@ class ApiAi(object):
         return self._put(endpoint, intent_json)
 
     ## Entities ##
+
+    @property
+    def agent_entities(self):
+        """Returns a list of intent json objects"""
+        endpoint = self._entity_uri()
+        entities = self._get(endpoint)
+        return entities
 
     def get_entity(self, entity_id):
         endpoint = self._entity_uri(entity_id=entity_id)
