@@ -9,7 +9,7 @@ from .api import ApiAi
 from api_ai import logger
 from multiprocessing import Process
 
-logging.getLogger('api_ai').setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 def import_with_3(module_name, path):
     import importlib.util
@@ -44,14 +44,16 @@ def intents():
     api = ApiAi()
     logger.info('Getting Registered Intents...')
     intents = api.agent_intents
-    logger.info(json.dumps(intents, indent=3))
+    for i in intents:
+        logger.info(i.name)
     return intents
 
 def entities():
     api = ApiAi()
     logger.info('Getting Registered Entities...')
     ents = api.agent_entities
-    logger.info(json.dumps(ents, indent=3))
+    for i in ents:
+        logger.info(i.name)
     return ents
 
 
@@ -74,8 +76,8 @@ def query():
     while True:
         q = input('Enter query...\n')
         resp = api.post_query(q).json()
-        print('Matched: {}'.format(resp['result']['metadata']['intentName']))
-        print('Params: {}'.format(resp['result']['parameters']))
-        print(resp['result']['fulfillment']['speech'])
+        logger.info('Matched: {}'.format(resp['result']['metadata']['intentName']))
+        logger.info('Params: {}'.format(resp['result']['parameters']))
+        logger.info(resp['result']['fulfillment']['speech'])
 
 

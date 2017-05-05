@@ -3,7 +3,7 @@ import requests
 import json
 
 from api_ai import logger
-# from api_ai.models import Intent
+from api_ai.models import Intent, Entity
 
 
 class ApiAi(object):
@@ -67,7 +67,7 @@ class ApiAi(object):
         """Returns a list of intent json objects"""
         endpoint = self._intent_uri()
         intents = self._get(endpoint)
-        return intents
+        return [Intent(intent_json=i) for i in intents]
 
     def get_intent(self, intent_id):
         """Returns the intent object with the given intent_id"""
@@ -91,7 +91,7 @@ class ApiAi(object):
         """Returns a list of intent json objects"""
         endpoint = self._entity_uri()
         entities = self._get(endpoint)
-        return entities
+        return [Entity(i['name']) for i in entities]
 
     def get_entity(self, entity_id):
         endpoint = self._entity_uri(entity_id=entity_id)
