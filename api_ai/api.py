@@ -13,12 +13,21 @@ class ApiAi(object):
 
     """
 
-    def __init__(self):
+    def __init__(self, dev_token=None, client_token=None):
 
-        self._dev_token = os.environ.get('DEV_ACCESS_TOKEN')
-        self._client_token = os.environ.get('CLIENT_ACCESS_TOKEN')
+
+        self._dev_token = dev_token or os.getenv('DEV_ACCESS_TOKEN')
+        self._client_token = client_token or os.getenv('CLIENT_ACCESS_TOKEN')
         self.versioning = '20161213'
         self.base_url = 'https://api.api.ai/v1/'
+
+        if self._dev_token is None:
+            logger.warn(json.dumps("""No API.AI Developer Access Token set.
+                You will not be able to register or retrieve resources from API.AI"""))
+
+        if self._client_token is None:
+            logger.warn(json.dumps("""No API.AI Client Access Token set. You will be able to query the agent"""))
+
 
     @property
     def _dev_header(self):

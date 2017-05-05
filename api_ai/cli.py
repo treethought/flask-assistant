@@ -11,6 +11,9 @@ from multiprocessing import Process
 
 logger.setLevel(logging.INFO)
 
+
+api = ApiAi()
+
 def import_with_3(module_name, path):
     import importlib.util
     spec = importlib.util.spec_from_file_location(module_name, path)
@@ -23,6 +26,8 @@ def import_with_2(module_name, path):
     return imp.load_source(module_name, path)
 
 def get_assistant():
+    if len(sys.argv) < 2:
+        raise KeyError('Please provide the file containing the Assistant object')
     agent_file = sys.argv[1]
     agent_name = os.path.splitext(agent_file)[0]
     try:
@@ -41,7 +46,6 @@ def gen_templates():
     templates.generate()
 
 def intents():
-    api = ApiAi()
     logger.info('Getting Registered Intents...')
     intents = api.agent_intents
     for i in intents:
@@ -49,7 +53,6 @@ def intents():
     return intents
 
 def entities():
-    api = ApiAi()
     logger.info('Getting Registered Entities...')
     ents = api.agent_entities
     for i in ents:
@@ -67,17 +70,46 @@ def schema():
     entities.generate()
     templates.generate()
 
+
+def check():
+    assist = get_assistant()
+    reg_total = len(assist.api.agent_intents)
+    map_total = len(assist._intent_action_funcs)
+    reg_names = [i.name for i in assist.api.agent_intents]
+    map_names = [i for i in assist._intent_action_funcs.keys()]
+    extra_reg = set(reg_names) - set(map_names)
+    extra_map = set(map_names) - set(reg_names)
+
+    if extra_reg != set():
+        print('\nThe following Intents are registered but not mapped to an action function:')
+        print(extra_reg)
+        print()
+
+    if extra_map != set():
+        print('\nThe Following Intents are mapped to an action fucntion, but not registered: ')
+        print(extra_map)
+        print()
+
+    print('Registered Entities:')
+    print([i.name for i in assist.api.agent_entities])
+
+
+
 def query():
     assist = get_assistant()
     p = Process(target=assist.app.run)
     p.start()
 
-    api = ApiAi()
     while True:
         q = input('Enter query...\n')
         resp = api.post_query(q).json()
-        print('Matched: {}'.format(resp['result']['metadata']['intentName']))
-        print('Params: {}'.format(resp['result']['parameters']))
-        print(resp['result']['fulfillment']['speech'])
+        try:
+            print('Matched: {}'.format(resp['result']['metadata']['intentName']))
+            print('Params: {}'.format(resp['result']['parameters']))
+            print(resp['result']['fulfillment']['speech'])
+
+        except KeyError:
+            logger.error('Error:')
+            logger.error(resp['status'])
 
 
