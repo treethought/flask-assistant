@@ -76,8 +76,8 @@ def query():
     while True:
         q = input('Enter query...\n')
         resp = api.post_query(q).json()
-        logger.info('Matched: {}'.format(resp['result']['metadata']['intentName']))
-        logger.info('Params: {}'.format(resp['result']['parameters']))
-        logger.info(resp['result']['fulfillment']['speech'])
+        print('Matched: {}'.format(resp['result']['metadata']['intentName']))
+        print('Params: {}'.format(resp['result']['parameters']))
+        print(resp['result']['fulfillment']['speech'])
 
 
