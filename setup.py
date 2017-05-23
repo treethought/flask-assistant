@@ -31,7 +31,7 @@ setup(
     entry_points={
         'console_scripts': ['schema=api_ai.cli:schema',
                             'query=api_ai.cli:query',
-                            'gen_templates=api_ai.cli:gen_templates',
+                            'templates=api_ai.cli:gen_templates',
                             'entities=api_ai.cli:entities',
                             'intents=api_ai.cli:intents',
                             'check=api_ai.cli:check']

@@ -5,7 +5,7 @@ import logging
 from flask_assistant.core import Assistant
 from .schema_handlers import IntentGenerator, EntityGenerator, TemplateCreator
 from .api import ApiAi
-from api_ai import logger
+from . import logger
 from multiprocessing import Process
 
 logger.setLevel(logging.INFO)
@@ -69,9 +69,10 @@ def schema():
     entities = EntityGenerator(assist)
     templates = TemplateCreator(assist)
 
+    templates.generate()
     intents.generate()
     entities.generate()
-    templates.generate()
+    
 
 
 def check():

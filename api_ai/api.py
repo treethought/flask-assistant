@@ -2,8 +2,8 @@ import os
 import requests
 import json
 
-from api_ai import logger
-from api_ai.models import Intent, Entity
+from . import logger
+from .models import Intent, Entity
 
 
 class ApiAi(object):
