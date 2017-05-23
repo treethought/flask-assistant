@@ -43,8 +43,11 @@ class SchemaHandler(object):
         with open(self.json_file, 'r') as f:
             try:
                 return json.load(f)
-            except json.decoder.JSONDecodeError:
+            except ValueError as e: # python2
                 return []
+            except json.decoder.JSONDecodeError: # python3
+                return []
+            
 
     @property
     def registered(self):
