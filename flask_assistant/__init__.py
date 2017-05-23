@@ -8,7 +8,9 @@ if logger.level == logging.NOTSET:
 
 from flask_assistant.core import (
     Assistant,
-    context_manager
+    context_manager,
+    intent,
+    request
 )
 
 from flask_assistant.response import ask, tell, event

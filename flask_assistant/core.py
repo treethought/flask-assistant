@@ -11,6 +11,7 @@ from flask_assistant.manager import ContextManager
 from api_ai.api import ApiAi
 
 request = LocalProxy(lambda: current_app.assist.request)
+intent = LocalProxy(lambda: current_app.assist.intent)
 context_in = LocalProxy(lambda: current_app.assist.context_in)
 context_manager = LocalProxy(lambda: current_app.assist.context_manager)
 
@@ -125,20 +126,20 @@ class Assistant(object):
             return wrapper
         return decorator
 
-    def action(self, intent, mapping={}, convert={}, default={}, with_context=[], *args, **kw):
-        """Decorates an intent's Action view function.
+    def action(self, intent_name, mapping={}, convert={}, default={}, with_context=[], *args, **kw):
+        """Decorates an intent_name's Action view function.
 
             The wrapped function is called when a request with the
             given intent_name is recieved along with all required parameters.
         """
         def decorator(f):
-            action_funcs = self._intent_action_funcs.get(intent, [])
+            action_funcs = self._intent_action_funcs.get(intent_name, [])
             action_funcs.append(f)
-            self._intent_action_funcs[intent] = action_funcs
+            self._intent_action_funcs[intent_name] = action_funcs
 
-            self._intent_mappings[intent] = mapping
-            self._intent_converts[intent] = convert
-            self._intent_defaults[intent] = default
+            self._intent_mappings[intent_name] = mapping
+            self._intent_converts[intent_name] = convert
+            self._intent_defaults[intent_name] = default
 
             @wraps(f)
             def wrapper(*args, **kw):
@@ -146,7 +147,7 @@ class Assistant(object):
             return f
         return decorator
 
-    def prompt_for(self, next_param, intent):
+    def prompt_for(self, next_param, intent_name):
         """Decorates a function to prompt for an action's required parameter.
 
         The wrapped function is called if next_param was not recieved with the given intent's
@@ -157,12 +158,12 @@ class Assistant(object):
             intent_name {str} -- name of the intent the dependent action belongs to
         """
         def decorator(f):
-            prompts = self._intent_prompts.get(intent)
+            prompts = self._intent_prompts.get(intent_name)
             if prompts:
                 prompts[next_param] = f
             else:
-                self._intent_prompts[intent] = {}
-                self._intent_prompts[intent][next_param] = f
+                self._intent_prompts[intent_name] = {}
+                self._intent_prompts[intent_name][next_param] = f
 
             @wraps(f)
             def wrapper(*args, **kw):
