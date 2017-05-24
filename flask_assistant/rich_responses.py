@@ -1,5 +1,10 @@
 from flask_assistant.response import _Response
 
+# https://developers.google.com/actions/assistant/responses
+
+# TODO include multiple types within one response
+# TODO and prbly refactor to add different cards/types onto a signle action response object
+# TODO possibly use config to determine which integrations are used for resposne rendering
 
 class _ActionResponse(_Response):
     """docstring for _ActionResponse"""
@@ -9,7 +14,8 @@ class _ActionResponse(_Response):
         self._response['messages'] = [{
             "type": "simple_response",
             "platform": "google",
-            "textToSpeech": speech
+            "textToSpeech": speech,
+            # "displayText": speech
         }]
 
     def with_speech(self, speech):
@@ -24,14 +30,15 @@ class _ActionResponse(_Response):
 class simple(_ActionResponse):
     """docstring for simple"""
 
-    def __init__(self, speech):
+    def __init__(self, speech, display_text=None):
         super(simple, self).__init__(speech)
 
         self._response['messages'] = [
             {
                 "type": "simple_response",
                 "platform": "google",
-                "textToSpeech": speech
+                "textToSpeech": speech,
+                "displayText": display_text
             }
         ]
 
@@ -77,3 +84,39 @@ class list_selector(_ActionResponse):
             'image': {'url': img_url}
         }
         self._items.append(item)
+
+
+class carousel(list_selector):
+    """docstring for carousel"""
+
+    def __init__(self, speech, title, items=[]):
+        super(carousel, self).__init__(speech)
+        self._items = items
+        self._response['messages'].append(
+            {
+                "type": "carousel_card",
+                "platform": "google",
+                "title": title,
+                "items": self._items
+            }
+        )
+
+
+class suggest(_ActionResponse):
+    """docstring for suggest"""
+
+    def __init__(self, speech, suggestions):
+        super(suggest, self).__init__(speech)
+
+        self._suggestions = []
+        for s in suggestions:
+            self._suggestions.append({'title': s})
+
+        self._response['messages'].append(
+            {
+                "type": "suggestion_chips",
+                "platform": "google",
+                "suggestions": self._suggestions
+            }
+        )
+

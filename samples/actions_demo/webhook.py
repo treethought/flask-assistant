@@ -1,6 +1,6 @@
 import logging
 from flask import Flask
-from flask_assistant import Assistant, ask, card, list_selector, simple, context_manager as manager
+from flask_assistant import Assistant, ask, card, carousel, list_selector, simple, suggest, context_manager as manager
 
 
 app = Flask(__name__)
@@ -36,15 +36,24 @@ def show_card():
     return card(speech, text, title, img_url)
 
 
-
-
-
 @assist.action('ShowList')
 def action_func():
     mylist = list_selector(speech='Here is a list', title='My Sample List')
-    mylist.add_item('Option A', 'Key1')
+    mylist.add_item('Option A', 'Key1', img_url="http://flask-assistant.readthedocs.io/en/latest/_static/logo-xs.png")
     mylist.add_item('Option B', 'Key2')
     return mylist
+
+@assist.action('ShowCarousel')
+def action_func():
+    mycarousel = carousel(speech='Here is a carousel', title='A sample carousel')
+    mycarousel.add_item('Option A', 'Key1', img_url="http://flask-assistant.readthedocs.io/en/latest/_static/logo-xs.png")
+    mycarousel.add_item('Option B', 'Key2')
+    return mycarousel
+
+@assist.action('ShowSuggestion')
+def action_func():
+    speech = 'Try these sugeestions'
+    return suggest(speech, ['a', 'b', 'c'])
 
 
 if __name__ == '__main__':
