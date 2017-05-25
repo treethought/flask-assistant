@@ -85,6 +85,17 @@ class _Response(object):
         )
         return self
 
+    def link_out(self, name, url):
+        """Presents a chip similar to suggestion, but instead links to a url"""
+        self._messages.append(
+        {
+          "type": "link_out_chip",
+          "platform": "google",
+          "destinationName": name,
+          "url": url
+        }
+        )
+
     def card(self, text, title=None, img_url=None, img_alt=None, subtitle=None, link=None):
         self._card_idx = len(self._messages)
         self._messages.append(
