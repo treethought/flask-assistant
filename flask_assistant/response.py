@@ -179,6 +179,13 @@ class _CardWithItems(_Response):
         self._items.append(item)
         return self
 
+    def include_items(self, item_objects):
+        if not isinstance(item_objects, list):
+            item_objects = list(item_objects)
+        self._items.extend(item_objects)
+
+        return self
+
 
 class _ListSelector(_CardWithItems):
     """Subclass of basic _Response to provide an instance capable of adding items."""
