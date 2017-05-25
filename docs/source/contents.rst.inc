@@ -6,6 +6,7 @@ Table Of Contents
 
 
    quick_start
+   responses
    parameters
    contexts
    generate_schema

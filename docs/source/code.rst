@@ -10,7 +10,7 @@ Central interface for the assistant app
 
 
 
-ContextManager -- explicit members
+ContextManager
 ===================================
 
 Used for storing and accessing contexts and their parameters
@@ -25,3 +25,19 @@ Responses
     :members:
 
 .. autoclass:: flask_assistant.response.tell
+    :members:
+
+.. autoclass:: flask_assistant.response.event
+    :members:
+
+.. autoclass:: flask_assistant.response._Response
+    :members:
+
+
+
+
+
+
+Rich Messages
+-------------
+
