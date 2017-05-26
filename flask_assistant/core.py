@@ -67,6 +67,16 @@ class Assistant(object):
 
         self.api = ApiAi()
 
+        if route is None and app is not None:
+
+            logger.warn("""WARNING:
+                No route was provided for the Assistant object, but a flask `app` object given
+                The Assistant will be mapped to the app's '/' endpoint.
+                If this is a problem please initialize the Assitant with the 'route' parameter
+                """)
+
+            self._route = '/'
+
         if app is not None:
             self.init_app(app)
         elif blueprint is not None:
