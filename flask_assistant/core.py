@@ -55,6 +55,7 @@ class Assistant(object):
     def __init__(self, app=None, blueprint=None, route=None):
 
         self.app = app
+        self.blueprint = blueprint
         self._route = route
         self._intent_action_funcs = {}
         self._intent_mappings = {}

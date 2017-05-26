@@ -300,7 +300,13 @@ class TemplateCreator(SchemaHandler):
             self.create_entity_skeleton()
 
     def get_or_create_dir(self, dir_name):
-        d = os.path.join(self.assist.app.root_path, dir_name)
+        try:
+            root = self.assist.app.root_path
+        except AttributeError: # for blueprints
+            root = self.assist.blueprint.root_path
+
+        d = os.path.join(root, dir_name)
+
         if not os.path.isdir(d):
             os.mkdir(d)
         return d
