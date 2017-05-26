@@ -1,6 +1,6 @@
 import logging
 from flask import Flask
-from flask_assistant import Assistant, ask, card, carousel, list_selector, simple, suggest, context_manager as manager
+from flask_assistant import Assistant, ask, tell, build_item
 
 
 app = Flask(__name__)
@@ -8,19 +8,22 @@ assist = Assistant(app)
 logging.getLogger('flask_assistant').setLevel(logging.DEBUG)
 
 
+app.config['INTEGRATIONS'] = ['ACTIONS_ON_GOOGLE']
+
+
 @assist.action('Default Welcome Intent')
 def welcome():
     speech = 'Welcome to Flask-Assistant on the Google Assistant! Wanna see what I can do?'
-    return simple(speech)
-
-
+    return ask(speech).reprompt('Do you want to see some examples?')
 
 
 @assist.action('Default Welcome Intent - yes')
 def action_func():
     speech = """This is just a simple text to speech message, not too impressive.
                 Ask to see a card!"""
-    return simple(speech)
+
+    return ask(speech).suggest('Show card', 'Show List')
+
 
 @assist.action('ShowCard')
 def show_card():
@@ -33,22 +36,53 @@ def show_card():
 
     speech = 'Now ask to see a list...'
 
-    return card(speech, text, title, img_url)
+    resp = ask(speech)
+    resp.card(text, title, img_url)
+    resp.suggest('Show List')
+
+    return resp
 
 
 @assist.action('ShowList')
 def action_func():
-    mylist = list_selector(speech='Here is a list', title='My Sample List')
-    mylist.add_item('Option A', 'Key1', img_url="http://flask-assistant.readthedocs.io/en/latest/_static/logo-xs.png")
-    mylist.add_item('Option B', 'Key2')
+
+    #Build items independent of list
+    items = []
+    for i in range(4,10):
+        title = 'Item {}'.format(i)
+        key = str(i)
+        items.append(build_item(title, key))
+
+    resp = ask("Here's an example of a list selector")
+    mylist = resp.build_list('Cool Projects')  # passes the speech paramter to new class
+
+
+    mylist.add_item('Flask-Assistant', key='flask_assistant', img_url="http://flask-assistant.readthedocs.io/en/latest/_static/logo-xs.png")
+    mylist.add_item('Flask-Ask', key='flask_ask')
+    mylist.add_item('Alphabets', key='alphabets')
+
+    # include built items in list
+    mylist.include_items(items).link_out('GitHub Repo', 'https://github.com/treethought/flask-assistant')
+
     return mylist
+
+
+@assist.action('FlaskAssistantCarousel')
+def action_func():
+    resp = tell('Heres some info on Flask-Assistant').build_carousel()
+    resp.add_item('Title', key='title', description='Here is a Description')
+    resp.add_item('Title2', key='title2', description='Here is another descriotion')
+    return resp
 
 @assist.action('ShowCarousel')
 def action_func():
-    mycarousel = carousel(speech='Here is a carousel', title='A sample carousel')
-    mycarousel.add_item('Option A', 'Key1', img_url="http://flask-assistant.readthedocs.io/en/latest/_static/logo-xs.png")
+    mycarousel = carousel(speech='Here is a carousel',
+                          title='A sample carousel')
+    mycarousel.add_item(
+        'Option A', 'Key1', img_url="http://flask-assistant.readthedocs.io/en/latest/_static/logo-xs.png")
     mycarousel.add_item('Option B', 'Key2')
     return mycarousel
+
 
 @assist.action('ShowSuggestion')
 def action_func():
