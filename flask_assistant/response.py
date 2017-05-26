@@ -1,6 +1,5 @@
-from flask_assistant import logger
-from flask import json, Response, make_response, current_app
-from xml.etree import ElementTree
+from flask import json, make_response, current_app
+
 
 
 class _Response(object):
@@ -88,12 +87,12 @@ class _Response(object):
     def link_out(self, name, url):
         """Presents a chip similar to suggestion, but instead links to a url"""
         self._messages.append(
-        {
-          "type": "link_out_chip",
-          "platform": "google",
-          "destinationName": name,
-          "url": url
-        }
+            {
+                "type": "link_out_chip",
+                "platform": "google",
+                "destinationName": name,
+                "url": url
+            }
         )
 
     def card(self, text, title=None, img_url=None, img_alt=None, subtitle=None, link=None):
@@ -144,16 +143,16 @@ class _Response(object):
         return carousel
 
 
-def build_item(title, key, synonyms=None, description=None, img_url=None):
+def build_item(title, key=None, synonyms=None, description=None, img_url=None):
     """Builds an item that may be added to List or Carousel"""
     item = {
         'option_info': {
-            'key': key,
+            'key': key or title,
             'synonyms': synonyms
         },
         'title': title,
         'description': description,
-        'image': {'url': img_url}
+        'image': {'url': img_url or ''}
     }
     return item
 
@@ -167,7 +166,7 @@ class _CardWithItems(_Response):
     def __init__(self, speech, items=None):
         super(_CardWithItems, self).__init__(speech)
         self._items = items or list()
-        self._add_message() # possibly call this later?
+        self._add_message()  # possibly call this later?
 
     def _add_message(self):
         raise NotImplementedError
@@ -206,7 +205,6 @@ class _ListSelector(_CardWithItems):
 
         super(_ListSelector, self).__init__(speech, items)
 
-
     def _add_message(self):
         self._response['messages'].append(
             {
@@ -217,12 +215,12 @@ class _ListSelector(_CardWithItems):
             }
         )
 
+
 class _CarouselCard(_CardWithItems):
     """Subclass of _CardWithItems used to build Carousel cards."""
 
     def __init__(self, speech, items=None):
         super(_CarouselCard, self).__init__(speech, items)
-
 
     def _add_message(self):
 
@@ -243,6 +241,11 @@ class tell(_Response):
 
 class ask(_Response):
     def __init__(self, speech):
+        """Returns a response to the user and keeps the current session alive. Expects a response from the user.
+        
+        Arguments:
+            speech {str} --  Text to be pronounced to the user / shown on the screen
+        """
         super(ask, self).__init__(speech)
         self._response['data']['google']['expect_user_response'] = True
 
