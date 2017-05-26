@@ -29,7 +29,7 @@ def find_assistant():  # Taken from Flask-ask courtesy of @voutilad
 
 
 request = LocalProxy(lambda: find_assistant().request)
-intent = LocalProxy(lambda: find_assistant().assist.intent)
+intent = LocalProxy(lambda: find_assistant().intent)
 context_in = LocalProxy(lambda: find_assistant().context_in)
 context_manager = LocalProxy(lambda: find_assistant().context_manager)
 
@@ -91,7 +91,7 @@ class Assistant(object):
         app.add_url_rule(self._route, view_func=self._flask_assitant_view_func, methods=['POST'])
 
     # Taken from Flask-ask courtesy of @voutilad
-    def init_blueprint(self, blueprint, path='templates.yaml'): 
+    def init_blueprint(self, blueprint, path='templates.yaml'):
         """Initialize a Flask Blueprint, similar to init_app, but without the access
         to the application config.
 
@@ -359,9 +359,9 @@ class Assistant(object):
             # param name cant have '.',
             # so when registered, the sys. is stripped,
             # and must be stripped when looking up in request
-            mapped_param_name = entity_mapping.replace('sys.', '') 
+            mapped_param_name = entity_mapping.replace('sys.', '')
             value = params.get(mapped_param_name)  # params declared in GUI present in request
-            
+
             if not value:  # params not declared, so must look in contexts
                 value = self._map_arg_from_context(arg_name)
             arg_values.append(value)
