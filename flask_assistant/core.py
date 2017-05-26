@@ -10,10 +10,28 @@ from flask_assistant.response import _Response
 from flask_assistant.manager import ContextManager
 from api_ai.api import ApiAi
 
-request = LocalProxy(lambda: current_app.assist.request)
-intent = LocalProxy(lambda: current_app.assist.intent)
-context_in = LocalProxy(lambda: current_app.assist.context_in)
-context_manager = LocalProxy(lambda: current_app.assist.context_manager)
+
+def find_assistant():  # Taken from Flask-ask courtesy of @voutilad
+    """
+    Find our instance of Assistant, navigating Local's and possible blueprints.
+
+    Note: This only supports returning a reference to the first instance
+    of Assistant found.
+    """
+    if hasattr(current_app, 'assist'):
+        return getattr(current_app, 'assist')
+    else:
+        if hasattr(current_app, 'blueprints'):
+            blueprints = getattr(current_app, 'blueprints')
+            for blueprint_name in blueprints:
+                if hasattr(blueprints[blueprint_name], 'assist'):
+                    return getattr(blueprints[blueprint_name], 'assist')
+
+
+request = LocalProxy(lambda: find_assistant().request)
+intent = LocalProxy(lambda: find_assistant().assist.intent)
+context_in = LocalProxy(lambda: find_assistant().context_in)
+context_manager = LocalProxy(lambda: find_assistant().context_manager)
 
 
 class Assistant(object):
@@ -34,7 +52,7 @@ class Assistant(object):
 
     """
 
-    def __init__(self, app=None, route='/'):
+    def __init__(self, app=None, blueprint=None, route=None):
 
         self.app = app
         self._route = route
@@ -51,6 +69,8 @@ class Assistant(object):
 
         if app is not None:
             self.init_app(app)
+        elif blueprint is not None:
+            self.init_blueprint(blueprint)
 
     def init_app(self, app):
 
@@ -59,6 +79,29 @@ class Assistant(object):
 
         app.assist = self
         app.add_url_rule(self._route, view_func=self._flask_assitant_view_func, methods=['POST'])
+
+    # Taken from Flask-ask courtesy of @voutilad
+    def init_blueprint(self, blueprint, path='templates.yaml'): 
+        """Initialize a Flask Blueprint, similar to init_app, but without the access
+        to the application config.
+
+        Keyword Arguments:
+            blueprint {Flask Blueprint} -- Flask Blueprint instance to initialize (Default: {None})
+            path {str} -- path to templates yaml file, relative to Blueprint (Default: {'templates.yaml'})
+        """
+        if self._route is not None:
+            raise TypeError("route cannot be set when using blueprints!")
+
+        # we need to tuck our reference to this Ask instance into the blueprint object and find it later!
+        blueprint.assist = self
+
+        # BlueprintSetupState.add_url_rule gets called underneath the covers and
+        # concats the rule string, so we should set to an empty string to allow
+        # Blueprint('blueprint_api', __name__, url_prefix="/assist") to result in
+        # exposing the rule at "/assist" and not "/assist/".
+        blueprint.add_url_rule("", view_func=self._flask_assitant_view_func, methods=['POST'])
+        # blueprint.jinja_loader = ChoiceLoader([YamlLoader(blueprint, path)])
+
 
     @property
     def request(self):
@@ -185,8 +228,12 @@ class Assistant(object):
     def _dump_view_info(self, view_func=lambda: None):
         _infodump('Result: Matched {} intent to {} func'.format(self.intent, view_func.__name__))
 
-    def _flask_assitant_view_func(self, *args, **kwargs):
-        self.request = self._api_request(verify=False)
+    def _flask_assitant_view_func(self, nlp_result=None, *args, **kwargs):
+        if nlp_result: # pass API query result directly
+            self.request = nlp_result
+        else: # called as webhook
+            self.request = self._api_request(verify=False)
+
         _dbgdump(self.request['result'])
 
         self.intent = self.request['result']['metadata']['intentName']
