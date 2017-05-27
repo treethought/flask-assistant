@@ -8,7 +8,9 @@ assist = Assistant(app)
 logging.getLogger('flask_assistant').setLevel(logging.DEBUG)
 
 
-app.config['INTEGRATIONS'] = ['ACTIONS_ON_GOOGLE']
+app.config['ASSIST_ACTIONS_ON_GOOGLE'] = True
+
+LOGO_URL = "http://flask-assistant.readthedocs.io/en/latest/_static/logo-xs.png"
 
 
 @assist.action('Default Welcome Intent')
@@ -28,16 +30,15 @@ def action_func():
 @assist.action('ShowCard')
 def show_card():
     title = 'A Simple Card'
-    img_url = "http://flask-assistant.readthedocs.io/en/latest/_static/logo-xs.png"
 
     text = """Flask-Assistant allows you to focus on building the core business logic
-                of conversational user interfaces while utilizing API.AI’s
-                Natural Language Processing to interact with users."""
+            of conversational user interfaces while utilizing API.AI’s
+            Natural Language Processing to interact with users."""
 
     speech = 'Now ask to see a list...'
 
     resp = ask(speech)
-    resp.card(text, title, img_url)
+    resp.card(text, title, LOGO_URL)
     resp.suggest('Show List')
 
     return resp
@@ -46,48 +47,46 @@ def show_card():
 @assist.action('ShowList')
 def action_func():
 
-    #Build items independent of list
+    # Build items independent of list
     items = []
-    for i in range(4,10):
+    for i in range(2, 5):
         title = 'Item {}'.format(i)
         key = str(i)
         items.append(build_item(title, key))
 
     resp = ask("Here's an example of a list selector")
-    mylist = resp.build_list('Cool Projects')  # passes the speech paramter to new class
+    # passes the speech paramter to new class
+    mylist = resp.build_list('Cool Options')
 
-
-    mylist.add_item('Flask-Assistant', key='flask_assistant', img_url="http://flask-assistant.readthedocs.io/en/latest/_static/logo-xs.png")
-    mylist.add_item('Flask-Ask', key='flask_ask')
-    mylist.add_item('Alphabets', key='alphabets')
+    mylist.add_item('Flask-Assistant',
+                    key='flask_assistant',
+                    img_url=LOGO_URL,
+                    description='Select this item to see a carousel',
+                    synonyms=['flask assistant', 'number one', 'flask', 'assistant'])
 
     # include built items in list
-    mylist.include_items(items).link_out('GitHub Repo', 'https://github.com/treethought/flask-assistant')
+    mylist.include_items(items).link_out(
+        'GitHub Repo', 'https://github.com/treethought/flask-assistant')
+    mylist.link_out('Read the Docs',
+                    "https://flask-assistant.readthedocs.io/en/latest/")
 
     return mylist
 
 
 @assist.action('FlaskAssistantCarousel')
+@assist.action('ShowCarousel')
 def action_func():
     resp = tell('Heres some info on Flask-Assistant').build_carousel()
     resp.add_item('Title', key='title', description='Here is a Description')
-    resp.add_item('Title2', key='title2', description='Here is another descriotion')
+    resp.add_item('Title2', key='title2',
+                  description='Here is another descriotion')
     return resp
-
-@assist.action('ShowCarousel')
-def action_func():
-    mycarousel = carousel(speech='Here is a carousel',
-                          title='A sample carousel')
-    mycarousel.add_item(
-        'Option A', 'Key1', img_url="http://flask-assistant.readthedocs.io/en/latest/_static/logo-xs.png")
-    mycarousel.add_item('Option B', 'Key2')
-    return mycarousel
 
 
 @assist.action('ShowSuggestion')
 def action_func():
     speech = 'Try these sugeestions'
-    return suggest(speech, ['a', 'b', 'c'])
+    return tell(speech).suggest('a', 'b', 'c')
 
 
 if __name__ == '__main__':

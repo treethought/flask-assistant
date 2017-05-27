@@ -31,7 +31,7 @@ class _Response(object):
 
         }
 
-        if 'ACTIONS_ON_GOOGLE' in self._integrations:
+        if current_app.config.get('ASSIST_ACTIONS_ON_GOOGLE'):
             self._integrate_with_actions(speech)
 
     def _integrate_with_actions(self, speech):
@@ -95,6 +95,7 @@ class _Response(object):
             }
         )
 
+
     def card(self, text, title=None, img_url=None, img_alt=None, subtitle=None, link=None):
         self._card_idx = len(self._messages)
         self._messages.append(
@@ -155,6 +156,9 @@ def build_item(title, key=None, synonyms=None, description=None, img_url=None):
         'image': {'url': img_url or ''}
     }
     return item
+
+
+    
 
 
 class _CardWithItems(_Response):
