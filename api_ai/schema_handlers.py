@@ -47,7 +47,7 @@ class SchemaHandler(object):
                 return []
             except json.decoder.JSONDecodeError: # python3
                 return []
-            
+
 
     @property
     def registered(self):
@@ -78,8 +78,8 @@ class SchemaHandler(object):
     @property
     def entity_template(self):
         return self.template_file('entities')
-    
-    
+
+
     def load_yaml(self, template_file):
         with open(template_file) as f:
             try:
@@ -134,7 +134,7 @@ class IntentGenerator(SchemaHandler):
 
     def parse_params(self, intent_name):
         """Parses params from an intent's action decorator and view function.
-        
+
         Returns a list of parameter field dicts to be included in the intent object's response field.
         """
 
@@ -174,7 +174,7 @@ class IntentGenerator(SchemaHandler):
     def build_user_says(self, intent):
         raw = self.user_says_yaml()
         intent_data = raw.get(intent.name)
-        
+
         if intent_data:
             phrases = intent_data.get('UserSays', [])
             annotations = intent_data.get('Annotations', [])
@@ -206,6 +206,9 @@ class IntentGenerator(SchemaHandler):
         print()
         if response['status']['code'] == 200:
             intent.id = response['id']
+        elif response['status']['code'] == 409: # intent already exists
+            intent.id = next(i.id for i in self.api.agent_intents if i.name == intent.name)
+            self.update(intent)
         return intent
 
     def update(self, intent):
@@ -256,6 +259,9 @@ class EntityGenerator(SchemaHandler):
         print()
         if response['status']['code'] == 200:
             entity.id = response['id']
+        if response['status']['code'] == 409: # entity already exists
+            entity.id = next(i.id for i in self.api.agent_entities if i.name == entity.name)
+            self.update(entity)
         return entity
 
     def update(self, entity):
@@ -287,7 +293,7 @@ class EntityGenerator(SchemaHandler):
 
 
 class TemplateCreator(SchemaHandler):
-    
+
     def __init__(self, assist):
         super(TemplateCreator, self).__init__(assist)
 
@@ -318,7 +324,7 @@ class TemplateCreator(SchemaHandler):
     @property
     def user_says_exists(self):
         return self._user_says_exists
-    
+
 
     def parse_annotations_from_action_mappings(self, intent_name):
         annotations = []
@@ -394,4 +400,4 @@ class TemplateCreator(SchemaHandler):
             f.write("#  - coffee: ['joe', 'caffeine', 'espresso', 'late'] \n")
             f.write("#  - soda: ['pop', 'coke']\n\n\n\n")
             yaml.dump(skeleton, f, default_flow_style=False, Dumper=yaml.RoundTripDumper)
-        
+

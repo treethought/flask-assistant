@@ -100,7 +100,7 @@ class ApiAi(object):
         """Returns a list of intent json objects"""
         endpoint = self._entity_uri()
         entities = self._get(endpoint)
-        return [Entity(i['name']) for i in entities]
+        return [Entity(entity_json=i) for i in entities]
 
     def get_entity(self, entity_id):
         endpoint = self._entity_uri(entity_id=entity_id)
@@ -122,10 +122,10 @@ class ApiAi(object):
             'lang': 'en',
             'contexts': [],
         }
-        
+
         data = json.dumps(data)
-        
+
         response = requests.post(self._query_uri, headers=self._client_header, data=data)
         response.raise_for_status
         return response
-      
+
