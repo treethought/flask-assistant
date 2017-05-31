@@ -115,10 +115,10 @@ class ApiAi(object):
         return self._put(endpoint, data=entity_json)
 
     ## Querying ##
-    def post_query(self, query):
+    def post_query(self, query, sessionID=None):
         data = {
             'query': query,
-            'sessionId': '123',
+            'sessionId': sessionID or '123',
             'lang': 'en',
             'contexts': [],
         }
