@@ -11,6 +11,8 @@ logging.getLogger('flask_assistant').setLevel(logging.DEBUG)
 app.config['ASSIST_ACTIONS_ON_GOOGLE'] = True
 
 LOGO_URL = "http://flask-assistant.readthedocs.io/en/latest/_static/logo-xs.png"
+REPO_URL = 'https://github.com/treethought/flask-assistant'
+DOCS_URL = "https://flask-assistant.readthedocs.io/en/latest/"
 
 
 @assist.action('Default Welcome Intent')
@@ -51,11 +53,9 @@ def action_func():
     items = []
     for i in range(2, 5):
         title = 'Item {}'.format(i)
-        key = str(i)
-        items.append(build_item(title, key))
+        items.append(build_item(title))
 
     resp = ask("Here's an example of a list selector")
-    # passes the speech paramter to new class
     mylist = resp.build_list('Cool Options')
 
     mylist.add_item('Flask-Assistant',
@@ -65,10 +65,11 @@ def action_func():
                     synonyms=['flask assistant', 'number one', 'flask', 'assistant'])
 
     # include built items in list
-    mylist.include_items(items).link_out(
-        'GitHub Repo', 'https://github.com/treethought/flask-assistant')
-    mylist.link_out('Read the Docs',
-                    "https://flask-assistant.readthedocs.io/en/latest/")
+    mylist.include_items(items)
+
+    # Provide links to outside sources
+    mylist.link_out('GitHub Repo', REPO_URL)
+    mylist.link_out('Read the Docs', DOCS_URL)
 
     return mylist
 
@@ -85,7 +86,7 @@ def action_func():
 
 @assist.action('ShowSuggestion')
 def action_func():
-    speech = 'Try these sugeestions'
+    speech = 'Try these suggestions'
     return tell(speech).suggest('a', 'b', 'c')
 
 
