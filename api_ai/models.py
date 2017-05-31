@@ -3,10 +3,19 @@ import json
 class Entity():
     """docstring for Entity"""
 
-    def __init__(self, name):
-        self.name = name
-        self.entries = []
-        self.isEnum = None
+    def __init__(self, name=None, entity_json=None):
+
+        if name and not entity_json:
+            self.name = name
+            self.entries = []
+            self.isEnum = None
+            self.id = None
+
+        elif entity_json:
+            self.update(entity_json)
+
+        else:
+            raise TypeError('Must provide a "name" argument if no json given')
 
     def add_entry(self, value, synonyms=[]):
         if self.isEnum:
@@ -25,7 +34,11 @@ class Entity():
     def __repr__(self):
         return '@' + self.name
 
-
+    def update(self, entity_json):
+        try:
+            self.__dict__.update(entity_json)
+        except TypeError:
+            self.__dict__.update(json.loads(entity_json))
 
 
 class Intent():
@@ -151,7 +164,7 @@ class UserDefinedExample(ExampleBase):
 
     def annotate_params(self, word):
         """Annotates a given word for the UserSays data field of an Intent object.
-        
+
         Annotations are created using the entity map within the user_says.yaml template.
         """
         annotation = {}
