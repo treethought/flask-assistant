@@ -43,8 +43,10 @@ class ContextManager():
         self._cache[context.name] = context
         return context
 
-    def get(self, context_name):
-        return self._cache.get(context_name, Context(context_name))
+    def get(self, context_name, default=None):
+        if default is None:
+            default = Context(context_name)
+        return self._cache.get(context_name, default)
 
     def set(self, context_name, param, val):
         context = self.get(context_name)

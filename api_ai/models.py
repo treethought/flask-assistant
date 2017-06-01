@@ -49,12 +49,12 @@ class Intent():
     the API.AI develoepr console via JSON requests.
     """
 
-    def __init__(self, name=None, priority=500000, fallback_intent=False, intent_json=None):
+    def __init__(self, name=None, priority=500000, fallback_intent=False, contexts=None, intent_json=None):
 
         if name and not intent_json:
             self.name = name
             self.auto = True
-            self.contexts = []
+            self.contexts = contexts or []
             self.templates = []
             self.userSays = []
             self.responses = []
