@@ -8,7 +8,7 @@ from setuptools import setup
 
 setup(
     name='Flask-Assistant',
-    version='0.2.7',
+    version='0.2.8',
     url='https://github.com/treethought/flask-assistant',
     license='Apache 2.0',
     author='Cam Sweeney',
