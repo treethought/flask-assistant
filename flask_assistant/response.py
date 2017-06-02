@@ -144,21 +144,19 @@ class _Response(object):
         return carousel
 
 
-def build_item(title, key=None, synonyms=None, description=None, img_url=None):
+def build_item(title, key=None, synonyms=None, description=None, img_url=None, alt_text=None):
     """Builds an item that may be added to List or Carousel"""
     item = {
-        'option_info': {
+        'optionInfo': {
             'key': key or title,
-            'synonyms': synonyms
+            'synonyms': synonyms or []
         },
         'title': title,
         'description': description,
-        'image': {'url': img_url or ''}
+        'image': {'url': img_url,
+                   'accessibilityText': alt_text or '{} img'.format(title) }
     }
     return item
-
-
-    
 
 
 class _CardWithItems(_Response):
