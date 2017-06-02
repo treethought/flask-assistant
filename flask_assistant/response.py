@@ -194,7 +194,7 @@ class _CardWithItems(_Response):
 
     def include_items(self, *item_objects):
         if not isinstance(item_objects, list):
-            item_objects = [*item_objects]
+            item_objects = list(item_objects)
         self._items.extend(item_objects)
 
         return self
