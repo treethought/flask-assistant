@@ -93,6 +93,7 @@ class _Response(object):
                 "url": url
             }
         )
+        return self
 
     def card(self, text, title=None, img_url=None, img_alt=None, subtitle=None, link=None):
         self._card_idx = len(self._messages)
@@ -153,7 +154,7 @@ def build_item(title, key=None, synonyms=None, description=None, img_url=None, a
         },
         'title': title,
         'description': description,
-        'image': {'url': img_url,
+        'image': {'url': img_url or '',
                   'accessibilityText': alt_text or '{} img'.format(title)}
     }
     return item
