@@ -1,0 +1,18 @@
+# Template file for entities
+
+#Format as below
+
+# entity_name:
+#  - entry1: list of synonyms 
+#  - entry2: list of synonyms 
+
+#For example:
+
+# drink:
+#  - water: ['aqua', 'h20'] 
+#  - coffee: ['joe', 'caffeine', 'espresso', 'late'] 
+#  - soda: ['pop', 'coke']
+
+
+
+{}

@@ -1,0 +1,37 @@
+# Template for defining UserSays examples
+
+# give-color-intent:
+
+#  UserSays:
+#    - My color is blue
+#    - red is my favorite color
+
+#  Annotations:
+#    - blue: sys.color     # maps param value -> entity
+#    - red: sys.color
+
+
+ShowCard:
+  UserSays:
+  - card
+  - show card
+
+ShowList:
+  UserSays:
+  - list
+  - show list
+
+FlaskAssistantCarousel:
+  UserSays:
+  - flask_assistant # key from list
+  - Flask-Assistant
+
+FlaskAskCard:
+  UserSays:
+  - flask_ask  # key from list
+  - Flask-Ask
+
+FlaskCard:
+  UserSays:
+  - flask # key from list
+  - Flask
