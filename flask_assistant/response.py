@@ -1,7 +1,6 @@
 from flask import json, make_response, current_app
 
 
-
 class _Response(object):
     """docstring for _Response"""
 
@@ -95,7 +94,6 @@ class _Response(object):
             }
         )
 
-
     def card(self, text, title=None, img_url=None, img_alt=None, subtitle=None, link=None):
         self._card_idx = len(self._messages)
         self._messages.append(
@@ -104,7 +102,9 @@ class _Response(object):
                 "platform": "google",
                 "title": title,
                 "formattedText": text,
-                "image": {'url': img_url, 'accessibilityText': img_alt},
+                "image": {'url': img_url or '',
+                          'accessibilityText': img_alt
+                          },
                 "buttons": []  # TODO link info here
             })
 
@@ -154,7 +154,7 @@ def build_item(title, key=None, synonyms=None, description=None, img_url=None, a
         'title': title,
         'description': description,
         'image': {'url': img_url,
-                   'accessibilityText': alt_text or '{} img'.format(title) }
+                  'accessibilityText': alt_text or '{} img'.format(title)}
     }
     return item
 
@@ -191,9 +191,9 @@ class _CardWithItems(_Response):
         self._items.append(item)
         return self
 
-    def include_items(self, item_objects):
+    def include_items(self, *item_objects):
         if not isinstance(item_objects, list):
-            item_objects = list(item_objects)
+            item_objects = [*item_objects]
         self._items.extend(item_objects)
 
         return self
@@ -244,7 +244,7 @@ class tell(_Response):
 class ask(_Response):
     def __init__(self, speech):
         """Returns a response to the user and keeps the current session alive. Expects a response from the user.
-        
+
         Arguments:
             speech {str} --  Text to be pronounced to the user / shown on the screen
         """
