@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import logging
 from flask import Flask
 from flask_assistant import Assistant, ask, tell, build_item
