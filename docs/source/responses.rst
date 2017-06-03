@@ -78,6 +78,12 @@ Rich Messages for Actions on Google
 
 By utlizing the following rich responses, an Assistant can easily integreate with Actions on Google and provide a greater experience on devices that support Google Assistant (Google Home and mobile phones).
 
+To enable Actions on Google Integration:
+
+.. code-block:: python
+
+    app.config['ASSIST_ACTIONS_ON_GOOGLE'] = True
+
 Displaying a Card
 -----------------
 
