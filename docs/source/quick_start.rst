@@ -102,7 +102,7 @@ In your new webhook.py file:
 .. code-block:: python
 
     from flask import Flask
-    from flask_assistant import Assistant, tell
+    from flask_assistant import Assistant, ask, tell
 
     app = Flask(__name__)
     assist = Assistant(app, '/')
@@ -113,7 +113,7 @@ In your new webhook.py file:
         speech = "Hey! Are you male or female?"
         return ask(speech)
 
-    if __name__ = '__main__':
+    if __name__ == '__main__':
         app.run(debug=True)
 
 Here, we have defined an action function to be called if the 'greeting' intent is matched.
