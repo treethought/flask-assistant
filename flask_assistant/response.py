@@ -273,3 +273,23 @@ class event(_Response):
             "name": event_name,
             "data": kwargs
         }
+
+class permission(_Response):
+    """Returns a permission request to the user.
+
+    Arguments:
+        permissions {list} -- list of permissions to request for eg. ['DEVICE_PRECISE_LOCATION']
+        context {str} -- Text explaining the reason/value for the requested permission
+    """
+
+    def __init__(self, permissions, context=None):
+        super(permission, self).__init__(speech=None)
+        self._messages[:] = []
+        self._response['data']['google']['systemIntent'] = {
+            'intent': 'actions.intent.PERMISSION',
+            'data': {
+                '@type': 'type.googleapis.com/google.actions.v2.PermissionValueSpec',
+                'optContext': context,
+                'permissions': permissions,
+            }
+        }

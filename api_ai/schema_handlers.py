@@ -121,7 +121,9 @@ class IntentGenerator(SchemaHandler):
     def build_intent(self, intent_name):
         """Builds an Intent object of the given name"""
         # TODO: contexts
-        new_intent = Intent(intent_name)
+        is_fallback = self.assist._intent_fallbacks[intent_name]
+        contexts = self.assist._required_contexts[intent_name]
+        new_intent = Intent(intent_name, fallback_intent=is_fallback, contexts=contexts)
         self.build_action(new_intent)
         self.build_user_says(new_intent)  # TODO
         return new_intent
