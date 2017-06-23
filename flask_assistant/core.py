@@ -61,6 +61,7 @@ class Assistant(object):
         self._intent_mappings = {}
         self._intent_converts = {}
         self._intent_defaults = {}
+        self._intent_fallbacks = {}
         self._intent_prompts = {}
         self._required_contexts = {}
         self._context_funcs = {}
@@ -160,7 +161,7 @@ class Assistant(object):
     def _register_context_to_func(self, intent_name, context=[]):
         required = self._required_contexts.get(intent_name)
         if required:
-            required.extend(context)
+            required.extend(list(set(context) - set(required)))
         else:
             self._required_contexts[intent_name] = []
             self._required_contexts[intent_name].extend(context)
@@ -180,7 +181,7 @@ class Assistant(object):
             return wrapper
         return decorator
 
-    def action(self, intent_name, mapping={}, convert={}, default={}, with_context=[], *args, **kw):
+    def action(self, intent_name, is_fallback=False, mapping={}, convert={}, default={}, with_context=[], *args, **kw):
         """Decorates an intent_name's Action view function.
 
             The wrapped function is called when a request with the
@@ -194,6 +195,8 @@ class Assistant(object):
             self._intent_mappings[intent_name] = mapping
             self._intent_converts[intent_name] = convert
             self._intent_defaults[intent_name] = default
+            self._intent_fallbacks[intent_name] = is_fallback
+            self._register_context_to_func(intent_name, with_context)
 
             @wraps(f)
             def wrapper(*args, **kw):
@@ -254,7 +257,7 @@ class Assistant(object):
         view_func = self._match_view_func()
         _dbgdump('Matched view func - {}'.format(self.intent, view_func))
         result = self._map_intent_to_view_func(view_func)()
-        print (result)
+
         if result is not None:
             if isinstance(result, _Response):
                 return result.render_response()
@@ -270,7 +273,6 @@ class Assistant(object):
     def _match_view_func(self):
         view_func = None
 
-       # if self.context_in:
         if self.hasLiveContext():
             view_func = self._choose_context_view()
 
