@@ -95,8 +95,16 @@ class _Response(object):
         )
         return self
 
-    def card(self, text, title=None, img_url=None, img_alt=None, subtitle=None, link=None):
+    def card(self, text, title=None, img_url=None, img_alt=None, subtitle=None, link=None, linkTitle=None):
         self._card_idx = len(self._messages)
+
+        links = [] #seems like only one link is supported at a time, despite this being a list
+        if link and linkTitle:
+            link_dict = {}
+            link_dict['title'] = linkTitle
+            url_action = {"url": link}
+            link_dict['openUrlAction'] = url_action
+            links.append(link_dict)
         self._messages.append(
             {
                 "type": "basic_card",
@@ -106,7 +114,7 @@ class _Response(object):
                 "image": {'url': img_url or '',
                           'accessibilityText': img_alt
                           },
-                "buttons": []  # TODO link info here
+                "buttons": links
             })
 
         return self
@@ -272,24 +280,4 @@ class event(_Response):
 
             "name": event_name,
             "data": kwargs
-        }
-
-class permission(_Response):
-    """Returns a permission request to the user.
-
-    Arguments:
-        permissions {list} -- list of permissions to request for eg. ['DEVICE_PRECISE_LOCATION']
-        context {str} -- Text explaining the reason/value for the requested permission
-    """
-
-    def __init__(self, permissions, context=None):
-        super(permission, self).__init__(speech=None)
-        self._messages[:] = []
-        self._response['data']['google']['systemIntent'] = {
-            'intent': 'actions.intent.PERMISSION',
-            'data': {
-                '@type': 'type.googleapis.com/google.actions.v2.PermissionValueSpec',
-                'optContext': context,
-                'permissions': permissions,
-            }
         }
