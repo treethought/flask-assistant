@@ -95,8 +95,16 @@ class _Response(object):
         )
         return self
 
-    def card(self, text, title=None, img_url=None, img_alt=None, subtitle=None, link=None):
+    def card(self, text, title=None, img_url=None, img_alt=None, subtitle=None, link=None, linkTitle=None):
         self._card_idx = len(self._messages)
+
+        links = [] #seems like only one link is supported at a time, despite this being a list
+        if link and linkTitle:
+            link_dict = {}
+            link_dict['title'] = linkTitle
+            url_action = {"url": link}
+            link_dict['openUrlAction'] = url_action
+            links.append(link_dict)
         self._messages.append(
             {
                 "type": "basic_card",
@@ -106,7 +114,7 @@ class _Response(object):
                 "image": {'url': img_url or '',
                           'accessibilityText': img_alt
                           },
-                "buttons": []  # TODO link info here
+                "buttons": links
             })
 
         return self

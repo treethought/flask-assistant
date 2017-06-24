@@ -273,7 +273,7 @@ class Assistant(object):
     def _match_view_func(self):
         view_func = None
 
-        if self.context_in:
+        if self.hasLiveContext():
             view_func = self._choose_context_view()
 
         elif self._missing_params:
@@ -297,6 +297,11 @@ class Assistant(object):
             })
 
         return view_func
+
+    def hasLiveContext(self):
+        for context in self.context_in:
+            if context['lifespan'] > 0:
+                return True;
 
     @property
     def _context_views(self):
@@ -331,7 +336,7 @@ class Assistant(object):
             _errordump('')
             _errordump('No view matched for {} with context'.format(self.intent))
             _errordump('intent: {}'.format(self.intent))
-            _errordump('possible biews: {}'.format(self._context_views))
+            _errordump('possible views: {}'.format(self._context_views))
             _errordump('intent action funcs: {}'.format(self._intent_action_funcs[self.intent]))
 
     @property
