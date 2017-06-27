@@ -1,8 +1,7 @@
 from __future__ import absolute_import
-import os
 import sys
 import logging
-from flask_assistant.core import Assistant
+from flask_assistant.utils import get_assistant
 from .schema_handlers import IntentGenerator, EntityGenerator, TemplateCreator
 from .api import ApiAi
 from . import logger
@@ -12,37 +11,17 @@ logger.setLevel(logging.INFO)
 
 api = ApiAi()
 
-def import_with_3(module_name, path):
-    import importlib.util
-    spec = importlib.util.spec_from_file_location(module_name, path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
 
-
-def import_with_2(module_name, path):
-    import imp
-    return imp.load_source(module_name, path)
-
-
-def get_assistant():
-    if len(sys.argv) < 2:
-        raise KeyError('Please provide the file containing the Assistant object')
-    agent_file = sys.argv[1]
-    agent_name = os.path.splitext(agent_file)[0]
+def file_from_args():
     try:
-        agent_module = import_with_3(agent_name, os.path.join(os.getcwd(), agent_file))
-
-    except ImportError:
-        agent_module = import_with_2(agent_name, os.path.join(os.getcwd(), agent_file))
-
-    for name, obj in agent_module.__dict__.items():
-        if isinstance(obj, Assistant):
-            return obj
+        return sys.argv[1]
+    except IndexError:
+        raise IndexError('Please provide the file containing the Assistant object')
 
 
 def gen_templates():
-    assist = get_assistant()
+    filename = file_from_args()
+    assist = get_assistant(filename)
     templates = TemplateCreator(assist)
     templates.generate()
 
@@ -64,7 +43,8 @@ def entities():
 
 
 def schema():
-    assist = get_assistant()
+    filename = file_from_args()
+    assist = get_assistant(filename)
     intents = IntentGenerator(assist)
     entities = EntityGenerator(assist)
     templates = TemplateCreator(assist)
@@ -72,13 +52,13 @@ def schema():
     templates.generate()
     intents.generate()
     entities.generate()
-    
 
 
 def check():
-    assist = get_assistant()
-    reg_total = len(assist.api.agent_intents)
-    map_total = len(assist._intent_action_funcs)
+    filename = file_from_args()
+    assist = get_assistant(filename)
+    # reg_total = len(assist.api.agent_intents)
+    # map_total = len(assist._intent_action_funcs)
     reg_names = [i.name for i in assist.api.agent_intents]
     map_names = [i for i in assist._intent_action_funcs.keys()]
     extra_reg = set(reg_names) - set(map_names)
@@ -103,7 +83,8 @@ def check():
 
 
 def query():
-    assist = get_assistant()
+    filename = file_from_args()
+    assist = get_assistant(filename)
     p = Process(target=assist.app.run)
     p.start()
 
