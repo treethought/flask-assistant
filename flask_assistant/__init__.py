@@ -16,4 +16,6 @@ from flask_assistant.core import (
 from flask_assistant.response import ask, tell, event, build_item, permission
 from flask_assistant.manager import Context
 
+import flask_assistant.utils
+
 from api_ai.api import ApiAi
