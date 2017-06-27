@@ -75,7 +75,10 @@ class ApiAi(object):
     def agent_intents(self):
         """Returns a list of intent json objects"""
         endpoint = self._intent_uri()
-        intents = self._get(endpoint)
+        intents = self._get(endpoint)  # should be list of dicts
+        if isinstance(intents, dict):  # if error: intents = {status: {error}}
+            raise Exception(intents['status'])
+
         return [Intent(intent_json=i) for i in intents]
 
     def get_intent(self, intent_id):
@@ -99,8 +102,11 @@ class ApiAi(object):
     def agent_entities(self):
         """Returns a list of intent json objects"""
         endpoint = self._entity_uri()
-        entities = self._get(endpoint)
-        return [Entity(entity_json=i) for i in entities]
+        entities = self._get(endpoint)  # should be list of dicts
+        if isinstance(entities, dict):  # error: entities = {status: {error}}
+            raise Exception(entities['status'])
+
+        return [Entity(entity_json=i) for i in entities if isinstance(i, dict)]
 
     def get_entity(self, entity_id):
         endpoint = self._entity_uri(entity_id=entity_id)
@@ -125,7 +131,7 @@ class ApiAi(object):
 
         data = json.dumps(data)
 
-        response = requests.post(self._query_uri, headers=self._client_header, data=data)
+        response = requests.post(self._query_uri,
+            headers=self._client_header, data=data)
         response.raise_for_status
         return response
-
