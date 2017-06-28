@@ -1,6 +1,7 @@
 import pytest
 from flask_assistant.manager import Context, ContextManager
 
+
 @pytest.fixture(scope='function')
 def manager():
     m = ContextManager()
@@ -12,6 +13,7 @@ def manager():
 def test_get_non_existant_context(manager):
     result = manager.get('doesnt-exist')
     assert result is None
+
 
 def test_add_context(manager):
     c = manager.add('sample')
@@ -30,26 +32,27 @@ def test_add_and_get_context(manager):
     assert added is retrieved
     assert retrieved.lifespan == 5
 
+
 def test_add_context_with_params(manager):
     manager.add('sample', parameters={'param1': 1, 'param2': 'two'})
     c = manager.get('sample')
     assert c.get('param1') == 1
     assert c.get('param2') == 'two'
 
+
 def test_get_param_from_manager(manager):
     manager.add('sample', parameters={'param1': 1, 'param2': 'two'})
     assert manager.get_param('sample', 'param1') == 1
     assert manager.get_param('sample', 'param2') == 'two'
+
 
 def test_set_param_from_manager(manager):
     c = manager.add('sample')
     assert c.get('param1') is None
 
     manager.set('sample', 'param1', 1)
-    assert manager.get('sample').get('param1') == 1 # thru manager
-    assert c.get('param1') == 1 # check original context object
-
-
+    assert manager.get('sample').get('param1') == 1  # thru manager
+    assert c.get('param1') == 1  # check original context object
 
 
 def test_active_and_expired(manager):
@@ -64,5 +67,3 @@ def test_active_and_expired(manager):
     assert c1 in manager.active
     assert c2 in manager.active
     assert c3 in manager.expired
-
-

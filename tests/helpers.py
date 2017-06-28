@@ -1,6 +1,6 @@
 import json
 
-def build_payload(intent, params={}, contexts={}, action='test_action', query='test query'):
+def build_payload(intent, params={}, contexts=[], action='test_action', query='test query'):
 
     return json.dumps({
         "id": "8ea2d357-10c0-40d1-b1dc-e109cd714f67",
