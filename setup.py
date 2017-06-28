@@ -22,9 +22,15 @@ setup(
     install_requires=[
         'Flask',
         'requests',
-        'six',
         'ruamel.yaml'
     ],
+    setup_requires=[
+        'pytest-runner'
+    ],
+    tests_require=[
+        'pytest'
+    ],
+    test_suite='tests',
     extras_require={
         'HassRemote': ["homeassistant>=0.37.1"]
     },
