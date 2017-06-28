@@ -20,7 +20,7 @@ class Context(dict):
         self.parameters[param_name] = value
 
     def get(self, param):
-        return self.parameters[param]
+        return self.parameters.get(param)
 
     def sync(self, context_json):
         self.__dict__.update(context_json)
@@ -44,8 +44,6 @@ class ContextManager():
         return context
 
     def get(self, context_name, default=None):
-        if default is None:
-            default = Context(context_name)
         return self._cache.get(context_name, default)
 
     def set(self, context_name, param, val):
@@ -53,13 +51,12 @@ class ContextManager():
         context.set(param, val)
         return context
 
-
     def get_param(self, context_name, param):
         return self._cache[context_name].parameters[param]
 
     def update(self, contexts_json):
         for obj in contexts_json:
-            context = self.get(obj['name'])
+            context = Context(obj['name'])  # TODO
             context.lifespan = obj['lifespan']
             context.parameters = obj['parameters']
             self._cache[context.name] = context
