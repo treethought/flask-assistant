@@ -38,4 +38,4 @@ def build_payload(intent, params={}, contexts=[], action='test_action', query='t
 def get_query_response(client, payload):
     resp = client.post('/', data=payload)
     assert resp.status_code == 200
-    return json.loads(resp.data)
+    return json.loads(resp.data.decode('utf-8'))
