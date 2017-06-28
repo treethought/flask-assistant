@@ -7,6 +7,19 @@ Create Virtual Assistants with Python
    :alt: Join the chat at https://gitter.im/flask-assistant/Lobby
    :target: https://gitter.im/flask-assistant/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
+.. image:: https://readthedocs.org/projects/flask-assistant/badge/?version=latest
+   :target: https://flask-assistant.readthedocs.org/en/latest
+
+.. image:: https://travis-ci.org/treethought/flask-assistant.svg?branch=master
+  :target: https://travis-ci.org/treethought/flask-assistant
+
+.. image:: https://img.shields.io/badge/python-2.7-blue.svg
+
+.. image:: https://img.shields.io/badge/python-3.5-blue.svg
+
+.. image:: https://img.shields.io/badge/python-3.6-blue.svg
+
+
 
 A flask extension serving as an `API.AI`_  SDK to provide an easy way to create virtual assistants which may be integrated with platforms such as `Actions on Google`_ (Google Assistant).
 
