@@ -3,7 +3,7 @@
 Create Virtual Assistants with Python
 *************************************
 
-.. image:: https://img.shields.io/pypi/v/flask-assistant-.svg
+.. image:: https://img.shields.io/pypi/v/flask-assistant.svg
     :target: https://pypi.python.org/pypi/flask-assistant
 
 .. image:: https://travis-ci.org/treethought/flask-assistant.svg?branch=master
@@ -11,11 +11,10 @@ Create Virtual Assistants with Python
 
 .. image:: https://img.shields.io/badge/python-2.7, 3.5, 3.6-blue.svg
 
-
 .. image:: https://badges.gitter.im/flask-assistant/Lobby.svg
    :alt: Join the chat at https://gitter.im/flask-assistant/Lobby
    :target: https://gitter.im/flask-assistant/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-
+   
 .. .. image:: https://readthedocs.org/projects/flask-assistant/badge/?version=latest
 ..    :target: https://flask-assistant.readthedocs.org/en/latest
 
