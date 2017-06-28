@@ -285,6 +285,8 @@ class Assistant(object):
         elif len(self._intent_action_funcs[self.intent]) == 1:
             view_func = self._intent_action_funcs[self.intent][0]
 
+            # TODO: Do not match func if context not satisfied
+
         if not view_func:
             view_func = self._intent_action_funcs[self.intent][0]
             _errordump('No view func matched')
@@ -301,28 +303,28 @@ class Assistant(object):
     def hasLiveContext(self):
         for context in self.context_in:
             if context['lifespan'] > 0:
-                return True;
+                return True
+
+    def _context_satified(self, view_func):
+        met = []
+        requires = list(self._func_contexts[view_func])
+        recieved_contexts = [c['name'] for c in self.context_in]
+
+        for req_context in requires:
+            if req_context in recieved_contexts:
+                met.append(req_context)
+
+        if set(met) == set(requires) and len(requires) <= len(recieved_contexts):
+            return True
 
     @property
     def _context_views(self):
         """Returns view functions for which the context requirements are met"""
         possible_views = []
-        recieved_contexts = [c['name'] for c in self.context_in]
-        # recieved_contexts = [c['name'] for c in self.context_manager.active]
-
 
         for func in self._func_contexts:
-            requires = list(self._func_contexts[func])
-            met = []
-            for req_context in requires:
-                if req_context in recieved_contexts:
-                    met.append(req_context)
-
-            if set(met) == set(requires) and len(requires) <= len(recieved_contexts):
-                # if not requires:
-                # import ipdb; ipdb.set_trace()
+            if self._context_satified(func):
                 possible_views.append(func)
-
         return possible_views
 
     def _choose_context_view(self):
