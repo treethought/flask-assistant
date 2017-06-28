@@ -13,11 +13,15 @@ Create Virtual Assistants with Python
 .. image:: https://travis-ci.org/treethought/flask-assistant.svg?branch=master
   :target: https://travis-ci.org/treethought/flask-assistant
 
-.. image:: https://img.shields.io/badge/python-2.7-blue.svg
+.. image:: https://img.shields.io/badge/python-2.7, 3.5, 3.6-blue.svg
 
-.. image:: https://img.shields.io/badge/python-3.5-blue.svg
 
-.. image:: https://img.shields.io/badge/python-3.6-blue.svg
+.. image:: https://img.shields.io/pypi/v/flask-assistant.svg
+    :target: https://pypi.python.org/pypi/flask-assistant
+
+.. image:: https://img.shields.io/pypi/l/flask-assistant.svg
+    :target: https://pypi.python.org/pypi/flask-assistant
+
 
 
 
