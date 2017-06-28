@@ -10,6 +10,6 @@ itsdangerous==0.24        # via flask
 Jinja2==2.9.5             # via flask
 MarkupSafe==1.0           # via jinja2
 requests==2.13.0
-ruamel.yaml==0.15.12
+ruamel.yaml==0.15.15
 six==1.10.0
 Werkzeug==0.12            # via flask
