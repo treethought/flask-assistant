@@ -12,10 +12,11 @@ from flask_assistant.core import (
     intent,
     request
 )
-
-from flask_assistant.response import ask, tell, event, build_item, permission
+# from flask_assistant.response import ask, tell, event
+from flask_assistant.responses.public import ask, tell, event
 from flask_assistant.manager import Context
 
 import flask_assistant.utils
 
 from api_ai.api import ApiAi
+
