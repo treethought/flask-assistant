@@ -63,6 +63,7 @@ class Assistant(object):
         self._intent_defaults = {}
         self._intent_fallbacks = {}
         self._intent_prompts = {}
+        self._intent_events= {}
         self._required_contexts = {}
         self._context_funcs = {}
         self._func_contexts = {}
@@ -181,7 +182,7 @@ class Assistant(object):
             return wrapper
         return decorator
 
-    def action(self, intent_name, is_fallback=False, mapping={}, convert={}, default={}, with_context=[], *args, **kw):
+    def action(self, intent_name, is_fallback=False, mapping={}, convert={}, default={}, with_context=[], events=[], *args, **kw):
         """Decorates an intent_name's Action view function.
 
             The wrapped function is called when a request with the
@@ -196,6 +197,7 @@ class Assistant(object):
             self._intent_converts[intent_name] = convert
             self._intent_defaults[intent_name] = default
             self._intent_fallbacks[intent_name] = is_fallback
+            self._intent_events[intent_name] = events
             self._register_context_to_func(intent_name, with_context)
 
             @wraps(f)
