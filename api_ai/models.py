@@ -49,7 +49,7 @@ class Intent():
     the API.AI develoepr console via JSON requests.
     """
 
-    def __init__(self, name=None, priority=500000, fallback_intent=False, contexts=None, intent_json=None):
+    def __init__(self, name=None, priority=500000, fallback_intent=False, contexts=None, events=None, intent_json=None):
 
         if name and not intent_json:
             self.name = name
@@ -62,7 +62,7 @@ class Intent():
             self.fallbackIntent = fallback_intent
             self.webhookUsed = True
             self.webhookForSlotFilling = True
-            self.events = []
+            self.events = Intent._build_events(events)
             self.id = None
 
         elif intent_json:
@@ -70,6 +70,10 @@ class Intent():
 
         else:
             raise TypeError('Must provide a "name" argument if no json given')
+
+    @staticmethod
+    def _build_events(events):
+        return [] if events is None else [{'name': event} for event in events]
 
     def __repr__(self):
         return "<Intent: {}>".format(self.name)
