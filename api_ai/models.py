@@ -156,15 +156,16 @@ class UserDefinedExample(ExampleBase):
 
         for word in self.text.split():
             if word in self.entity_map:
-                self.data.append({'text': sub_phrase})  # add non-annotated, then deal with annotation
-                sub_phrase = ''
+                if sub_phrase != '':
+                    self.data.append({'text': sub_phrase})  # add non-annotated, then deal with annotation
+                sub_phrase = ' '
                 self.annotate_params(word)
 
             else:
                 sub_phrase += '{} '.format(word)
 
-        if sub_phrase:
-            self.data.append({'text': sub_phrase})
+        if sub_phrase != ' ':
+            self.data.append({'text': sub_phrase.rstrip()})
 
     def annotate_params(self, word):
         """Annotates a given word for the UserSays data field of an Intent object.
