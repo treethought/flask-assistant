@@ -164,7 +164,7 @@ class UserDefinedExample(ExampleBase):
 
         self.data.append({'text': sub_phrase})
 
-    def annotate_params(self, word):
+    def _annotate_params(self, word):
         """Annotates a given word for the UserSays data field of an Intent object.
 
         Annotations are created using the entity map within the user_says.yaml template.
