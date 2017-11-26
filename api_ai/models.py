@@ -155,7 +155,7 @@ class UserDefinedExample(ExampleBase):
             return
 
         for value in self.entity_map:
-            if re.search(r"\b" + value + r"\b",sub_phrase):
+            if re.search(r"\b" + value + r"\b", sub_phrase):
                 parts = sub_phrase.split(value, 1)
                 self._parse_phrase(parts[0])
                 self._annotate_params(value)
