@@ -181,9 +181,19 @@ class IntentGenerator(SchemaHandler):
         if intent_data:
             phrases = intent_data.get('UserSays', [])
             annotations = intent_data.get('Annotations', [])
+
+            entities = []
+            for d in [d.__dict__ for d in EntityGenerator(self.assist).build_entities()]:
+                entities.append(d)
+
             mapping = {}
             for a in [a for a in annotations if a]:
-                mapping.update(a)
+                for annotation, entity in a.items():
+                    for d in [d for d in entities if d['name'] == entity]:
+                        for e in [e for e in d['entries'] if e['value'] == annotation]:
+                            mapping.update({annotation:entity})
+                            for synonym in e['synonyms']:
+                                mapping.update({synonym:entity})
 
             for phrase in [p for p in phrases if p]:
                 if phrase != '':
