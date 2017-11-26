@@ -1,4 +1,5 @@
 import json
+import re
 
 class Entity():
     """docstring for Entity"""
@@ -147,24 +148,21 @@ class UserDefinedExample(ExampleBase):
         # import ipdb; ipdb.set_trace()
         self.entity_map = entity_map
 
-        self.parse_phrase()
+        self._parse_phrase(self.text)
 
-    def parse_phrase(self):
-        # import ipdb; ipdb.set_trace()
-        annotated = {}
-        sub_phrase = ''
+    def _parse_phrase(self, sub_phrase):
+        if not sub_phrase:
+            return
 
-        for word in self.text.split():
-            if word in self.entity_map:
-                self.data.append({'text': sub_phrase})  # add non-annotated, then deal with annotation
-                sub_phrase = ''
-                self.annotate_params(word)
+        for value in self.entity_map:
+            if re.search(r"\b" + value + r"\b", sub_phrase):
+                parts = sub_phrase.split(value, 1)
+                self._parse_phrase(parts[0])
+                self._annotate_params(value)
+                self._parse_phrase(parts[1])
+                return
 
-            else:
-                sub_phrase += '{} '.format(word)
-
-        if sub_phrase:
-            self.data.append({'text': sub_phrase})
+        self.data.append({'text': sub_phrase})
 
     def annotate_params(self, word):
         """Annotates a given word for the UserSays data field of an Intent object.
