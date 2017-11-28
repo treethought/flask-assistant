@@ -181,6 +181,7 @@ class IntentGenerator(SchemaHandler):
         if intent_data:
             phrases = intent_data.get('UserSays', [])
             annotations = intent_data.get('Annotations', [])
+            events = intent_data.get('Events', [])
             mapping = {}
             for a in [a for a in annotations if a]:
                 mapping.update(a)
@@ -189,7 +190,8 @@ class IntentGenerator(SchemaHandler):
                 if phrase != '':
                     intent.add_example(phrase, templ_entity_map=mapping)
 
-
+            for event in [e for e in events if e]:
+                intent.add_event(event)
 
 
     def push_intent(self, intent):
@@ -354,6 +356,7 @@ class TemplateCreator(SchemaHandler):
             d = yaml.compat.ordereddict()
             d['UserSays'] = [None, None]
             d['Annotations'] = [None, None]
+            d['Events'] = [None]
 
             # d['Annotations'] = self.parse_annotations_from_action_mappings(intent)
 
@@ -368,7 +371,9 @@ class TemplateCreator(SchemaHandler):
             f.write('#    - red is my favorite color\n\n')
             f.write('#  Annotations:\n')
             f.write('#    - blue: sys.color     # maps param value -> entity\n')
-            f.write('#    - red: sys.color\n\n\n\n')
+            f.write('#    - red: sys.color\n\n')
+            f.write('#  Events:\n')
+            f.write('#    - event1              # adds a triggerable event named \'event1\' to the intent\n\n\n\n')
             # f.write(header)
             yaml.dump(skeleton, f, default_flow_style=False, Dumper=yaml.RoundTripDumper)
 

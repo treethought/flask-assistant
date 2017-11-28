@@ -100,6 +100,9 @@ class Intent():
             'messages': []  # TODO: possibly register action responses to call from intent object directly
         }]
         # self.responses.append(new_response)
+    
+    def add_event(self, event_name):
+        self.events.append({'name': event_name})
 
     @property
     def serialize(self):
