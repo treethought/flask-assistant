@@ -1,3 +1,5 @@
+# coding: utf8
+
 import json
 import re
 
@@ -158,7 +160,7 @@ class UserDefinedExample(ExampleBase):
             return
 
         for value in self.entity_map: #TODO python 2.7 compatibility. SyntaxError: Non-ASCII character '\xc2'
-            re_value = r".\b{}\b".format(value) if value.startswith(('$', '¥', '￥', '€', '£')) else r"\b{}\b".format(value)
+            re_value = r".\b{}\b".format(value[1:]) if value.startswith(('$', '¥', '￥', '€', '£')) else r"\b{}\b".format(value)
             if re.search(re_value, sub_phrase):
                 parts = sub_phrase.split(value, 1)
                 self._parse_phrase(parts[0])
