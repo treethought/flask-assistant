@@ -157,8 +157,8 @@ class UserDefinedExample(ExampleBase):
         if not sub_phrase:
             return
 
-        for value in self.entity_map:
-            re_value = r".\b{}\b".format(value) if value.startswith((r'$', r'¥', r'￥', r'€', r'£')) else r"\b{}\b".format(value)
+        for value in self.entity_map: #TODO python 2.7 compatibility. SyntaxError: Non-ASCII character '\xc2'
+            re_value = r".\b{}\b".format(value) if value.startswith(('$', '¥', '￥', '€', '£')) else r"\b{}\b".format(value)
             if re.search(re_value, sub_phrase):
                 parts = sub_phrase.split(value, 1)
                 self._parse_phrase(parts[0])
