@@ -173,6 +173,15 @@ class IntentGenerator(SchemaHandler):
             params.append(param_info)
         return params
 
+    def get_synonyms(self, annotation, entity):
+        raw_temp = self.entity_yaml()
+        for temp_dict in [d for d in raw_temp if d == entity]:
+            for entry in raw_temp.get(temp_dict):
+                if isinstance(entry, dict):
+                    for a, s in entry.items():
+                        if a == annotation:
+                            for synonym in s:
+                                yield(synonym)
 
     def build_user_says(self, intent):
         raw = self.user_says_yaml()
@@ -183,7 +192,10 @@ class IntentGenerator(SchemaHandler):
             annotations = intent_data.get('Annotations', [])
             mapping = {}
             for a in [a for a in annotations if a]:
-                mapping.update(a)
+                for annotation, entity in a.items():
+                    mapping.update({annotation:entity})
+                    for synonym in self.get_synonyms(annotation, entity):
+                        mapping.update({synonym:entity})
 
             for phrase in [p for p in phrases if p]:
                 if phrase != '':
