@@ -4,7 +4,7 @@ from flask import json, make_response, current_app
 class _Response(object):
     """docstring for _Response"""
 
-    def __init__(self, speech):
+    def __init__(self, speech, display_text=None):
 
         self._speech = speech
         self._integrations = current_app.config.get('INTEGRATIONS', [])
@@ -17,6 +17,7 @@ class _Response(object):
 
         self._response = {
             'speech': speech,
+            'displayText': display_text,
             'messages': self._messages,
             'data': {
                 'google': {  # TODO: may be depreciated
@@ -31,15 +32,15 @@ class _Response(object):
         }
 
         if current_app.config.get('ASSIST_ACTIONS_ON_GOOGLE'):
-            self._integrate_with_actions(speech)
+            self._integrate_with_actions(display_text)
 
-    def _integrate_with_actions(self, speech):
+    def _integrate_with_actions(self, display_text=None):
 
         self._messages.append({
             "type": "simple_response",   # For actions on google -
             "platform": "google",  # provides the required simple response for home/mobile devices
-            "textToSpeech": speech,
-            "displayText": speech
+            "textToSpeech": self._speech,
+            "displayText": display_text
         })
 
     def _include_contexts(self):
@@ -245,19 +246,19 @@ class _CarouselCard(_CardWithItems):
 
 
 class tell(_Response):
-    def __init__(self, speech):
-        super(tell, self).__init__(speech)
+    def __init__(self, speech, display_text=None):
+        super(tell, self).__init__(speech, display_text)
         self._response['data']['google']['expect_user_response'] = False
 
 
 class ask(_Response):
-    def __init__(self, speech):
+    def __init__(self, speech, display_text=None):
         """Returns a response to the user and keeps the current session alive. Expects a response from the user.
 
         Arguments:
             speech {str} --  Text to be pronounced to the user / shown on the screen
         """
-        super(ask, self).__init__(speech)
+        super(ask, self).__init__(speech, display_text)
         self._response['data']['google']['expect_user_response'] = True
 
     def reprompt(self, prompt):
