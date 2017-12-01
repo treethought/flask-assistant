@@ -89,7 +89,7 @@ The :meth:`prompt_for <flask_assistant.assistant.prompt_for>` decorator is passe
 
 .. code-block:: python
 
-    @assist.prompt_for('color', intent='give-color')
+    @assist.prompt_for('color', intent_name='give-color')
     def prompt_color(color):
         speech = "Sorry I didn't catch that. What color did you say?"
         return ask(speech)
