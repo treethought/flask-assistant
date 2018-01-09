@@ -65,10 +65,10 @@ Explanation
 2. Used the :meth:`action <flask_assistant.Assistant.action>` decorator to map the `greetings` intent to the proper action function.
     - The action decorator accepts the name of an intent as a parameter
     - The decorated function serves as the action view function, called when an API.AI request sent on behalf of the `send-message` intent is received
-3. The action funtion returns an :class:`ask <flask_assistant.ask>` response containing text/speech which prompts the user for the next intent.
+3. The action function returns an :class:`ask <flask_assistant.ask>` response containing text/speech which prompts the user for the next intent.
 
 
-Check out the :doc:`quick_start` to see how to quicky build an assistant
+Check out the :doc:`quick_start` to see how to quickly build an assistant
 
 
 .. include:: contents.rst.inc
