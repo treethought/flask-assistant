@@ -52,7 +52,7 @@ class Assistant(object):
 
     """
 
-    def __init__(self, app=None, blueprint=None, route=None):
+    def __init__(self, app=None, blueprint=None, route=None,dev_token=None,client_token=None):
 
         self.app = app
         self.blueprint = blueprint
@@ -68,7 +68,7 @@ class Assistant(object):
         self._context_funcs = {}
         self._func_contexts = {}
 
-        self.api = ApiAi()
+        self.api = ApiAi(dev_token,client_token)
 
         if route is None and app is not None:
 
