@@ -105,7 +105,7 @@ The only information required for a card is the `text` paramter which is used to
 
             resp = ask("Here's an example of a card")
 
-            resp.card(text='The text to display'
+            resp.card(text='The text to display',
                       title='Card Title',
                       img_url='http://example.com/image.png'
                       )
