@@ -160,11 +160,7 @@ class UserDefinedExample(ExampleBase):
             return
 
         for value in self.entity_map:
-            str_value = str(value) # Treat entities as strings
-            re_value = r".\b{}\b".format(str_value[1:]) \
-                if str_value.startswith(('$', '¥', '￥', '€', '£')) \
-                else r"\b{}\b".format(str_value)
-
+            re_value = r".\b{}\b".format(value[1:]) if value.startswith(('$', '¥', '￥', '€', '£')) else r"\b{}\b".format(value)
             if re.search(re_value, sub_phrase):
                 parts = sub_phrase.split(value, 1)
                 self._parse_phrase(parts[0])
