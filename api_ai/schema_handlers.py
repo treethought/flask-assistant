@@ -194,9 +194,9 @@ class IntentGenerator(SchemaHandler):
             mapping = {}
             for a in [a for a in annotations if a]:
                 for annotation, entity in a.items():
-                    mapping.update({annotation:entity})
+                    mapping.update({str(annotation):str(entity)})
                     for synonym in self.get_synonyms(annotation, entity):
-                        mapping.update({synonym:entity})
+                        mapping.update({str(synonym):str(entity)})
 
             for phrase in [p for p in phrases if p]:
                 if phrase != '':
