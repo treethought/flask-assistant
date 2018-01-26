@@ -1,10 +1,10 @@
 # TODO texttospeech mutually exclusive with ssml
 
 
-class _GoogleData():
+class _GoogleIntegration():
     """Represents the data.google object of the _ApiAiResponse.
 
-    The _GoogleData object is not to be rendered as a response but rather
+    The _GoogleIntegration object is not to be rendered as a response but rather
     to extend an existing response to be returned to Api.AI. It contains all the
     data required for communicating with Actions on Google via Api.AI.
 
@@ -13,7 +13,7 @@ class _GoogleData():
     Note that the contents of this class mirror the Actions API.AI webhook format,
     which closely resembles but is not identical to the Conversation webhook API.ai
 
-    
+
     Migration guide - https://developers.google.com/actions/reference/v1/migration#apiai_webhook_protocol_changes
     Webhook Response format - https://developers.google.com/actions/apiai/webhook
 
@@ -26,22 +26,17 @@ class _GoogleData():
 
     Sample Responses - https://developers.google.com/actions/assistant/responses
 
-    Example Google Data Object:
-
     """
 
     def __init__(self):
-        super(_GoogleData, self).__init__()
-
-        self.speech = ''
-        self.display_text = ''
         self.expect_response = True
+        self.is_ssml = True
+        self.speech = ''
 
-        self.rich_response = _RichResponse()
         self.system_intent = {}
+        self.rich_response = _RichResponse()
+        self.final_response = {}
 
-        self.intent = ''
-        self.input_data = {}
         self._data = {}
 
     def simple_response(self, speech, display_text, expect_response):
@@ -50,7 +45,6 @@ class _GoogleData():
         self.expect_response = expect_response
 
         self.rich_response.add_simple_response_item(speech, display_text)
-
         expected_intent = _SystemIntent('TEXT')._load_data()
         self.system_intent = expected_intent
 
@@ -65,6 +59,16 @@ class _GoogleData():
     def link_out(self, dest, url):
         self.rich_response.add_link_out(dest, url)
         return self._load_data()
+
+    def build_card(self, title=None, subtitle=None, body_text=None, img=None, btns=None, img_options=None):
+        card = BasicCard(title, subtitle, body_text, img, btns, img_options)
+        self.rich_response.add_basic_card(card)
+        return self._load_data()
+
+    def attach_card(self, card):
+        self.rich_response.add_basic_card(card)
+        return self._load_data()
+
 
     def _load_data(self):
         self._data['speech'] = self.speech
@@ -81,6 +85,88 @@ class _GoogleData():
 
         # replaces expectedInputs.possibleIntents
         self._data['systemIntent'] = self.system_intent
+        return self._data
+
+
+
+class Image(object):
+    """docstring for Image"""
+
+    def __init__(self, url, descr, height=None, width=None):
+        super(Image, self).__init__()
+        self.url = url
+        self.descr = descr
+        self.height = height
+        self.width = width
+
+    def _build(self):
+        obj = {
+            "url": self.url,
+            "accessibilityText": self.descr,
+            "height": self.width,
+            "width": self.height,
+        }
+        return obj
+
+
+class Button(object):
+    """docstring for Button"""
+
+    def __init__(self, title, url):
+        super(Button, self).__init__()
+        self.title = title
+        self.url = url
+
+    def _build(self):
+        obj = {
+            "title": self.title,
+            "openUrlAction": {
+                'url': self.url
+            },
+        }
+        return obj
+
+
+class BasicCard(object):
+    """docstring for BasicCard"""
+
+    def __init__(self, title=None, subtitle=None, body_text=None, img=None, btns=None, img_options=None):
+        """Represents a BasicCard UI element object to be included in a RichResponse
+
+        [description]
+
+        Keyword Arguments:
+            title {str} -- Overall title of the card. Optional.  (default: {None})
+            subtitle {str} -- Card Subtitle (default: {None})
+            body_text {str} -- Body text of the card. Supports a limited set of markdown syntax for formatting. Required, unless image is present.  (default: {None})
+            img {Image} -- A hero image for the card. The height is fixed to 192dp. Optional. (default: {None})
+            btns {Button} -- Currently at most 1 button is supported. Optional.  (default: {None})
+            img_options {str} -- Type of image display option. Optional.  (default: {None})
+
+        Raises:
+            ValueError -- [description]
+        """
+
+        super(BasicCard, self).__init__()
+        self.title = title
+        self.subtitle = subtitle
+        self.body_text = body_text
+        self.img = img
+        self.btns = btns
+        self.img_options = img_options or 'DEFAULT'
+        self._data = {}
+
+        if self.img is None and self.body_text is None:
+            raise ValueError('Body text or an image must be included in a card')
+
+    def _load_data(self):
+        self._data['title'] = self.title
+        self._data['subtitle'] = self.subtitle
+        self._data['formattedText'] = self.body_text
+        self._data['image'] = self.img
+        self._data['buttons'] = self.btns
+        self._data['imageDisplayOptions'] = self.img_options
+
         return self._data
 
 
@@ -108,12 +194,16 @@ class _RichResponse():
         Every _RichResponse requires this type of response as the first item
 
         This object does not include the ssml field found in the Actions API
-        because API.ai formats the ssml based off the value of data.google.isSsml
+        because DialogFlowformats the ssml based off the value of data.google.isSsml
         """
 
         simple = {'textToSpeech': speech, 'displayText': display_text}
         payload = {'simpleResponse': simple}
         self.items.append(payload)
+
+    def add_basic_card(self, card_obj):
+        card = {'basicCard': card_obj._load_data()}
+        self.items.append(card)
 
 
     def add_suggestion(self, title):

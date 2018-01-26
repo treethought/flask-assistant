@@ -1,5 +1,4 @@
-from flask import json, make_response, current_app
-from flask_assistant.responses.google import _GoogleData
+from flask import json, make_response
 
 
 class _ApiAiResponse(object):
@@ -32,17 +31,6 @@ class _ApiAiResponse(object):
             # 'messages': self._messages,
         }
 
-        self.hook_integrations()
-
-    def hook_integrations(self):
-        self.integrations = current_app.config.get('INTEGRATIONS', [])
-
-        if self.google:
-            self.google_data = _GoogleData()
-
-    @property
-    def google(self):
-        return 'ACTIONS' in self.integrations
 
     def _include_contexts(self):
         from flask_assistant import core

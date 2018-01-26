@@ -1,6 +1,6 @@
 from flask import current_app
-from flask_assistant.responses.standard import _ApiAiResponse
-from flask_assistant.responses.google import _GoogleData
+from flask_assistant.responses.base import _ApiAiResponse
+from flask_assistant.integrations.google import _GoogleIntegration
 
 
 class _IntegratedResponse(_ApiAiResponse):
@@ -9,6 +9,13 @@ class _IntegratedResponse(_ApiAiResponse):
     def __init__(self, speech, display_text=None, followup_event=None):
         super(_IntegratedResponse, self).__init__(speech=speech,
                                                   display_text=display_text, followup_event=followup_event)
+
+        self.hook_integrations()
+
+    def hook_integrations(self):
+        if 'ACTIONS' in current_app.config.get('INTEGRATIONS', []):
+            self.google_data = _GoogleIntegration()
+            self.google = True
 
     def google_required(self):
         if not self.google:
@@ -24,6 +31,10 @@ class _IntegratedResponse(_ApiAiResponse):
 
     def link(self, destination, url):
         self.google_data.link_out(destination, url)
+        return self
+
+    def attach_card(self, card):
+        self.google_data.attach_card(card)
         return self
 
 
@@ -76,4 +87,3 @@ class event(_IntegratedResponse):
             "name": event_name,
             "data": kwargs
         }
-        
