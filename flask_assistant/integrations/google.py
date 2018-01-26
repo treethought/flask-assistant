@@ -17,9 +17,9 @@ class _GoogleIntegration():
     Migration guide - https://developers.google.com/actions/reference/v1/migration#apiai_webhook_protocol_changes
     Webhook Response format - https://developers.google.com/actions/apiai/webhook
 
-    #InputPrompt.FIELDS.rich_initial_prompt
+    # InputPrompt.FIELDS.rich_initial_prompt
     Relavent Field for RIch Response - https://developers.google.com/actions/reference/rest/Shared.Types/AppResponse
-    #ExpectedInput.FIELDS.possible_intents
+    # ExpectedInput.FIELDS.possible_intents
     Relavent field for SystemIntent - https://developers.google.com/actions/reference/rest/Shared.Types/AppResponse
 
     V1 info - https://developers.google.com/actions/reference/v1/apiai-webhook
@@ -45,7 +45,7 @@ class _GoogleIntegration():
         self.expect_response = expect_response
 
         self.rich_response.add_simple_response_item(speech, display_text)
-        expected_intent = _SystemIntent('TEXT')._load_data()
+        expected_intent = _SystemIntent('TEXT')
         self.system_intent = expected_intent
 
         return self._load_data()
@@ -69,6 +69,11 @@ class _GoogleIntegration():
         self.rich_response.add_basic_card(card)
         return self._load_data()
 
+    def attach_list(self, list_obj):
+        expected_intent = _SystemIntent('OPTION')
+        expected_intent.set_value_data(list_obj)
+        self.system_intent = expected_intent
+        return self._load_data()
 
     def _load_data(self):
         self._data['speech'] = self.speech
@@ -84,9 +89,8 @@ class _GoogleIntegration():
         self._data['richResponse'] = self.rich_response._load_data()
 
         # replaces expectedInputs.possibleIntents
-        self._data['systemIntent'] = self.system_intent
+        self._data['systemIntent'] = self.system_intent._load_data()
         return self._data
-
 
 
 class Image(object):
@@ -170,8 +174,24 @@ class BasicCard(object):
         return self._data
 
 
-class _RichResponse():
-    """docstring for _RichResponse"""
+class ListItem(object):
+    """docstring for ListItem"""
+
+    def __init__(self, arg):
+        super(ListItem, self).__init__()
+        self.arg = arg
+
+
+class ListSelect(object):
+    """docstring for ListSelect"""
+
+    def __init__(self, title=None, items=None):
+        super(ListSelect, self).__init__()
+        self.title = title
+        self.items = items
+
+
+class _RichResponse(object):
 
     def __init__(self):
         self.items = []
@@ -205,7 +225,6 @@ class _RichResponse():
         card = {'basicCard': card_obj._load_data()}
         self.items.append(card)
 
-
     def add_suggestion(self, title):
         """Provides a suggestion chip that the user can tap to quickly post a reply to the conversation
 
@@ -224,6 +243,12 @@ class _RichResponse():
             'url': url
         }
         self.link_out = payload
+
+
+SYSTEM_INTENT_TYPES = {
+    'actions.intent.TEXT': None,
+    'actions.intent.OPTION': 'type.googleapis.com/google.actions.v2.OptionValueSpec'
+}
 
 
 class _SystemIntent(object):
@@ -249,71 +274,108 @@ class _SystemIntent(object):
     def __init__(self, intent='text'):
 
         self.intent = 'actions.intent.{}'.format(intent.upper())
+
+        self.value_spec_type = SYSTEM_INTENT_TYPES[self.intent]
         self.input_value_data = {}
 
-        if 'OPTION' in self.intent:
-            self.input_value_data = OptionValueSpec()
+    def set_value_data(self, value_spec):
+        """Attach the conifguration data required by one of the possible intents
+
+
+        actions.intent.OPTION requires a SimpleSelect, ListSelect, or CarouselSelect value spec object
+
+
+        Arguments:
+            value_spec {obj} -- COnfiguration data for the built-in actions intent
+        """
+        print('*****')
+        print('Setting value spec')
+        self.input_value_data['@type'] = self.value_spec_type
+
+        # now just attach the valuespec payload (list/carousel)
+        value_spec_data = value_spec._load_data()
+        self.input_value_data.update(value_spec_data)
+        print('Value data')
+        print(self.input_value_data)
 
     def _load_data(self):
         if self.input_value_data is None:
             return {'intent': self.intent}
-        return {'intent': self.intent, 'inputValueData': self.input_value_data}
+        return {'intent': self.intent, 'data': self.input_value_data}
 
 
-class OptionValueSpec():
-    """Presents a selector and Asks the user to select one of the options.
+### OptionValueSpec Types ##
 
-    The type of selector presented can be only one of the following:
+class SimpleOption(object):
+    """docstring for SelectionItem"""
 
-        simpleSelect, listSelect, carouselSelect"""
+    def __init__(self, key, title, synonyms=None):
+        super(OptionItem, self).__init__()
+        self.title. title
+        self.key = key
+        self.synonyms = synonyms
 
-    def __init__(self):
-        super(OptionValueSpec, self).__init__()
+    def _load_data(self):
+        self._data['optionInfo'] = {
+            'key': self.key,
+            'synonyms': self.synonyms
+        }
+        if self.title:
+            self._data['title'] = title
+        return self._data
 
-    @staticmethod
-    def build_option_item(key, synonyms=None, title=None):
-        """Builds an option item to be presented in a selector
+    def add_synonym(self, syn):
+        self._data['synonyms'].appened(syn)
 
-        Follows a slightly different format than List or Carousel Items
 
-        Arguments:
-            key {str} -- A unique key that will be sent back
-                        to the agent if this response is given. (default: {None})
+class ListItem(object):
+    """docstring for ListItem"""
 
-        Keyword Arguments:
-            synonyms {list} -- synonyms that can also be used to trigger this item in dialog.
-            title {str} -- Title of the item. It will act as synonym if it's provided (default: {None})
+    def __init__(self, title, synonyms=None, descr=None, image=None):
+        super(ListItem, self).__init__()
 
-        Returns:
-            dict -- item object to be included in a simpleSelect selector
-        """
+        self.title = title
+        self.synonyms = synonyms
+        self.descr = descr
+        self.image = image
+        self._data = {}
 
-        if synonyms is None:
-            synonyms = []
+        # docs for title and key both state they are sent to user
+        # so use the same value until usage is clear
+        self.option_info = {
+            'key': self.title,
+            'synonyms': self.synonyms
+        }
 
-        item = {}
-        item['optionInfo'] = {'key': key, 'synonyms': synonyms}
+    def _load_data(self):
+        self._data['optionInfo'] = self.option_info
+        self._data['title'] = self.title
+        self._data['description'] = self.descr
+        self._data['image'] = self.image
+        return self._data
 
-        if title is not None:
-            item['title'] = title
 
-        return item
+class ListSelect(object):
+    """docstring for ListSelect"""
 
-    @staticmethod
-    def build_list_item(key, title, synonyms, description=None, image=None):
-        """Builds an item that may be added to List or Carousel"""
-        item = OptionValueSpec.build_option_item(key, synonyms, title)
-        item['description'] = description
-        item['image'] = image  # TODO: implement Image object
-        return item
+    def __init__(self, title=None, list_items=None):
+        super(ListSelect, self).__init__()
+        self.title = title
+        self.list_items = list_items or []
+        self._data = {}
 
-    def add_simple_select(self, items):  # TODO: HEREE
-        """A simple select with no associated GUI"""
+    def attach_item(self, list_item):
+        item_data = list_item._load_data()
+        self.list_items.append(item_data)
 
-    def add_list_select(self):
-        """A select with a list card GUI"""
-        pass
+    def add_item(self, title, synonyms=None, descr=None, image=None):
+        item = ListItem(title, synonyms, descr, image)
+        self.attach_item(item)
 
-    def add_carouselSelect(self):
-        """A select with a card carousel GUI"""
-        pass
+    def _load_data(self):
+        return {
+            'listSelect': {
+                'title': self.title,
+                'items': self.list_items
+            }
+        }

@@ -37,6 +37,10 @@ class _IntegratedResponse(_ApiAiResponse):
         self.google_data.attach_card(card)
         return self
 
+    def attach_list(self, list_obj):
+        self.google_data.attach_list(list_obj)
+        return self
+
 
 class tell(_IntegratedResponse):
     def __init__(self, speech, display_text=None, followup_event=None):
