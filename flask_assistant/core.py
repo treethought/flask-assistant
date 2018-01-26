@@ -6,8 +6,7 @@ from flask import current_app, json, request as flask_request, _app_ctx_stack
 from werkzeug.local import LocalProxy
 
 from flask_assistant import logger
-# from flask_assistant.response import _Response
-from flask_assistant.responses.standard import _ApiAiResponse
+from flask_assistant.responses.base import _ApiAiResponse
 from flask_assistant.manager import ContextManager
 from api_ai.api import ApiAi
 

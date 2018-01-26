@@ -1,6 +1,6 @@
 from flask import current_app
 from flask_assistant.responses.base import _ApiAiResponse
-from flask_assistant.integrations.google import _GoogleIntegration
+from flask_assistant.integrations.google.extension import _GoogleIntegration
 
 
 class _IntegratedResponse(_ApiAiResponse):
