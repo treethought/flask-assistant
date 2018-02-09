@@ -124,9 +124,9 @@ Now let's define the action to be performed when the user provides their gender.
 
 .. code-block:: python
 
-    @assist.action("user-gender")
+    @assist.action("give-gender")
     def ask_for_color(gender):
-        if gender is 'male':
+        if gender == 'male':
             gender_msg = 'Sup bro!'
         else:
             gender_msg = 'Haay gurl!'
@@ -134,7 +134,7 @@ Now let's define the action to be performed when the user provides their gender.
         speech = gender_msg + ' What is your favorite color?'
         return ask(speech)
 
-When the user gives their gender as a response to the ``greet_and_start`` action, it matches the `user-gender` intent and triggers the ``ask_for_color`` action.
+When the user gives their gender as a response to the ``greet_and_start`` action, it matches the `give-gender` intent and triggers the ``ask_for_color`` action.
 
 The gender value will be parsed as an `entity <https://docs.api.ai/docs/concept-entities#overview>`_ from the user's phrase, identified as a parameter and passed to the action function.
 
@@ -154,7 +154,7 @@ Before we define our entity, let's first finish the webhook by defining the fina
 Because this action requires the ``color`` parameter, a color entity needs to be defined within our API.AI agent.
 However, there are a very large number of colors that we'd like our API.AI to recognize as a color entity.
 
-Instead of defining our own ``color`` entity and all of the possible entries for the entity (as  we will do with ``gender``), we will utilize one of API.AI's `System Entities <https://docs.api.ai/docs/concept-entities#section-system-entities>`_.
+Instead of defining our own ``color`` entity and all of the possible entries for the entity (as we will do with ``gender``), we will utilize one of API.AI's `System Entities <https://docs.api.ai/docs/concept-entities#section-system-entities>`_.
 
 To do this we simply mapped the  ``color`` parameter to the `sys.color` System Entity:
 
@@ -174,7 +174,7 @@ Now we do not need to provide any definition about the ``color`` entity, and API
 
 Registering Schema
 ===================================
-At this point our assistant app has three intents: ``greeting`` and ``user-gender`` and ``user-color``.
+At this point our assistant app has three intents: ``greeting`` and ``give-gender`` and ``give-color``.
 They are defined with the :meth:`action <flask_assistant.Assistant.action>` decorator, but how does API.AI know that these intents exist and how does it know what the user should say to match them?
 
 Flask-assistant includes a command line utilty to automatically create and register required schema with API.AI.
@@ -188,12 +188,13 @@ Let's walk through how to utilize the :doc:`schema <generate_schema>` command.
 Run the schema command
 ----------------------
 
-1. First obtain your agent's Developer Access Token from the `API.AI Console`_.
+1. First obtain your agent's Access Tokens from the `API.AI Console`_.
 2. Ensure you are in the same directory as your assistant and store your token as an environment variable
     .. code-block:: bash
     
         cd my_assistant
-        export DEV_ACCESS_TOKEN='YOUR ACCESS TOKEN'
+        export DEV_ACCESS_TOKEN='YOUR DEV TOKEN'
+        export CLIENT_ACCESS_TOKEN='YOUR CLIENT TOKEN'
 
 3. Run the `schema` command
     .. code-block:: bash
@@ -210,14 +211,14 @@ With regards to the intent registration:
     Registering greeting intent
     {'status': {'errorType': 'success', 'code': 200}, 'id': 'be697c8a-539d-4905-81f2-44032261f715'}
 
-    Registering user-gender intent
+    Registering give-gender intent
     {'status': {'errorType': 'success', 'code': 200}, 'id': '9759acde-d5f4-4552-940c-884dbcd8c615'}
 
     Writing schema json to file
 
-Navigate to your agent's Intents section within the `API.AI Console`_. You will now see that the ``greeting``, ``user-gender`` and ``user-color`` intents have been registered.
+Navigate to your agent's Intents section within the `API.AI Console`_. You will now see that the ``greeting``, ``give-gender`` and ``give-color`` intents have been registered.
 
-However, if you click on the ``user-gender`` intent, you'll see an error pop-up message that the `gender` entity hasn't been created. This is expected from the ``schema`` output message for the entities registration:
+However, if you click on the ``give-gender`` intent, you'll see an error pop-up message that the `gender` entity hasn't been created. This is expected from the ``schema`` output message for the entities registration:
 
 ::
     Generating entity schema...
@@ -307,7 +308,7 @@ To fill in the template, provide exmaples of what the user may say under ``UserS
       - red: sys.color
 
 
-    user-gives-gender:
+    give-gender:
 
       UserSays:
       - male
@@ -319,7 +320,7 @@ To fill in the template, provide exmaples of what the user may say under ``UserS
       - female: gender
       - girl: gender
     
-If the intent requires no parameters or you'd like API.AI to automaticcaly annotate the phrase, simply exclude the ``Annotations``  or leave it blank.
+If the intent requires no parameters or you'd like API.AI to automatically annotate the phrase, simply exclude the ``Annotations``  or leave it blank.
 
 .. code-block:: yaml
     

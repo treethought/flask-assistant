@@ -13,7 +13,7 @@ def greet_and_start():
     return ask(speech)
 
 
-@assist.action("user-gives-gender")
+@assist.action("give-gender")
 def ask_for_color(gender):
     if gender == 'male':
         gender_msg = 'Sup bro!'

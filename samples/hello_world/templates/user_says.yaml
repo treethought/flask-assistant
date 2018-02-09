@@ -33,7 +33,7 @@ greeting:
     - begin
     - launch
 
-user-gives-gender:
+give-gender:
   UserSays:
   - male
   - Im a female
