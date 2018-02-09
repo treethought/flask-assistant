@@ -12,7 +12,7 @@ def test_hello_world_greeting(hello_world_assist):
 
 def test_hello_world_give_gender(hello_world_assist):
     client = hello_world_assist.app.test_client()
-    payload = build_payload('user-gives-gender', params={'gender': 'male'})
+    payload = build_payload('give-gender', params={'gender': 'male'})
     resp = get_query_response(client, payload)
     assert 'Sup bro' in resp['speech']
     assert 'What is your favorite color?' in resp['speech']
