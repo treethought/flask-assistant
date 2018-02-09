@@ -174,7 +174,7 @@ Now we do not need to provide any definition about the ``color`` entity, and API
 
 Registering Schema
 ===================================
-At this point our assistant app has three intents: ``greeting`` and ``user-gender`` and ``user-color``.
+At this point our assistant app has three intents: ``greeting`` and ``user-gives-gender`` and ``user-color``.
 They are defined with the :meth:`action <flask_assistant.Assistant.action>` decorator, but how does API.AI know that these intents exist and how does it know what the user should say to match them?
 
 Flask-assistant includes a command line utilty to automatically create and register required schema with API.AI.
@@ -210,14 +210,14 @@ With regards to the intent registration:
     Registering greeting intent
     {'status': {'errorType': 'success', 'code': 200}, 'id': 'be697c8a-539d-4905-81f2-44032261f715'}
 
-    Registering user-gender intent
+    Registering user-gives-gender intent
     {'status': {'errorType': 'success', 'code': 200}, 'id': '9759acde-d5f4-4552-940c-884dbcd8c615'}
 
     Writing schema json to file
 
-Navigate to your agent's Intents section within the `API.AI Console`_. You will now see that the ``greeting``, ``user-gender`` and ``user-color`` intents have been registered.
+Navigate to your agent's Intents section within the `API.AI Console`_. You will now see that the ``greeting``, ``user-gives-gender`` and ``user-color`` intents have been registered.
 
-However, if you click on the ``user-gender`` intent, you'll see an error pop-up message that the `gender` entity hasn't been created. This is expected from the ``schema`` output message for the entities registration:
+However, if you click on the ``user-gives-gender`` intent, you'll see an error pop-up message that the `gender` entity hasn't been created. This is expected from the ``schema`` output message for the entities registration:
 
 ::
     Generating entity schema...
