@@ -105,7 +105,7 @@ In your new webhook.py file:
     from flask_assistant import Assistant, ask, tell
 
     app = Flask(__name__)
-    assist = Assistant(app, '/')
+    assist = Assistant(app, route='/')
 
     
     @assist.action('greeting')
