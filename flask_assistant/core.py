@@ -37,19 +37,18 @@ context_manager = LocalProxy(lambda: find_assistant().context_manager)
 class Assistant(object):
     """Central Interface for interacting with Google Actions via Api.ai.
 
-    The Assitant object routes requests to :func:`action` decorated functions.
+    The Assistant object routes requests to :func:`action` decorated functions.
 
-    The assistant object maps requests recieved from an API.ai agent to Intent-specific view functions.
+    The assistant object maps requests received from an API.ai agent to Intent-specific view functions.
     The view_functions can be properly matched depending on required parameters and contexts.
-    These requests originate from Google Actions and are sent to the Assitant object
-    after through API.ai's infrastrcutre
+    These requests originate from Google Actions and are sent to the Assistant object
+    after through API.ai's infrastructure.
 
 
     Keyword Arguments:
             app {Flask object} -- App instance - created with Flask(__name__) (default: {None})
+            blueprint {Flask Blueprint} -- Flask Blueprint instance to initialize (Default: {None})
             route {str} -- entry point to which initial Alexa Requests are forwarded (default: {None})
-
-
     """
 
     def __init__(self, app=None, blueprint=None, route=None):
