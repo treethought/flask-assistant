@@ -58,6 +58,9 @@ target/
 # Pycharm
 .idea/
 
+# Virtualenv
+venv/
+
 ###SublimeText###
 
 # cache files for sublime text
