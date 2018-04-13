@@ -4,7 +4,6 @@ import json
 from ruamel import yaml
 
 from .models import Intent, Entity
-from .api import ApiAi
 
 
 
@@ -15,7 +14,7 @@ class SchemaHandler(object):
 
         self.assist = assist
         self.intents = []
-        self.api = ApiAi()
+        self.api = assist.api
         self.object_type = object_type
 
     # File set up
