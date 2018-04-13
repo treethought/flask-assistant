@@ -48,11 +48,11 @@ class Assistant(object):
     Keyword Arguments:
             app {Flask object} -- App instance - created with Flask(__name__) (default: {None})
             route {str} -- entry point to which initial Alexa Requests are forwarded (default: {None})
-
-
+            dev_token {str} - Dialogflow dev access token used to register and retrieve agent resources
+            client_token {str} - Dialogflow client access token required for querying agent
     """
 
-    def __init__(self, app=None, blueprint=None, route=None,dev_token=None,client_token=None):
+    def __init__(self, app=None, blueprint=None, route=None, dev_token=None, client_token=None):
 
         self.app = app
         self.blueprint = blueprint
@@ -63,12 +63,12 @@ class Assistant(object):
         self._intent_defaults = {}
         self._intent_fallbacks = {}
         self._intent_prompts = {}
-        self._intent_events= {}
+        self._intent_events = {}
         self._required_contexts = {}
         self._context_funcs = {}
         self._func_contexts = {}
 
-        self.api = ApiAi(dev_token,client_token)
+        self.api = ApiAi(dev_token, client_token)
 
         if route is None and app is not None:
 
@@ -114,7 +114,6 @@ class Assistant(object):
         # exposing the rule at "/assist" and not "/assist/".
         blueprint.add_url_rule("", view_func=self._flask_assitant_view_func, methods=['POST'])
         # blueprint.jinja_loader = ChoiceLoader([YamlLoader(blueprint, path)])
-
 
     @property
     def request(self):
@@ -245,9 +244,9 @@ class Assistant(object):
         _infodump('Result: Matched {} intent to {} func'.format(self.intent, view_func.__name__))
 
     def _flask_assitant_view_func(self, nlp_result=None, *args, **kwargs):
-        if nlp_result: # pass API query result directly
+        if nlp_result:  # pass API query result directly
             self.request = nlp_result
-        else: # called as webhook
+        else:  # called as webhook
             self.request = self._api_request(verify=False)
 
         _dbgdump(self.request)
@@ -270,7 +269,6 @@ class Assistant(object):
         temp = self.context_manager
         temp.update(self.context_in)
         self.context_manager = temp
-
 
     def _match_view_func(self):
         view_func = None
@@ -362,7 +360,7 @@ class Assistant(object):
         arg_values = self._map_params_to_view_args(arg_names)
         return partial(view_func, *arg_values)
 
-    def _map_params_to_view_args(self, arg_names): # TODO map to correct name
+    def _map_params_to_view_args(self, arg_names):  # TODO map to correct name
         arg_values = []
         mapping = self._intent_mappings.get(self.intent)
         params = self.request['result']['parameters']

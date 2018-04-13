@@ -21,21 +21,17 @@ class ApiAi(object):
         self.versioning = '20161213'
         self.base_url = 'https://api.api.ai/v1/'
 
-        if self._dev_token is None:
-            logger.warn(json.dumps("""No API.AI Developer Access Token set.
-                You will not be able to register or retrieve resources from API.AI"""))
-
-        if self._client_token is None:
-            logger.warn(json.dumps("""No API.AI Client Access Token set. You will be able to query the agent"""))
-
-
     @property
     def _dev_header(self):
+        if self._dev_token is None:
+            raise ValueError('No Dialogflow dev_token set.\nTokens must be passed to the Assistant() constructor or set as enviornment variable')
         return {'Authorization': 'Bearer {}'.format(self._dev_token),
                 'Content-Type': 'application/json'}
 
     @property
     def _client_header(self):
+        if self._client_token is None:
+            raise ValueError('No Dialogflow client_token set.\nTokens must be passed to Assistant() constructor or set as enviornment variable')
         return {'Authorization': 'Bearer {}'.format(self._client_token),
                 'Content-Type': 'application/json; charset=utf-8'}
 
