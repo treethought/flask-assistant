@@ -28,7 +28,9 @@ def gen_templates():
 
 def intents():
     logger.info('Getting Registered Intents...')
-    intents = api.agent_intents
+    filename = file_from_args()
+    assist = get_assistant(filename)
+    intents = assist.api.agent_intents
     for i in intents:
         logger.info(i.name)
     return intents
@@ -36,7 +38,9 @@ def intents():
 
 def entities():
     logger.info('Getting Registered Entities...')
-    ents = api.agent_entities
+    filename = file_from_args()
+    assist = get_assistant(filename)
+    ents = assist.api.agent_entities
     for i in ents:
         logger.info(i.name)
     return ents
@@ -90,7 +94,7 @@ def query():
 
     while True:
         q = input('Enter query...\n')
-        resp = api.post_query(q).json()
+        resp = assist.api.post_query(q).json()
         try:
             print('Matched: {}'.format(resp['result']['metadata']['intentName']))
             print('Params: {}'.format(resp['result']['parameters']))
