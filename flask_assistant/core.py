@@ -250,7 +250,7 @@ class Assistant(object):
         else: # called as webhook
             self.request = self._api_request(verify=False)
 
-        _dbgdump(self.request['result'])
+        _dbgdump(self.request)
 
         self.intent = self.request['result']['metadata']['intentName']
         self.context_in = self.request['result'].get('contexts', [])
