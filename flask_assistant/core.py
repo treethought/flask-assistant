@@ -2,6 +2,7 @@ import inspect
 from functools import wraps, partial
 
 
+import aniso8601
 from flask import current_app, json, request as flask_request, _app_ctx_stack
 from werkzeug.local import LocalProxy
 
@@ -33,6 +34,13 @@ intent = LocalProxy(lambda: find_assistant().intent)
 context_in = LocalProxy(lambda: find_assistant().context_in)
 context_manager = LocalProxy(lambda: find_assistant().context_manager)
 convert_errors = LocalProxy(lambda: find_assistant().convert_errors)
+
+# Converter shorthands for commonly used system entities
+_converter_shorthands = {
+    'date': aniso8601.parse_date,  # Returns date
+    'date-period': aniso8601.parse_interval,  # Returns (date, date)
+    'time': aniso8601.parse_time,  # Returns time
+}
 
 
 class Assistant(object):
@@ -390,7 +398,11 @@ class Assistant(object):
                 value = self._map_arg_from_context(arg_name)
             elif arg_name in convert:
                 # Apply parameter conversion
-                convert_func = convert[arg_name]
+                shorthand_or_function = convert[arg_name]
+                if shorthand_or_function in _converter_shorthands:
+                    convert_func = _converter_shorthands[shorthand_or_function]
+                else:
+                    convert_func = shorthand_or_function
                 try:
                     value = convert_func(value)
                 except Exception as exc:
