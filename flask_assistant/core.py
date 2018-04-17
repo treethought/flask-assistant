@@ -32,6 +32,7 @@ request = LocalProxy(lambda: find_assistant().request)
 intent = LocalProxy(lambda: find_assistant().intent)
 context_in = LocalProxy(lambda: find_assistant().context_in)
 context_manager = LocalProxy(lambda: find_assistant().context_manager)
+convert_errors = LocalProxy(lambda: find_assistant().convert_errors)
 
 
 class Assistant(object):
@@ -154,6 +155,14 @@ class Assistant(object):
     @context_manager.setter
     def context_manager(self, value):
         _app_ctx_stack.top._assist_context_manager = value
+
+    @property
+    def convert_errors(self):
+        return getattr(_app_ctx_stack.top, '_assistant_convert_errors', None)
+
+    @convert_errors.setter
+    def convert_errors(self, value):
+        _app_ctx_stack.top._assistant_convert_errors = value
 
     @property
     def session_id(self):
@@ -364,7 +373,10 @@ class Assistant(object):
     def _map_params_to_view_args(self, arg_names):  # TODO map to correct name
         arg_values = []
         mapping = self._intent_mappings.get(self.intent)
+        convert = self._intent_converts.get(self.intent)
         params = self.request['result']['parameters']
+
+        convert_errors = {}
 
         for arg_name in arg_names:
             entity_mapping = mapping.get(arg_name, arg_name)
@@ -376,8 +388,16 @@ class Assistant(object):
 
             if not value:  # params not declared, so must look in contexts
                 value = self._map_arg_from_context(arg_name)
+            elif arg_name in convert:
+                # Apply parameter conversion
+                convert_func = convert[arg_name]
+                try:
+                    value = convert_func(value)
+                except Exception as exc:
+                    convert_errors[arg_name] = exc
             arg_values.append(value)
 
+        self.convert_errors = convert_errors
         return arg_values
 
     def _map_arg_from_context(self, arg_name):
