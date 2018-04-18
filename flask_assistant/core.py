@@ -39,7 +39,7 @@ convert_errors = LocalProxy(lambda: find_assistant().convert_errors)
 _converter_shorthands = {
     'date': aniso8601.parse_date,  # Returns date
     'date-period': aniso8601.parse_interval,  # Returns (date, date)
-    'time': aniso8601.parse_time,  # Returns time
+    'time': aniso8601.parse_time  # Returns time
 }
 
 
