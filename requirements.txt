@@ -4,6 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
+aniso8601==3.0.0
 click==6.7                # via flask
 Flask==0.12
 itsdangerous==0.24        # via flask
