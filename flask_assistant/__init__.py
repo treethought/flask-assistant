@@ -10,7 +10,8 @@ from flask_assistant.core import (
     Assistant,
     context_manager,
     intent,
-    request
+    request,
+    access_token
 )
 
 from flask_assistant.response import ask, tell, event, build_item, permission
