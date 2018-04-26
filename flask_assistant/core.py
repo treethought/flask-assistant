@@ -34,6 +34,7 @@ def find_assistant():  # Taken from Flask-ask courtesy of @voutilad
 
 request = LocalProxy(lambda: find_assistant().request)
 intent = LocalProxy(lambda: find_assistant().intent)
+access_token = LocalProxy(lambda: find_assistant().access_token)
 context_in = LocalProxy(lambda: find_assistant().context_in)
 context_manager = LocalProxy(lambda: find_assistant().context_manager)
 convert_errors = LocalProxy(lambda: find_assistant().convert_errors)
@@ -145,6 +146,15 @@ class Assistant(object):
     @intent.setter
     def intent(self, value):
         _app_ctx_stack.top._assist_intent = value
+
+    @property
+    def access_token(self):
+        """Local proxy referring to the OAuth token for linked accounts."""
+        return getattr(_app_ctx_stack.top, '_assist_access_token', None)
+
+    @access_token.setter
+    def access_token(self, value):
+        _app_ctx_stack.top._assist_access_token = value
 
     @property
     def context_in(self):
@@ -274,6 +284,11 @@ class Assistant(object):
 
         self.intent = self.request['result']['metadata']['intentName']
         self.context_in = self.request['result'].get('contexts', [])
+
+        # Get access token from request
+        user_obj = self.request['originalRequest']['data']['user']
+        self.access_token = user_obj.get('accessToken')
+
         self._update_contexts()
 
         view_func = self._match_view_func()
