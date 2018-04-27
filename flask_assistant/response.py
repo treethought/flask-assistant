@@ -1,3 +1,5 @@
+import re
+
 from flask import json, make_response, current_app
 
 
@@ -14,6 +16,11 @@ class _Response(object):
                 "speech": speech
             }
         ]
+
+        # If no display_text given use the speech output,
+        # but strip the SSML tags.
+        if not display_text:
+            display_text = strip_ssml(speech)
 
         self._response = {
             'speech': speech,
@@ -302,3 +309,19 @@ class permission(_Response):
                 'permissions': permissions,
             }
         }
+
+
+def strip_ssml(ssml_string):
+    """Strips all SSML tags from a string.
+
+    Can be used to clean up rendered SSML responses before displaying them to
+    the user.
+
+    Arguments:
+        ssml_string {str} -- A string that may or may not contain SSML tags.
+
+    Returns:
+        str: The string with all tags (everything between '<' and '>') replaced
+            by an empty string.
+    """
+    return re.sub(r'<.*?>', '', ssml_string)

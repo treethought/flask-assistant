@@ -19,6 +19,9 @@ To import the repsonse types:
     from flask_assistant import ask, tell, event, build_item
 
 
+Each response must get a speech text as its first argument and may get a separate text to display on GUI surfaces as a second argument.
+If no display text is given the speech text will be used, but with all SSML tags stripped.
+
 ask
 ---
 
