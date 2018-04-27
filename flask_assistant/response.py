@@ -324,4 +324,4 @@ def strip_ssml(ssml_string):
         str: The string with all tags (everything between '<' and '>') replaced
             by an empty string.
     """
-    return re.sub(f'<.*?>', '', ssml_string)
+    return re.sub(r'<.*?>', '', ssml_string)
