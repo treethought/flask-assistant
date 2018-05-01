@@ -3,11 +3,12 @@
 These tests use the unittest.mock mechanism to provide a simple Assistant
 instance for the _Response initialization.
 """
-from unittest.mock import patch
-
 from flask import Flask
 from flask_assistant import Assistant
 from flask_assistant.response import _Response
+import pytest
+
+patch = pytest.importorskip('unittest.mock.patch')
 
 
 @patch('flask_assistant.response.current_app')
