@@ -8,7 +8,7 @@ class _Response(object):
 
     def __init__(self, speech, display_text=None):
 
-        self._speech = escape(speech)
+        self._speech = escape(speech) if speech is not None else speech
         self._integrations = current_app.config.get('INTEGRATIONS', [])
         self._messages = [
             {
