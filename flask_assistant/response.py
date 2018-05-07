@@ -1,5 +1,3 @@
-from xml.sax.saxutils import escape
-
 from flask import json, make_response, current_app
 
 
@@ -8,17 +6,17 @@ class _Response(object):
 
     def __init__(self, speech, display_text=None):
 
-        self._speech = escape(speech) if speech is not None else speech
+        self._speech = speech
         self._integrations = current_app.config.get('INTEGRATIONS', [])
         self._messages = [
             {
                 "type": 0,  # required for supporting API w/ other integrations
-                "speech": self._speech
+                "speech": speech
             }
         ]
 
         self._response = {
-            'speech': self._speech,
+            'speech': speech,
             'displayText': display_text,
             'messages': self._messages,
             'data': {
