@@ -286,8 +286,9 @@ class Assistant(object):
         self.context_in = self.request['result'].get('contexts', [])
 
         # Get access token from request
-        user_obj = self.request['originalRequest']['data']['user']
-        self.access_token = user_obj.get('accessToken')
+        original_request = self.request.get('originalRequest')
+        if original_request:
+            self.access_token = original_request['data']['user'].get('accessToken')
 
         self._update_contexts()
 
