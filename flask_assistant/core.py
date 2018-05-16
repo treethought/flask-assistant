@@ -455,7 +455,7 @@ class Assistant(object):
         else:
             msg = 'No view matched for intent {} with context '.format(self.intent)
             msg += '(Registered context views: {}, '.format(self._context_views)
-            msg += 'Intent action funcs: {})'.format(self._intent_action_funcs[self.intent])
+            msg += 'Intent action funcs: {})'.format(self._intent_action_funcs[self.intent].__name__)
             _errordump(msg)
 
     @property
