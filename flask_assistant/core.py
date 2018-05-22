@@ -453,7 +453,7 @@ class Assistant(object):
         if choice:
             return choice
         else:
-            msg = 'No view matched for intent {} with context '.format(self.intent)
+            msg = 'No view matched for intent {} with contexts {}'.format(self.intent, self.context_in)
             msg += '(Registered context views: {}, '.format(self._context_views)
             msg += 'Intent action funcs: {})'.format([f.__name__ for f in self._intent_action_funcs[self.intent]])
             _errordump(msg)
