@@ -475,7 +475,7 @@ class Assistant(object):
         return missing
 
     def _func_args(self, f):
-        argspec = inspect.getargspec(f)
+        argspec = inspect.getfullargspec(f)
         return argspec.args
 
     def _map_intent_to_view_func(self, view_func):
