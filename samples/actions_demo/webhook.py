@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 from flask import Flask
-from flask_assistant import Assistant, ask, tell, build_item
+from flask_assistant import Assistant, ask, tell, build_item, context_manager, event
 
 
 app = Flask(__name__)
@@ -74,6 +74,16 @@ def show_card():
 
 @assist.action('ShowList')
 def action_func():
+
+    #Checking if option is selected
+    if(context_manager.get('actions_intent_option')) is not None:
+        option=context_manager.get('actions_intent_option').get('OPTION')#getting the key sent
+        if(option=="flask_assistant"):
+            return event('assistCarousel')#returning events
+        elif option=='flask_ask':
+            return event('fAsk')#returning events
+        elif option=='flask':
+            return event('fCard')#returning events       
 
     # Basic speech/text response
     resp = ask("Select Flask-Assistant for a carousel")
