@@ -287,7 +287,7 @@ class Assistant(object):
 
         # Get access token from request
         original_request = self.request.get('originalRequest')
-        if original_request:
+        if original_request and original_request['data'].get('user'):
             self.access_token = original_request['data']['user'].get('accessToken')
 
         self._update_contexts()
