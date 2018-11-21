@@ -326,14 +326,9 @@ class Assistant(object):
 
         if not view_func:
             view_func = self._intent_action_funcs[self.intent][0]
-            _errordump('No view func matched')
-            _errordump({
-                'intent recieved': self.intent,
-                'recieved parameters': self.request['result']['parameters'],
-                'required args': self._func_args(view_func),
-                'context_in': self.context_in,
-                'matched view_func': view_func.__name__
-            })
+            msg = 'No view func matched. Received intent {} with parameters {}. '.format(self.intent, self.request['result']['parameters'])
+            msg += 'Required args {}, context_in {}, matched view func {}.'.format(self._func_args(view_func), self.context_in, view_func.__name__)
+            _errordump(msg)
 
         return view_func
 
@@ -458,11 +453,10 @@ class Assistant(object):
         if choice:
             return choice
         else:
-            _errordump('')
-            _errordump('No view matched for {} with context'.format(self.intent))
-            _errordump('intent: {}'.format(self.intent))
-            _errordump('possible views: {}'.format(self._context_views))
-            _errordump('intent action funcs: {}'.format(self._intent_action_funcs[self.intent]))
+            msg = 'No view matched for intent {} with contexts {}'.format(self.intent, self.context_in)
+            msg += '(Registered context views: {}, '.format(self._context_views)
+            msg += 'Intent action funcs: {})'.format([f.__name__ for f in self._intent_action_funcs[self.intent]])
+            _errordump(msg)
 
     @property
     def _missing_params(self):  # TODO: fill missing slot from default
