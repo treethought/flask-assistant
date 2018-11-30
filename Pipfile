@@ -1,0 +1,32 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pytest = "*"
+pytest-cov = "*"
+tox = "*"
+black = "*"
+
+[packages]
+aniso8601 = "*"
+certifi = "*"
+chardet = "*"
+click = "*"
+idna = "*"
+itsdangerous = "*"
+requests = "*"
+urllib3 = "*"
+Flask = "*"
+Jinja2 = "*"
+MarkupSafe = "*"
+"ruamel.yaml" = "*"
+Werkzeug = "*"
+flask-assistant = {editable = true,path = "."}
+
+[requires]
+python_version = "3.6"
+
+[pipenv]
+allow_prereleases = true
