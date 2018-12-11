@@ -10,23 +10,7 @@ tox = "*"
 black = "*"
 
 [packages]
-aniso8601 = "*"
-certifi = "*"
-chardet = "*"
-click = "*"
-idna = "*"
-itsdangerous = "*"
-requests = "*"
-urllib3 = "*"
-Flask = "*"
-Jinja2 = "*"
-MarkupSafe = "*"
-"ruamel.yaml" = "*"
-Werkzeug = "*"
 flask-assistant = {editable = true,path = "."}
-
-[requires]
-python_version = "3.6"
 
 [pipenv]
 allow_prereleases = true
