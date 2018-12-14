@@ -10,7 +10,7 @@ from werkzeug.local import LocalProxy
 
 from flask_assistant import logger
 from flask_assistant.response import _Response
-from flask_assistant.manager import ContextManager
+from flask_assistant.manager import ContextManager, parse_context_name
 from api_ai.api import ApiAi
 from io import StringIO
 
@@ -310,7 +310,7 @@ class Assistant(object):
     def _match_view_func(self):
         view_func = None
 
-        if self.hasLiveContext():
+        if self.has_live_context():
             view_func = self._choose_context_view()
 
         if not view_func and self._missing_params:
@@ -332,9 +332,10 @@ class Assistant(object):
 
         return view_func
 
-    def hasLiveContext(self):
+    def has_live_context(self):
         for context in self.context_in:
-            if context['lifespan'] > 0:
+            # lifespanCount appears to be missing if context expired
+            if context.get("lifespanCount", 0) > 0:
                 return True
 
     def run_aws_lambda(self, event):
@@ -426,7 +427,7 @@ class Assistant(object):
     def _context_satified(self, view_func):
         met = []
         requires = list(self._func_contexts[view_func])
-        recieved_contexts = [c['name'] for c in self.context_in]
+        recieved_contexts = [parse_context_name(c["name"]) for c in self.context_in]
 
         for req_context in requires:
             if req_context in recieved_contexts:

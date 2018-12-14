@@ -1,20 +1,23 @@
 
+def parse_context_name(context_obj):
+    """Parses context name from Dialogflow's contextsession prefixed context path"""
+    return context_obj["name"].split("/contexts/")[1]
+
 
 class Context(dict):
     """docstring for _Context"""
+
     def __init__(self, name, parameters={}, lifespan=5):
 
         self.name = name
         self.parameters = parameters
         self.lifespan = lifespan
-
-
+        self._full_name = None
 
     # def __getattr__(self, param):
     #     if param in ['name', 'parameters', 'lifespan']:
     #         return getattr(self, param)
     #     return self.parameters[param]
-
 
     def set(self, param_name, value):
         self.parameters[param_name] = value
@@ -28,13 +31,16 @@ class Context(dict):
     def __repr__(self):
         return self.name
 
-
     @property
     def serialize(self):
-        return {"name": self.name, "lifespan": self.lifespan, "parameters": self.parameters}
-    
-class ContextManager():
+        return {
+            "name": self._full_name,
+            "lifespanCount": self.lifespan,
+            "parameters": self.parameters,
+        }
 
+
+class ContextManager:
     def __init__(self):
         self._cache = {}
 
@@ -56,19 +62,16 @@ class ContextManager():
 
     def update(self, contexts_json):
         for obj in contexts_json:
-            context = Context(obj['name'])  # TODO
-            context.lifespan = obj['lifespan']
-            context.parameters = obj['parameters']
+            short_name = parse_context_name(obj)
+            context = Context(short_name)
+            context._full_name = obj["name"]
+            context.lifespan = obj.get("lifespanCount", 0)
+            context.parameters = obj["parameters"]
             self._cache[context.name] = context
-
 
     @property
     def status(self):
-        return {
-            'Active contexts': self.active,
-            'Expired contexts': self.expired,
-        }
-
+        return {"Active contexts": self.active, "Expired contexts": self.expired}
 
     @property
     def active(self):
@@ -77,7 +80,3 @@ class ContextManager():
     @property
     def expired(self):
         return [self._cache[c] for c in self._cache if self._cache[c].lifespan == 0]
-
-    
-
-
