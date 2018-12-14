@@ -2,52 +2,52 @@ from flask import json, make_response, current_app
 
 
 class _Response(object):
-    """docstring for _Response"""
+    """Base webhook response to be returned to Dialogflow"""
 
-    def __init__(self, speech, display_text=None):
+    def __init__(self, speech):
 
         self._speech = speech
-        self._integrations = current_app.config.get('INTEGRATIONS', [])
-        self._messages = [
-            {
-                "type": 0,  # required for supporting API w/ other integrations
-                "speech": speech
-            }
-        ]
+        self._integrations = current_app.config.get("INTEGRATIONS", [])
+        self._messages = []
 
         self._response = {
-            'speech': speech,
-            'displayText': display_text,
-            'messages': self._messages,
-            'data': {
-                'google': {  # TODO: may be depreciated
+            "fulfillmentText": speech,
+            "fulfillmentMessages": self._messages,
+            "payload": {
+                "google": {  # TODO: may be depreciated
                     "expect_user_response": True,
                     "is_ssml": True,
                     "permissions_request": None,
                 }
             },
-            'contextOut': [],
-            'source': 'webhook'
-
+            "outputContexts": [],
+            "source": "webhook",
+            "followupEventInput": None,  # TODO
         }
 
-        if current_app.config.get('ASSIST_ACTIONS_ON_GOOGLE'):
-            self._integrate_with_actions(display_text)
+        if current_app.config.get("ASSIST_ACTIONS_ON_GOOGLE"):
+            self._integrate_with_actions(speech)
 
-    def _integrate_with_actions(self, display_text=None):
+    def _integrate_with_actions(self, speech=None):
 
-        self._messages.append({
-            "type": "simple_response",   # For actions on google -
-            "platform": "google",  # provides the required simple response for home/mobile devices
-            "textToSpeech": self._speech,
-            "displayText": display_text
-        })
+        self._messages.append(
+            {"platform": "ACTIONS_ON_GOOGLE", "text": {"text": [speech]}}
+        )
+
+        self._messages.append(
+            {
+                "type": "simple_response",  # For actions on google -
+                "platform": "google",  # provides the required simple response for home/mobile devices
+                "textToSpeech": self._speech,
+                # "displayText": display_text,
+            }
+        )
 
     def _include_contexts(self):
         from flask_assistant import core
 
         for context in core.context_manager.active:
-            self._response['contextOut'].append(context.serialize)
+            self._response["outputContexts"].append(context.serialize)
 
     def render_response(self):
         from flask_assistant import core
@@ -56,7 +56,8 @@ class _Response(object):
         core._dbgdump(self._response)
         resp = json.dumps(self._response, indent=4)
         resp = make_response(resp)
-        resp.headers['Content-Type'] = 'application/json'
+        resp.headers["Content-Type"] = "application/json"
+
         return resp
 
     def suggest(self, *suggestions):
@@ -73,14 +74,10 @@ class _Response(object):
         """
         items = []
         for s in suggestions:
-            items.append({'title': s})
+            items.append({"title": s})
 
         self._messages.append(
-            {
-                "type": "suggestion_chips",
-                "platform": "google",
-                "suggestions": items
-            }
+            {"type": "suggestion_chips", "platform": "google", "suggestions": items}
         )
         return self
 
@@ -91,20 +88,31 @@ class _Response(object):
                 "type": "link_out_chip",
                 "platform": "google",
                 "destinationName": name,
-                "url": url
+                "url": url,
             }
         )
         return self
 
-    def card(self, text, title=None, img_url=None, img_alt=None, subtitle=None, link=None, linkTitle=None):
+    def card(
+        self,
+        text,
+        title=None,
+        img_url=None,
+        img_alt=None,
+        subtitle=None,
+        link=None,
+        linkTitle=None,
+    ):
         self._card_idx = len(self._messages)
 
-        links = [] #seems like only one link is supported at a time, despite this being a list
+        links = (
+            []
+        )  # seems like only one link is supported at a time, despite this being a list
         if link and linkTitle:
             link_dict = {}
-            link_dict['title'] = linkTitle
+            link_dict["title"] = linkTitle
             url_action = {"url": link}
-            link_dict['openUrlAction'] = url_action
+            link_dict["openUrlAction"] = url_action
             links.append(link_dict)
         self._messages.append(
             {
@@ -112,11 +120,10 @@ class _Response(object):
                 "platform": "google",
                 "title": title,
                 "formattedText": text,
-                "image": {'url': img_url or '',
-                          'accessibilityText': img_alt
-                          },
-                "buttons": links
-            })
+                "image": {"url": img_url or "", "accessibilityText": img_alt},
+                "buttons": links,
+            }
+        )
 
         return self
 
@@ -124,10 +131,12 @@ class _Response(object):
         """Presents the user with a vertical list of multiple items.
 
         Allows the user to select a single item.
-        Selection generates a user query (chat bubble) containing the title of the list item
+        Selection generates a user query containing the title of the list item
 
-        *Note* Returns a completely new object, and does not modify the existing resposne object
-                Therefore, to add items, must be assigned to new variable or call the method directly after initializing list
+        *Note* Returns a completely new object,
+        and does not modify the existing response object
+        Therefore, to add items, must be assigned to new variable
+        or call the method directly after initializing list
 
         example usage:
 
@@ -154,17 +163,18 @@ class _Response(object):
         return carousel
 
 
-def build_item(title, key=None, synonyms=None, description=None, img_url=None, alt_text=None):
+def build_item(
+    title, key=None, synonyms=None, description=None, img_url=None, alt_text=None
+):
     """Builds an item that may be added to List or Carousel"""
     item = {
-        'optionInfo': {
-            'key': key or title,
-            'synonyms': synonyms or []
+        "optionInfo": {"key": key or title, "synonyms": synonyms or []},
+        "title": title,
+        "description": description,
+        "image": {
+            "url": img_url or "",
+            "accessibilityText": alt_text or "{} img".format(title),
         },
-        'title': title,
-        'description': description,
-        'image': {'url': img_url or '',
-                  'accessibilityText': alt_text or '{} img'.format(title)}
     }
     return item
 
@@ -186,14 +196,16 @@ class _CardWithItems(_Response):
     def add_item(self, title, key, synonyms=None, description=None, img_url=None):
         """Adds item to a list or carousel card.
 
-        A list must contain at least 2 items and each item requires atitle and object key.
+        A list must contain at least 2 items, each requiring a title and object key.
 
         Arguments:
             title {str} -- Name of the item object
-            key {str} -- Key refering to the item. This string will be used to send a query to your app if selected
+            key {str} -- Key refering to the item.
+                        This string will be used to send a query to your app if selected
 
         Keyword Arguments:
-            synonyms {list} -- Words and phrases the user may send to select the item (default: {None})
+            synonyms {list} -- Words and phrases the user may send to select the item
+                              (default: {None})
             description {str} -- A description of the item (default: {None})
             img_url {str} -- URL of the image to represent the item (default: {None})
         """
@@ -218,12 +230,12 @@ class _ListSelector(_CardWithItems):
         super(_ListSelector, self).__init__(speech, items)
 
     def _add_message(self):
-        self._response['messages'].append(
+        self._response["messages"].append(
             {
                 "type": "list_card",
                 "platform": "google",
                 "title": self._title,
-                "items": self._items
+                "items": self._items,
             }
         )
 
@@ -236,34 +248,32 @@ class _CarouselCard(_CardWithItems):
 
     def _add_message(self):
 
-        self._response['messages'].append(
-            {
-                "type": "carousel_card",
-                "platform": "google",
-                "items": self._items
-            }
+        self._response["messages"].append(
+            {"type": "carousel_card", "platform": "google", "items": self._items}
         )
 
 
 class tell(_Response):
-    def __init__(self, speech, display_text=None):
-        super(tell, self).__init__(speech, display_text)
-        self._response['data']['google']['expect_user_response'] = False
+    def __init__(self, speech):
+        super(tell, self).__init__(speech)
+        self._response["payload"]["google"]["expect_user_response"] = False
 
 
 class ask(_Response):
-    def __init__(self, speech, display_text=None):
-        """Returns a response to the user and keeps the current session alive. Expects a response from the user.
+    def __init__(self, speech):
+        """Returns a response to the user and keeps the current session alive.
+        Expects a response from the user.
 
         Arguments:
             speech {str} --  Text to be pronounced to the user / shown on the screen
         """
-        super(ask, self).__init__(speech, display_text)
-        self._response['data']['google']['expect_user_response'] = True
+        super(ask, self).__init__(speech)
+        self._response["payload"]["google"]["expect_user_response"] = True
 
     def reprompt(self, prompt):
-        self._response['data']['google'][
-            'no_input_prompts'] = [{'text_to_speech': prompt}]
+        self._response["payload"]["google"]["no_input_prompts"] = [
+            {"text_to_speech": prompt}
+        ]
 
         return self
 
@@ -277,11 +287,8 @@ class event(_Response):
     def __init__(self, event_name, **kwargs):
         super(event, self).__init__(speech=None)
 
-        self._response['followupEvent'] = {
+        self._response["followupEvent"] = {"name": event_name, "parameters": kwargs}
 
-            "name": event_name,
-            "data": kwargs
-        }
 
 class permission(_Response):
     """Returns a permission request to the user.
@@ -294,11 +301,11 @@ class permission(_Response):
     def __init__(self, permissions, context=None):
         super(permission, self).__init__(speech=None)
         self._messages[:] = []
-        self._response['data']['google']['systemIntent'] = {
-            'intent': 'actions.intent.PERMISSION',
-            'data': {
-                '@type': 'type.googleapis.com/google.actions.v2.PermissionValueSpec',
-                'optContext': context,
-                'permissions': permissions,
-            }
+        self._response["payload"]["google"]["systemIntent"] = {
+            "intent": "actions.intent.PERMISSION",
+            "data": {
+                "@type": "type.googleapis.com/google.actions.v2.PermissionValueSpec",
+                "optContext": context,
+                "permissions": permissions,
+            },
         }
