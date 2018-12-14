@@ -282,13 +282,13 @@ class Assistant(object):
 
         _dbgdump(self.request)
 
-        self.intent = self.request['result']['metadata']['intentName']
-        self.context_in = self.request['result'].get('contexts', [])
+        self.intent = self.request["queryResult"]["intent"]["displayName"]
+        self.context_in = self.request["queryResult"].get("outputContexts", [])
 
         # Get access token from request
-        original_request = self.request.get('originalRequest')
-        if original_request and original_request['data'].get('user'):
-            self.access_token = original_request['data']['user'].get('accessToken')
+        original_request = self.request.get("originalDetectIntentRequest")
+        if original_request and original_request.get("user"):
+            self.access_token = original_request["user"].get("accessToken")
 
         self._update_contexts()
 
@@ -460,10 +460,11 @@ class Assistant(object):
 
     @property
     def _missing_params(self):  # TODO: fill missing slot from default
-        params = self.request['result']['parameters']
+        params = self.request["queryResult"]["parameters"]
+        all_present = self.request["queryResult"]["allRequiredParamsPresent"]
         missing = []
         for p_name in params:
-            if params[p_name] == '':
+            if params[p_name] == "":
                 missing.append(p_name)
 
         return missing
@@ -486,7 +487,7 @@ class Assistant(object):
         arg_values = []
         mapping = self._intent_mappings.get(self.intent)
         convert = self._intent_converts.get(self.intent)
-        params = self.request['result']['parameters']
+        params = self.request["queryResult"]["parameters"]
 
         convert_errors = {}
 
