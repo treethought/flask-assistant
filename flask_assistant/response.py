@@ -92,33 +92,26 @@ class _Response(object):
     def card(
         self,
         text,
-        title=None,
+        title,
         img_url=None,
         img_alt=None,
         subtitle=None,
         link=None,
-        linkTitle=None,
+        link_title=None,
     ):
-        self._card_idx = len(self._messages)
 
-        links = (
-            []
-        )  # seems like only one link is supported at a time, despite this being a list
-        if link and linkTitle:
-            link_dict = {}
-            link_dict["title"] = linkTitle
-            url_action = {"url": link}
-            link_dict["openUrlAction"] = url_action
-            links.append(link_dict)
+        card_payload = {"title": title, "subtitle": subtitle, "formattedText": text}
+
+        if link and link_title:
+            btn_payload = [{"title": link_title, "openUriAction": {"uri": link}}]
+            card_payload["buttons"] = btn_payload
+
+        if img_url:
+            img_payload = {"imageUri": img_url, "accessibilityText": img_alt or img_url}
+            card_payload["image"] = img_payload
+
         self._messages.append(
-            {
-                "type": "basic_card",
-                "platform": "google",
-                "title": title,
-                "formattedText": text,
-                "image": {"url": img_url or "", "accessibilityText": img_alt},
-                "buttons": links,
-            }
+            {"platform": "ACTIONS_ON_GOOGLE", "basicCard": card_payload}
         )
 
         return self
