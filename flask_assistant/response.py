@@ -53,7 +53,7 @@ class _Response(object):
 
         return resp
 
-    def suggest(self, replies):
+    def suggest(self, *replies):
         """Use suggestion chips to hint at responses to continue or pivot the conversation"""
         chips = []
         for r in replies:
