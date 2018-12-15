@@ -8,7 +8,7 @@ class _Response(object):
 
         self._speech = speech
         self._integrations = current_app.config.get("INTEGRATIONS", [])
-        self._messages = []
+        self._messages = [{"text": {"text": [speech]}}]
 
         self._response = {
             "fulfillmentText": speech,
@@ -25,21 +25,14 @@ class _Response(object):
             "followupEventInput": None,  # TODO
         }
 
-        if current_app.config.get("ASSIST_ACTIONS_ON_GOOGLE"):
+        if "ACTIONS_ON_GOOGLE" in self._integrations:
             self._integrate_with_actions(speech)
 
     def _integrate_with_actions(self, speech=None):
-
-        self._messages.append(
-            {"platform": "ACTIONS_ON_GOOGLE", "text": {"text": [speech]}}
-        )
-
         self._messages.append(
             {
-                "type": "simple_response",  # For actions on google -
-                "platform": "google",  # provides the required simple response for home/mobile devices
-                "textToSpeech": self._speech,
-                # "displayText": display_text,
+                "platform": "ACTIONS_ON_GOOGLE",
+                "simpleResponses": {"simpleResponses": [{"textToSpeech": speech}]},
             }
         )
 
@@ -60,25 +53,28 @@ class _Response(object):
 
         return resp
 
-    def suggest(self, *suggestions):
-        """Use suggestion chips to hint at responses to continue or pivot the conversation
+    def suggest(self, replies):
+        """Use suggestion chips to hint at responses to continue or pivot the conversation"""
+        chips = []
+        for r in replies:
+            chips.append({"title": r})
 
-        Never repeat the options presented in the list as suggestion chips.
-        Chips in the list context are use to pivot the conversation (not for choice selection).
+        # NOTE: both of these formats work in the dialogflow console,
+        # but only the first (suggestions) appears in actual Google Assistant
 
-        Arguments:
-            *suggestions {str} -- [description]
-
-        Returns:
-            [type] -- [description]
-        """
-        items = []
-        for s in suggestions:
-            items.append({"title": s})
-
+        # native chips for GA
         self._messages.append(
-            {"type": "suggestion_chips", "platform": "google", "suggestions": items}
+            {"platform": "ACTIONS_ON_GOOGLE", "suggestions": {"suggestions": chips}}
         )
+
+        # quick replies for other platforms
+        self._messages.append(
+            {
+                "platform": "ACTIONS_ON_GOOGLE",
+                "quickReplies": {"title": None, "quickReplies": replies},
+            }
+        )
+
         return self
 
     def link_out(self, name, url):
