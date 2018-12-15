@@ -81,12 +81,11 @@ class _Response(object):
         """Presents a chip similar to suggestion, but instead links to a url"""
         self._messages.append(
             {
-                "type": "link_out_chip",
-                "platform": "google",
-                "destinationName": name,
-                "url": url,
+                "platform": "ACTIONS_ON_GOOGLE",
+                "linkOutSuggestion": {"destinationName": name, "uri": url},
             }
         )
+
         return self
 
     def card(
