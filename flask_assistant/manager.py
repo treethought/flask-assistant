@@ -66,7 +66,7 @@ class ContextManager:
             context = Context(short_name)
             context._full_name = obj["name"]
             context.lifespan = obj.get("lifespanCount", 0)
-            context.parameters = obj["parameters"]
+            context.parameters = obj.get("parameters", {})
             self._cache[context.name] = context
 
     @property
