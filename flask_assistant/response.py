@@ -156,11 +156,11 @@ def build_item(
 ):
     """Builds an item that may be added to List or Carousel"""
     item = {
-        "optionInfo": {"key": key or title, "synonyms": synonyms or []},
+        "info": {"key": key or title, "synonyms": synonyms or []},
         "title": title,
         "description": description,
         "image": {
-            "url": img_url or "",
+            "imageUri": img_url or "",
             "accessibilityText": alt_text or "{} img".format(title),
         },
     }
@@ -218,26 +218,23 @@ class _ListSelector(_CardWithItems):
         super(_ListSelector, self).__init__(speech, items)
 
     def _add_message(self):
-        self._response["messages"].append(
+        self._messages.append(
             {
-                "type": "list_card",
-                "platform": "google",
-                "title": self._title,
-                "items": self._items,
+                "platform": "ACTIONS_ON_GOOGLE",
+                "listSelect": {"title": self._title, "items": self._items},
             }
         )
 
 
-class _CarouselCard(_CardWithItems):
+class _CarouselCard(_ListSelector):
     """Subclass of _CardWithItems used to build Carousel cards."""
 
     def __init__(self, speech, items=None):
         super(_CarouselCard, self).__init__(speech, items)
 
     def _add_message(self):
-
-        self._response["messages"].append(
-            {"type": "carousel_card", "platform": "google", "items": self._items}
+        self._messages.append(
+            {"platform": "ACTIONS_ON_GOOGLE", "carouselSelect": {"items": self._items}}
         )
 
 
