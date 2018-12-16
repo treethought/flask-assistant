@@ -270,9 +270,12 @@ class event(_Response):
     """
 
     def __init__(self, event_name, **kwargs):
-        super(event, self).__init__(speech=None)
+        super(event, self).__init__(speech="")
 
-        self._response["followupEvent"] = {"name": event_name, "parameters": kwargs}
+        self._response["followupEventInput"] = {
+            "name": event_name,
+            "parameters": kwargs,
+        }
 
 
 class permission(_Response):
