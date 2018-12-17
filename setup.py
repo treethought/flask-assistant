@@ -11,7 +11,7 @@ with open("./README.rst", "r") as f:
 
 setup(
     name="Flask-Assistant",
-    version="0.3.1",
+    version="0.3.2",
     url="https://github.com/treethought/flask-assistant",
     license="Apache 2.0",
     author="Cam Sweeney",
