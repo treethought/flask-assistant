@@ -7,7 +7,6 @@ verify_ssl = true
 pytest = "*"
 pytest-cov = "*"
 tox = "*"
-black = "*"
 
 [packages]
 flask-assistant = {editable = true,path = "."}

@@ -15,44 +15,50 @@ class ApiAi(object):
 
     def __init__(self, dev_token=None, client_token=None):
 
-
-        self._dev_token = dev_token or os.getenv('DEV_ACCESS_TOKEN')
-        self._client_token = client_token or os.getenv('CLIENT_ACCESS_TOKEN')
-        self.versioning = '20161213'
-        self.base_url = 'https://api.api.ai/v1/'
+        self._dev_token = dev_token or os.getenv("DEV_ACCESS_TOKEN")
+        self._client_token = client_token or os.getenv("CLIENT_ACCESS_TOKEN")
+        self.base_url = "https://dialogflow.googleapis.com/v2"
 
     @property
     def _dev_header(self):
         if self._dev_token is None:
-            raise ValueError('No Dialogflow dev_token set.\nTokens must be passed to the Assistant() constructor or set as enviornment variable')
-        return {'Authorization': 'Bearer {}'.format(self._dev_token),
-                'Content-Type': 'application/json'}
+            raise ValueError(
+                "No Dialogflow dev_token set.\nTokens must be passed to the Assistant() constructor or set as enviornment variable"
+            )
+        return {
+            "Authorization": "Bearer {}".format(self._dev_token),
+            "Content-Type": "application/json",
+        }
 
     @property
     def _client_header(self):
         if self._client_token is None:
-            raise ValueError('No Dialogflow client_token set.\nTokens must be passed to Assistant() constructor or set as enviornment variable')
-        return {'Authorization': 'Bearer {}'.format(self._client_token),
-                'Content-Type': 'application/json; charset=utf-8'}
+            raise ValueError(
+                "No Dialogflow client_token set.\nTokens must be passed to Assistant() constructor or set as enviornment variable"
+            )
+        return {
+            "Authorization": "Bearer {}".format(self._client_token),
+            "Content-Type": "application/json; charset=utf-8",
+        }
 
-    def _intent_uri(self, intent_id=''):
-        if intent_id != '':
-            intent_id = '/' + intent_id
-        return '{}intents{}?v={}'.format(self.base_url, intent_id, self.versioning)
+    def _intent_uri(self, intent_id=""):
+        if intent_id != "":
+            intent_id = "/" + intent_id
+        return "{}intents{}?v={}".format(self.base_url, intent_id, self.versioning)
 
-    def _entity_uri(self, entity_id=''):
-        if entity_id != '':
-            entity_id = '/' + entity_id
-        return '{}entities{}?v={}'.format(self.base_url, entity_id, self.versioning)
+    def _entity_uri(self, entity_id=""):
+        if entity_id != "":
+            entity_id = "/" + entity_id
+        return "{}entities{}?v={}".format(self.base_url, entity_id, self.versioning)
 
     @property
     def _query_uri(self):
-        return '{}query?v={}'.format(self.base_url, self.versioning)
+        return "{}query?v={}".format(self.base_url, self.versioning)
 
     def _get(self, endpoint):
         response = requests.get(endpoint, headers=self._dev_header)
         response.raise_for_status
-        logger.debug('Response from {}: {}'.format(endpoint, response))
+        logger.debug("Response from {}: {}".format(endpoint, response))
         return response.json()
 
     def _post(self, endpoint, data):
@@ -73,7 +79,7 @@ class ApiAi(object):
         endpoint = self._intent_uri()
         intents = self._get(endpoint)  # should be list of dicts
         if isinstance(intents, dict):  # if error: intents = {status: {error}}
-            raise Exception(intents['status'])
+            raise Exception(intents["status"])
 
         return [Intent(intent_json=i) for i in intents]
 
@@ -100,7 +106,7 @@ class ApiAi(object):
         endpoint = self._entity_uri()
         entities = self._get(endpoint)  # should be list of dicts
         if isinstance(entities, dict):  # error: entities = {status: {error}}
-            raise Exception(entities['status'])
+            raise Exception(entities["status"])
 
         return [Entity(entity_json=i) for i in entities if isinstance(i, dict)]
 
@@ -119,15 +125,16 @@ class ApiAi(object):
     ## Querying ##
     def post_query(self, query, sessionID=None):
         data = {
-            'query': query,
-            'sessionId': sessionID or '123',
-            'lang': 'en',
-            'contexts': [],
+            "query": query,
+            "sessionId": sessionID or "123",
+            "lang": "en",
+            "contexts": [],
         }
 
         data = json.dumps(data)
 
-        response = requests.post(self._query_uri,
-            headers=self._client_header, data=data)
+        response = requests.post(
+            self._query_uri, headers=self._client_header, data=data
+        )
         response.raise_for_status
         return response

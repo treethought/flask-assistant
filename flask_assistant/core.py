@@ -10,7 +10,7 @@ from werkzeug.local import LocalProxy
 
 from flask_assistant import logger
 from flask_assistant.response import _Response
-from flask_assistant.manager import ContextManager
+from flask_assistant.manager import ContextManager, parse_context_name
 from api_ai.api import ApiAi
 from io import StringIO
 
@@ -22,14 +22,14 @@ def find_assistant():  # Taken from Flask-ask courtesy of @voutilad
     Note: This only supports returning a reference to the first instance
     of Assistant found.
     """
-    if hasattr(current_app, 'assist'):
-        return getattr(current_app, 'assist')
+    if hasattr(current_app, "assist"):
+        return getattr(current_app, "assist")
     else:
-        if hasattr(current_app, 'blueprints'):
-            blueprints = getattr(current_app, 'blueprints')
+        if hasattr(current_app, "blueprints"):
+            blueprints = getattr(current_app, "blueprints")
             for blueprint_name in blueprints:
-                if hasattr(blueprints[blueprint_name], 'assist'):
-                    return getattr(blueprints[blueprint_name], 'assist')
+                if hasattr(blueprints[blueprint_name], "assist"):
+                    return getattr(blueprints[blueprint_name], "assist")
 
 
 request = LocalProxy(lambda: find_assistant().request)
@@ -38,39 +38,49 @@ access_token = LocalProxy(lambda: find_assistant().access_token)
 context_in = LocalProxy(lambda: find_assistant().context_in)
 context_manager = LocalProxy(lambda: find_assistant().context_manager)
 convert_errors = LocalProxy(lambda: find_assistant().convert_errors)
+session_id = LocalProxy(lambda: find_assistant().session_id)
 
 # Converter shorthands for commonly used system entities
 _converter_shorthands = {
-    'date': aniso8601.parse_date,  # Returns date
-    'date-period': aniso8601.parse_interval,  # Returns (date, date)
-    'time': aniso8601.parse_time  # Returns time
+    "date": aniso8601.parse_date,  # Returns date
+    "date-period": aniso8601.parse_interval,  # Returns (date, date)
+    "time": aniso8601.parse_time,  # Returns time
 }
 
 
 class Assistant(object):
-    """Central Interface for interacting with Google Actions via Api.ai.
+    """Central Interface for creating a Dialogflow webhook.
 
     The Assistant object routes requests to :func:`action` decorated functions.
 
-    The assistant object maps requests received from an API.ai agent to Intent-specific view functions.
+    The assistant object maps requests received from an Dialogflow agent to Intent-specific view functions.
     The view_functions can be properly matched depending on required parameters and contexts.
     These requests originate from Google Actions and are sent to the Assistant object
-    after through API.ai's infrastructure.
+    through Dialogflow's infrastructure.
 
 
     Keyword Arguments:
-            app {Flask object} -- App instance - created with Flask(__name__) (default: {None})
-            blueprint {Flask Blueprint} -- Flask Blueprint instance to initialize (Default: {None})
-            route {str} -- entry point to which initial Alexa Requests are forwarded (default: {None})
-            dev_token {str} - Dialogflow dev access token used to register and retrieve agent resources
-            client_token {str} - Dialogflow client access token required for querying agent
+        app {Flask object} -- App instance - created with Flask(__name__) (default: {None})
+        blueprint {Flask Blueprint} -- Flask Blueprint instance to initialize (Default: {None})
+        route {str} -- entry point to which initial Alexa Requests are forwarded (default: {None})
+        dev_token {str} - Dialogflow dev access token used to register and retrieve agent resources
+        client_token {str} - Dialogflow client access token required for querying agent
     """
 
-    def __init__(self, app=None, blueprint=None, route=None, dev_token=None, client_token=None):
+    def __init__(
+        self,
+        app=None,
+        blueprint=None,
+        route=None,
+        project_id=None,
+        dev_token=None,
+        client_token=None,
+    ):
 
         self.app = app
         self.blueprint = blueprint
         self._route = route
+        self.project_id = project_id
         self._intent_action_funcs = {}
         self._intent_mappings = {}
         self._intent_converts = {}
@@ -85,19 +95,26 @@ class Assistant(object):
         self.api = ApiAi(dev_token, client_token)
 
         if route is None and app is not None:
-
-            logger.warn("""WARNING:
-                No route was provided for the Assistant object, but a flask `app` object given
-                The Assistant will be mapped to the app's '/' endpoint.
-                If this is a problem please initialize the Assitant with the 'route' parameter
-                """)
-
-            self._route = '/'
+            self._route = "/"
 
         if app is not None:
             self.init_app(app)
         elif blueprint is not None:
             self.init_blueprint(blueprint)
+        else:
+            raise ValueError(
+                "Assistant object must be intialized with either an app or blueprint"
+            )
+
+        if project_id is None:
+            import warnings
+
+            warnings.warn(
+                """\nGoogle Cloud Project ID is required to manage contexts using flask-assistant\n
+                Please initialize the Assistant object with a project ID
+                assist = Assistant(app, project_id='YOUR_PROJECT_ID")""",
+                stacklevel=2,
+            )
 
     def init_app(self, app):
 
@@ -105,34 +122,41 @@ class Assistant(object):
             raise TypeError("route is a required argument when app is not None")
 
         app.assist = self
-        app.add_url_rule(self._route, view_func=self._flask_assitant_view_func, methods=['POST'])
+        app.add_url_rule(
+            self._route, view_func=self._flask_assitant_view_func, methods=["POST"]
+        )
 
     # Taken from Flask-ask courtesy of @voutilad
-    def init_blueprint(self, blueprint, path='templates.yaml'):
+    def init_blueprint(self, blueprint, path="templates.yaml"):
         """Initialize a Flask Blueprint, similar to init_app, but without the access
         to the application config.
 
         Keyword Arguments:
-            blueprint {Flask Blueprint} -- Flask Blueprint instance to initialize (Default: {None})
-            path {str} -- path to templates yaml file, relative to Blueprint (Default: {'templates.yaml'})
+            blueprint {Flask Blueprint} -- Flask Blueprint instance to initialize
+                                        (Default: {None})
+            path {str} -- path to templates yaml file, relative to Blueprint
+                      (Default: {'templates.yaml'})
         """
         if self._route is not None:
             raise TypeError("route cannot be set when using blueprints!")
 
-        # we need to tuck our reference to this Ask instance into the blueprint object and find it later!
+        # we need to tuck our reference to this Assistant instance
+        # into the blueprint object and find it later!
         blueprint.assist = self
 
         # BlueprintSetupState.add_url_rule gets called underneath the covers and
         # concats the rule string, so we should set to an empty string to allow
         # Blueprint('blueprint_api', __name__, url_prefix="/assist") to result in
         # exposing the rule at "/assist" and not "/assist/".
-        blueprint.add_url_rule("", view_func=self._flask_assitant_view_func, methods=['POST'])
+        blueprint.add_url_rule(
+            "", view_func=self._flask_assitant_view_func, methods=["POST"]
+        )
         # blueprint.jinja_loader = ChoiceLoader([YamlLoader(blueprint, path)])
 
     @property
     def request(self):
-        """Local Proxy refering to the request JSON recieved from API.AI"""
-        return getattr(_app_ctx_stack.top, '_assist_request', None)
+        """Local Proxy refering to the request JSON recieved from Dialogflow"""
+        return getattr(_app_ctx_stack.top, "_assist_request", None)
 
     @request.setter
     def request(self, value):
@@ -140,8 +164,8 @@ class Assistant(object):
 
     @property
     def intent(self):
-        """Local Proxy refering to the name of the intent contained in the API.AI request"""
-        return getattr(_app_ctx_stack.top, '_assist_intent', None)
+        """Local Proxy refering to the name of the intent contained in the Dialogflow request"""
+        return getattr(_app_ctx_stack.top, "_assist_intent", None)
 
     @intent.setter
     def intent(self, value):
@@ -150,7 +174,7 @@ class Assistant(object):
     @property
     def access_token(self):
         """Local proxy referring to the OAuth token for linked accounts."""
-        return getattr(_app_ctx_stack.top, '_assist_access_token', None)
+        return getattr(_app_ctx_stack.top, "_assist_access_token", None)
 
     @access_token.setter
     def access_token(self, value):
@@ -159,7 +183,7 @@ class Assistant(object):
     @property
     def context_in(self):
         """Local Proxy refering to context objects contained within current session"""
-        return getattr(_app_ctx_stack.top, '_assist_context_in', [])
+        return getattr(_app_ctx_stack.top, "_assist_context_in", [])
 
     @context_in.setter
     def context_in(self, value):
@@ -171,7 +195,9 @@ class Assistant(object):
 
         Interface for adding and accessing contexts and their parameters
         """
-        return getattr(_app_ctx_stack.top, '_assist_context_manager', ContextManager())
+        return getattr(
+            _app_ctx_stack.top, "_assist_context_manager", ContextManager(self)
+        )
 
     @context_manager.setter
     def context_manager(self, value):
@@ -179,7 +205,7 @@ class Assistant(object):
 
     @property
     def convert_errors(self):
-        return getattr(_app_ctx_stack.top, '_assistant_convert_errors', None)
+        return getattr(_app_ctx_stack.top, "_assistant_convert_errors", None)
 
     @convert_errors.setter
     def convert_errors(self, value):
@@ -187,7 +213,11 @@ class Assistant(object):
 
     @property
     def session_id(self):
-        return getattr(_app_ctx_stack.top, '_assist_session_id', None)
+        return getattr(_app_ctx_stack.top, "_assist_session_id", None)
+
+    @session_id.setter
+    def session_id(self, value):
+        _app_ctx_stack.top._assist_session_id = value
 
     def _register_context_to_func(self, intent_name, context=[]):
         required = self._required_contexts.get(intent_name)
@@ -198,7 +228,6 @@ class Assistant(object):
             self._required_contexts[intent_name].extend(context)
 
     def context(self, *context_names):
-
         def decorator(f):
             func_requires = self._func_contexts.get(f)
 
@@ -209,15 +238,29 @@ class Assistant(object):
 
             def wrapper(*args, **kw):
                 return f(*args, with_context=context_names, **kw)
+
             return wrapper
+
         return decorator
 
-    def action(self, intent_name, is_fallback=False, mapping={}, convert={}, default={}, with_context=[], events=[], *args, **kw):
+    def action(
+        self,
+        intent_name,
+        is_fallback=False,
+        mapping={},
+        convert={},
+        default={},
+        with_context=[],
+        events=[],
+        *args,
+        **kw
+    ):
         """Decorates an intent_name's Action view function.
 
             The wrapped function is called when a request with the
             given intent_name is recieved along with all required parameters.
         """
+
         def decorator(f):
             action_funcs = self._intent_action_funcs.get(intent_name, [])
             action_funcs.append(f)
@@ -233,7 +276,9 @@ class Assistant(object):
             @wraps(f)
             def wrapper(*args, **kw):
                 self._flask_assitant_view_func(*args, **kw)
+
             return f
+
         return decorator
 
     def prompt_for(self, next_param, intent_name):
@@ -246,6 +291,7 @@ class Assistant(object):
             next_param {str} -- name of the parameter required for action function
             intent_name {str} -- name of the intent the dependent action belongs to
         """
+
         def decorator(f):
             prompts = self._intent_prompts.get(intent_name)
             if prompts:
@@ -257,7 +303,9 @@ class Assistant(object):
             @wraps(f)
             def wrapper(*args, **kw):
                 self._flask_assitant_view_func(*args, **kw)
+
             return f
+
         return decorator
 
     def fallback(self):
@@ -265,35 +313,54 @@ class Assistant(object):
             self._fallback_response = f
             return f
 
-    def _api_request(self, verify=True):
+    def _dialogflow_request(self, verify=True):
         raw_body = flask_request.data
-        _api_request_payload = json.loads(raw_body)
+        _dialogflow_request_payload = json.loads(raw_body)
 
-        return _api_request_payload
+        return _dialogflow_request_payload
 
     def _dump_view_info(self, view_func=lambda: None):
-        _infodump('Result: Matched {} intent to {} func'.format(self.intent, view_func.__name__))
+        _infodump(
+            "Result: Matched {} intent to {} func".format(
+                self.intent, view_func.__name__
+            )
+        )
+
+    def _parse_session_id(self):
+        return self.request["session"].split("/sessions/")[1]
 
     def _flask_assitant_view_func(self, nlp_result=None, *args, **kwargs):
         if nlp_result:  # pass API query result directly
             self.request = nlp_result
         else:  # called as webhook
-            self.request = self._api_request(verify=False)
+            self.request = self._dialogflow_request(verify=False)
 
         _dbgdump(self.request)
 
-        self.intent = self.request['result']['metadata']['intentName']
-        self.context_in = self.request['result'].get('contexts', [])
+        try:
+            self.intent = self.request["queryResult"]["intent"]["displayName"]
+            self.context_in = self.request["queryResult"].get("outputContexts", [])
+            self.session_id = self._parse_session_id()
+            assert self.session_id is not None
+        except KeyError:
+            raise DeprecationWarning(
+                """It appears your agent is still using the Dialogflow V1 API,
+                please update to V2 in the Dialogflow console."""
+            )
+
+        # update context_manager's assist reference
+        # TODO: acces context_manager from assist, instead of own object
+        self.context_manager._assist = self
 
         # Get access token from request
-        original_request = self.request.get('originalRequest')
-        if original_request and original_request['data'].get('user'):
-            self.access_token = original_request['data']['user'].get('accessToken')
+        original_request = self.request.get("originalDetectIntentRequest")
+        if original_request and original_request.get("user"):
+            self.access_token = original_request["user"].get("accessToken")
 
         self._update_contexts()
 
         view_func = self._match_view_func()
-        _dbgdump('Matched view func - {}'.format(self.intent, view_func))
+        _dbgdump("Matched view func - {}".format(self.intent, view_func))
         result = self._map_intent_to_view_func(view_func)()
 
         if result is not None:
@@ -310,7 +377,7 @@ class Assistant(object):
     def _match_view_func(self):
         view_func = None
 
-        if self.hasLiveContext():
+        if self.has_live_context():
             view_func = self._choose_context_view()
 
         if not view_func and self._missing_params:
@@ -326,15 +393,20 @@ class Assistant(object):
 
         if not view_func:
             view_func = self._intent_action_funcs[self.intent][0]
-            msg = 'No view func matched. Received intent {} with parameters {}. '.format(self.intent, self.request['result']['parameters'])
-            msg += 'Required args {}, context_in {}, matched view func {}.'.format(self._func_args(view_func), self.context_in, view_func.__name__)
+            msg = "No view func matched. Received intent {} with parameters {}. ".format(
+                self.intent, self.request["queryResult"]["parameters"]
+            )
+            msg += "Required args {}, context_in {}, matched view func {}.".format(
+                self._func_args(view_func), self.context_in, view_func.__name__
+            )
             _errordump(msg)
 
         return view_func
 
-    def hasLiveContext(self):
+    def has_live_context(self):
         for context in self.context_in:
-            if context['lifespan'] > 0:
+            # lifespanCount appears to be missing if context expired
+            if context.get("lifespanCount", 0) > 0:
                 return True
 
     def run_aws_lambda(self, event):
@@ -366,38 +438,40 @@ class Assistant(object):
         """
 
         # Convert an environment variable to a WSGI "bytes-as-unicode" string
-        enc, esc = sys.getfilesystemencoding(), 'surrogateescape'
+        enc, esc = sys.getfilesystemencoding(), "surrogateescape"
+
         def unicode_to_wsgi(u):
-            return u.encode(enc, esc).decode('iso-8859-1')
+            return u.encode(enc, esc).decode("iso-8859-1")
 
         # Create a WSGI-compatible environ that can be passed to the
         # application. It is loaded with the OS environment variables,
         # mandatory CGI-like variables, as well as the mandatory WSGI
         # variables.
         environ = {k: unicode_to_wsgi(v) for k, v in os.environ.items()}
-        environ['REQUEST_METHOD'] = 'POST'
-        environ['PATH_INFO'] = '/'
-        environ['SERVER_NAME'] = 'AWS-Lambda'
-        environ['SERVER_PORT'] = '80'
-        environ['SERVER_PROTOCOL'] = 'HTTP/1.0'
-        environ['wsgi.version'] = (1, 0)
-        environ['wsgi.url_scheme'] = 'http'
-        environ['wsgi.errors'] = sys.stderr
-        environ['wsgi.multithread'] = False
-        environ['wsgi.multiprocess'] = False
-        environ['wsgi.run_once'] = True
+        environ["REQUEST_METHOD"] = "POST"
+        environ["PATH_INFO"] = "/"
+        environ["SERVER_NAME"] = "AWS-Lambda"
+        environ["SERVER_PORT"] = "80"
+        environ["SERVER_PROTOCOL"] = "HTTP/1.0"
+        environ["wsgi.version"] = (1, 0)
+        environ["wsgi.url_scheme"] = "http"
+        environ["wsgi.errors"] = sys.stderr
+        environ["wsgi.multithread"] = False
+        environ["wsgi.multiprocess"] = False
+        environ["wsgi.run_once"] = True
 
         # Convert the event provided by the AWS Lambda handler to a JSON
         # string that can be read as the body of a HTTP POST request.
-        body = event['body']
-        environ['CONTENT_TYPE'] = 'application/json'
-        environ['CONTENT_LENGTH'] = len(body)
-        environ['wsgi.input'] = StringIO(body)
+        body = event["body"]
+        environ["CONTENT_TYPE"] = "application/json"
+        environ["CONTENT_LENGTH"] = len(body)
+        environ["wsgi.input"] = StringIO(body)
 
         # Start response is a required callback that must be passed when
         # the application is invoked. It is used to set HTTP status and
         # headers. Read the WSGI spec for details (PEP3333).
         headers = []
+
         def start_response(status, response_headers, _exc_info=None):
             headers[:] = [status, response_headers]
 
@@ -412,28 +486,36 @@ class Assistant(object):
 
             output = json.loads(b"".join(result))
             if not headers[0].startswith("2"):
-                raise AssertionError("Non-2xx from app: hdrs={}, body={}".format(headers, output))
+                raise AssertionError(
+                    "Non-2xx from app: hdrs={}, body={}".format(headers, output)
+                )
 
             # API Gateway expects Status code, headers and Body
-            return {'statusCode': 200, 'headers': {'Content-Type': 'application/json'}, 'body': json.dumps(output)}
+            return {
+                "statusCode": 200,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps(output),
+            }
 
         finally:
             # Per the WSGI spec, we need to invoke the close method if it
             # is implemented on the result object.
-            if hasattr(result, 'close'):
+            if hasattr(result, "close"):
                 result.close()
 
     def _context_satified(self, view_func):
         met = []
-        requires = list(self._func_contexts[view_func])
-        recieved_contexts = [c['name'] for c in self.context_in]
 
-        for req_context in requires:
-            if req_context in recieved_contexts:
+        required_names = list(self._func_contexts[view_func])
+        recieved_context_names = [parse_context_name(c) for c in self.context_in]
+
+        for req_context in required_names:
+            if req_context in recieved_context_names:
                 met.append(req_context)
 
-        if set(met) == set(requires) and len(requires) <= len(recieved_contexts):
-            return True
+        if set(met) == set(required_names):
+            if len(required_names) <= len(recieved_context_names):
+                return True
 
     @property
     def _context_views(self):
@@ -453,17 +535,22 @@ class Assistant(object):
         if choice:
             return choice
         else:
-            msg = 'No view matched for intent {} with contexts {}'.format(self.intent, self.context_in)
-            msg += '(Registered context views: {}, '.format(self._context_views)
-            msg += 'Intent action funcs: {})'.format([f.__name__ for f in self._intent_action_funcs[self.intent]])
+            msg = "No view matched for intent {} with contexts {}".format(
+                self.intent, self.context_in
+            )
+            msg += "(Registered context views: {}, ".format(self._context_views)
+            msg += "Intent action funcs: {})".format(
+                [f.__name__ for f in self._intent_action_funcs[self.intent]]
+            )
             _errordump(msg)
 
     @property
-    def _missing_params(self):  # TODO: fill missing slot from default
-        params = self.request['result']['parameters']
+    def _missing_params(self):  # TODO: fill missing slot from default\
+
+        params = self.request["queryResult"]["parameters"]
         missing = []
         for p_name in params:
-            if params[p_name] == '':
+            if params[p_name] == "":
                 missing.append(p_name)
 
         return missing
@@ -472,7 +559,7 @@ class Assistant(object):
         try:
             argspec = inspect.getfullargspec(f)
 
-        except AttributeError: # for python2
+        except AttributeError:  # for python2
             argspec = inspect.getargspec(f)
 
         return argspec.args
@@ -486,7 +573,7 @@ class Assistant(object):
         arg_values = []
         mapping = self._intent_mappings.get(self.intent)
         convert = self._intent_converts.get(self.intent)
-        params = self.request['result']['parameters']
+        params = self.request["queryResult"]["parameters"]
 
         convert_errors = {}
 
@@ -495,8 +582,10 @@ class Assistant(object):
             # param name cant have '.',
             # so when registered, the sys. is stripped,
             # and must be stripped when looking up in request
-            mapped_param_name = entity_mapping.replace('sys.', '')
-            value = params.get(mapped_param_name)  # params declared in GUI present in request
+            mapped_param_name = entity_mapping.replace("sys.", "")
+            value = params.get(
+                mapped_param_name
+            )  # params declared in GUI present in request
 
             if not value:  # params not declared, so must look in contexts
                 value = self._map_arg_from_context(arg_name)
@@ -518,8 +607,8 @@ class Assistant(object):
 
     def _map_arg_from_context(self, arg_name):
         for context_obj in self.context_in:
-            if arg_name in context_obj['parameters']:
-                return context_obj['parameters'][arg_name]
+            if arg_name in context_obj["parameters"]:
+                return context_obj["parameters"][arg_name]
 
 
 def _dbgdump(obj, indent=2, default=None, cls=None):
@@ -534,7 +623,7 @@ def _infodump(obj, indent=2, default=None, cls=None):
 
 def _warndump(obj, indent=2, default=None, cls=None):
     msg = json.dumps(obj, indent=indent, default=default, cls=cls)
-    logger.warn(msg)
+    logger.warning(msg)
 
 
 def _errordump(obj, indent=2, default=None, cls=None):
