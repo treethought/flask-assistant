@@ -230,7 +230,7 @@ class _CarouselCard(_ListSelector):
     """Subclass of _CardWithItems used to build Carousel cards."""
 
     def __init__(self, speech, items=None):
-        super(_CarouselCard, self).__init__(speech, items)
+        super(_CarouselCard, self).__init__(speech, items=items)
 
     def _add_message(self):
         self._messages.append(
