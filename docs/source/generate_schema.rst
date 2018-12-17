@@ -6,7 +6,7 @@ Generating Dialogflow Schema
 
 Flask-Assistant provides a command line utilty to automatically generate your agent's JSON schema and register the required information to communicate with Dialogflow.
 
-This allows you to focus on building your entire webhook from your text editor while needing to interact with the API.AI web interface only for testing.
+This allows you to focus on building your entire webhook from your text editor while needing to interact with the Dialogflow web interface only for testing.
 
 
 The ``schema`` command generates JSON objects representing Intents and Entities
@@ -73,7 +73,7 @@ You can then annotate parameter values within the phrase to their respective ent
         - pepperoni: topping
         - delivery: order-method
 
-If the intent requires no parameters or you'd like API.AI to automaticcaly annotate the phrase, simply exclude the ``Annotations``  or leave it blank.
+If the intent requires no parameters or you'd like Dialogflow to automaticcaly annotate the phrase, simply exclude the ``Annotations``  or leave it blank.
 
 Re-running the ``schema`` command will then update your agent's Intents with the new user phrases, including their annotations.
 
@@ -114,7 +114,7 @@ You can provide entries by listing them under the entity name.
       - veggies
       - pepperoni
 
-Synonyms can be added for each entry to improve API.AI's detection of the entity.
+Synonyms can be added for each entry to improve Dialogflow's detection of the entity.
 
 .. code-block:: yaml
 
@@ -132,7 +132,7 @@ Synonyms can be added for each entry to improve API.AI's detection of the entity
 
 
 
-.. note:: Any pre-built API.AI `system entities <https://docs.api.ai/docs/concept-entities#section-system-entities>`_ (sys.color) will not be included in the template, as they are already defined within API.AI.
+.. note:: Any pre-built Dialogflow `system entities <https://docs.api.ai/docs/concept-entities#section-system-entities>`_ (sys.color) will not be included in the template, as they are already defined within Dialogflow.
 
 
 
@@ -141,9 +141,9 @@ Synonyms can be added for each entry to improve API.AI's detection of the entity
 Running the command
 ==========================
 
-This will require an existing API.AI agent, and your webhook should be within its own directory, as the utility will create two new folders in the app's root.
+This will require an existing Dialogflow agent, and your webhook should be within its own directory, as the utility will create two new folders in the app's root.
 
-1. First obtain your agent's Developer access token from the `API.AI Console`_
+1. First obtain your agent's Developer access token from the `Dialogflow Console`_
 2. Ensure you are in the same directory as your assistant and store your token as an environment variable
     .. code-block:: bash
 
@@ -153,7 +153,7 @@ This will require an existing API.AI agent, and your webhook should be within it
 
         schema my_assistant.py
 
-This will generate a JSON object for each intent and entity used in your webhook as described above. The schema objects will be pushed to API.AI and create a new intent/entity or update the existing one if the object already exists.
+This will generate a JSON object for each intent and entity used in your webhook as described above. The schema objects will be pushed to Dialogflow and create a new intent/entity or update the existing one if the object already exists.
 
 You will see an output of status messages indicating if the registration was successful for each object.
 
@@ -161,4 +161,4 @@ You can view the JSON generated in the newly created `schema` directory.
 
 
 
-.. _`API.AI Console`: https://console.api.ai/api-client/#/login
+.. _`Dialogflow Console`: https://console.dialogflow.com/api-client

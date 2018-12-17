@@ -63,6 +63,7 @@ class Assistant(object):
         app {Flask object} -- App instance - created with Flask(__name__) (default: {None})
         blueprint {Flask Blueprint} -- Flask Blueprint instance to initialize (Default: {None})
         route {str} -- entry point to which initial Alexa Requests are forwarded (default: {None})
+        project_id {str} -- Google Cloud Project ID, required to manage contexts from flask-assistant
         dev_token {str} - Dialogflow dev access token used to register and retrieve agent resources
         client_token {str} - Dialogflow client access token required for querying agent
     """
