@@ -181,7 +181,9 @@ class Assistant(object):
 
         Interface for adding and accessing contexts and their parameters
         """
-        return getattr(_app_ctx_stack.top, '_assist_context_manager', ContextManager())
+        return getattr(
+            _app_ctx_stack.top, "_assist_context_manager", ContextManager(self)
+        )
 
     @context_manager.setter
     def context_manager(self, value):
@@ -303,6 +305,9 @@ class Assistant(object):
         self.session_id = self._parse_session_id()
         assert self.session_id is not None
 
+        # update context_manager's assist reference
+        # TODO: acces context_manager from assist, instead of own object
+        self.context_manager._assist = self
 
         # Get access token from request
         original_request = self.request.get("originalDetectIntentRequest")

@@ -1,4 +1,3 @@
-
 def parse_context_name(context_obj):
     """Parses context name from Dialogflow's contextsession prefixed context path"""
     return context_obj["name"].split("/contexts/")[1]
@@ -41,11 +40,24 @@ class Context(dict):
 
 
 class ContextManager:
-    def __init__(self):
+    def __init__(self, assist):
+        self._assist = assist
         self._cache = {}
+
+    @property
+    def _project_id(self):
+        return self._assist.project_id
+
+    @property
+    def _session_id(self):
+        return self._assist.session_id
+
+    def build_full_name(self, short_name):
+        return f"projects/{self._project_id}/agent/sessions/{self._session_id}/contexts/{short_name}"
 
     def add(self, *args, **kwargs):
         context = Context(*args, **kwargs)
+        context._full_name = self.build_full_name(context.name)
         self._cache[context.name] = context
         return context
 
