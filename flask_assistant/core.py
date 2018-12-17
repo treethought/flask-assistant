@@ -22,14 +22,14 @@ def find_assistant():  # Taken from Flask-ask courtesy of @voutilad
     Note: This only supports returning a reference to the first instance
     of Assistant found.
     """
-    if hasattr(current_app, 'assist'):
-        return getattr(current_app, 'assist')
+    if hasattr(current_app, "assist"):
+        return getattr(current_app, "assist")
     else:
-        if hasattr(current_app, 'blueprints'):
-            blueprints = getattr(current_app, 'blueprints')
+        if hasattr(current_app, "blueprints"):
+            blueprints = getattr(current_app, "blueprints")
             for blueprint_name in blueprints:
-                if hasattr(blueprints[blueprint_name], 'assist'):
-                    return getattr(blueprints[blueprint_name], 'assist')
+                if hasattr(blueprints[blueprint_name], "assist"):
+                    return getattr(blueprints[blueprint_name], "assist")
 
 
 request = LocalProxy(lambda: find_assistant().request)
@@ -38,12 +38,13 @@ access_token = LocalProxy(lambda: find_assistant().access_token)
 context_in = LocalProxy(lambda: find_assistant().context_in)
 context_manager = LocalProxy(lambda: find_assistant().context_manager)
 convert_errors = LocalProxy(lambda: find_assistant().convert_errors)
+session_id = LocalProxy(lambda: find_assistant().session_id)
 
 # Converter shorthands for commonly used system entities
 _converter_shorthands = {
-    'date': aniso8601.parse_date,  # Returns date
-    'date-period': aniso8601.parse_interval,  # Returns (date, date)
-    'time': aniso8601.parse_time  # Returns time
+    "date": aniso8601.parse_date,  # Returns date
+    "date-period": aniso8601.parse_interval,  # Returns (date, date)
+    "time": aniso8601.parse_time,  # Returns time
 }
 
 
@@ -59,18 +60,27 @@ class Assistant(object):
 
 
     Keyword Arguments:
-            app {Flask object} -- App instance - created with Flask(__name__) (default: {None})
-            blueprint {Flask Blueprint} -- Flask Blueprint instance to initialize (Default: {None})
-            route {str} -- entry point to which initial Alexa Requests are forwarded (default: {None})
-            dev_token {str} - Dialogflow dev access token used to register and retrieve agent resources
-            client_token {str} - Dialogflow client access token required for querying agent
+        app {Flask object} -- App instance - created with Flask(__name__) (default: {None})
+        blueprint {Flask Blueprint} -- Flask Blueprint instance to initialize (Default: {None})
+        route {str} -- entry point to which initial Alexa Requests are forwarded (default: {None})
+        dev_token {str} - Dialogflow dev access token used to register and retrieve agent resources
+        client_token {str} - Dialogflow client access token required for querying agent
     """
 
-    def __init__(self, app=None, blueprint=None, route=None, dev_token=None, client_token=None):
+    def __init__(
+        self,
+        app=None,
+        blueprint=None,
+        route=None,
+        project_id=None,
+        dev_token=None,
+        client_token=None,
+    ):
 
         self.app = app
         self.blueprint = blueprint
         self._route = route
+        self.project_id = project_id
         self._intent_action_funcs = {}
         self._intent_mappings = {}
         self._intent_converts = {}
@@ -187,7 +197,11 @@ class Assistant(object):
 
     @property
     def session_id(self):
-        return getattr(_app_ctx_stack.top, '_assist_session_id', None)
+        return getattr(_app_ctx_stack.top, "_assist_session_id", None)
+
+    @session_id.setter
+    def session_id(self, value):
+        _app_ctx_stack.top._assist_session_id = value
 
     def _register_context_to_func(self, intent_name, context=[]):
         required = self._required_contexts.get(intent_name)
@@ -198,7 +212,6 @@ class Assistant(object):
             self._required_contexts[intent_name].extend(context)
 
     def context(self, *context_names):
-
         def decorator(f):
             func_requires = self._func_contexts.get(f)
 
@@ -274,6 +287,9 @@ class Assistant(object):
     def _dump_view_info(self, view_func=lambda: None):
         _infodump('Result: Matched {} intent to {} func'.format(self.intent, view_func.__name__))
 
+    def _parse_session_id(self):
+        return self.request["session"].split("/sessions/")[1]
+
     def _flask_assitant_view_func(self, nlp_result=None, *args, **kwargs):
         if nlp_result:  # pass API query result directly
             self.request = nlp_result
@@ -284,6 +300,9 @@ class Assistant(object):
 
         self.intent = self.request["queryResult"]["intent"]["displayName"]
         self.context_in = self.request["queryResult"].get("outputContexts", [])
+        self.session_id = self._parse_session_id()
+        assert self.session_id is not None
+
 
         # Get access token from request
         original_request = self.request.get("originalDetectIntentRequest")
