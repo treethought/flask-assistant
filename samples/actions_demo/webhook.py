@@ -15,7 +15,7 @@ ASSIST_LOGO_URL = "http://flask-assistant.readthedocs.io/en/latest/_static/logo-
 ASSIST_REPO_URL = "https://github.com/treethought/flask-assistant"
 ASSIST_DOCS_URL = "https://flask-assistant.readthedocs.io/en/latest/"
 ASSIST_DESCRIPT = """Flask-Assistant allows you to focus on building the core business logic
-                     of conversational user interfaces while utilizing API.AI’s
+                     of conversational user interfaces while utilizing Dialogflow’s
                      Natural Language Processing to interact with users."""
 
 ASK_LOGO_URL = "https://alexatutorial.com/flask-ask/_images/logo-full.png"
@@ -30,9 +30,9 @@ FLASK_DESCRIPT = """Flask is a microframework for Python based on Werkzeug
                     and Jinja2.  It's intended for getting started very quickly
                     and was developed with best intentions in mind."""
 
-API_LOGO_URL = "https://static.api.ai/assets/images/logo.png"
-API_DOCS_URL = "https://docs.api.ai/docs/welcome"
-API_DESCRIPT = """API.AI is a natural language understanding platform
+DIALOG_LOGO_URL = "https://www.gstatic.com/devrel-devsite/v38663d710eee65508ba32a8cb54a4950be119532cae3e02de8cb04cf45f67558/dialogflow/images/lockup.svg"
+DIALOG_DOCS_URL = "https://dialogflow.com/docs"
+DIALOG_DESCRIPT = """Dialogflow is a natural language understanding platform
                   that makes it easy for developers (and non-developers)
                   to design and integrate intelligent and sophisticated
                   conversational user interfaces into mobile apps,
@@ -137,14 +137,17 @@ def action_func():
 
 @assist.action("FlaskAssistantCarousel")
 def action_func():
-    resp = ask("Heres some info on Flask-Assistant and API.AI").build_carousel()
+    resp = ask("Heres some info on Flask-Assistant and Dialogflow").build_carousel()
 
     resp.add_item(
         "Overview", key="overview", description=ASSIST_DESCRIPT, img_url=ASSIST_LOGO_URL
     )
 
     resp.add_item(
-        "API.AI", key="api.ai", description=API_DESCRIPT, img_url=API_LOGO_URL
+        "Dialogflow",
+        key="dialogflow",
+        description=DIALOG_DESCRIPT,
+        img_url=DIALOG_LOGO_URL,
     )
     return resp
 

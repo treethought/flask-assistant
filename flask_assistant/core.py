@@ -49,14 +49,14 @@ _converter_shorthands = {
 
 
 class Assistant(object):
-    """Central Interface for interacting with Google Actions via Api.ai.
+    """Central Interface for creating a Dialogflow webhook.
 
     The Assistant object routes requests to :func:`action` decorated functions.
 
-    The assistant object maps requests received from an API.ai agent to Intent-specific view functions.
+    The assistant object maps requests received from an Dialogflow agent to Intent-specific view functions.
     The view_functions can be properly matched depending on required parameters and contexts.
     These requests originate from Google Actions and are sent to the Assistant object
-    after through API.ai's infrastructure.
+    through Dialogflow's infrastructure.
 
 
     Keyword Arguments:
@@ -155,7 +155,7 @@ class Assistant(object):
 
     @property
     def request(self):
-        """Local Proxy refering to the request JSON recieved from API.AI"""
+        """Local Proxy refering to the request JSON recieved from Dialogflow"""
         return getattr(_app_ctx_stack.top, "_assist_request", None)
 
     @request.setter
@@ -164,7 +164,7 @@ class Assistant(object):
 
     @property
     def intent(self):
-        """Local Proxy refering to the name of the intent contained in the API.AI request"""
+        """Local Proxy refering to the name of the intent contained in the Dialogflow request"""
         return getattr(_app_ctx_stack.top, "_assist_intent", None)
 
     @intent.setter
@@ -313,11 +313,11 @@ class Assistant(object):
             self._fallback_response = f
             return f
 
-    def _api_request(self, verify=True):
+    def _dialogflow_request(self, verify=True):
         raw_body = flask_request.data
-        _api_request_payload = json.loads(raw_body)
+        _dialogflow_request_payload = json.loads(raw_body)
 
-        return _api_request_payload
+        return _dialogflow_request_payload
 
     def _dump_view_info(self, view_func=lambda: None):
         _infodump(
@@ -333,7 +333,7 @@ class Assistant(object):
         if nlp_result:  # pass API query result directly
             self.request = nlp_result
         else:  # called as webhook
-            self.request = self._api_request(verify=False)
+            self.request = self._dialogflow_request(verify=False)
 
         _dbgdump(self.request)
 
