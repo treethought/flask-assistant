@@ -1,6 +1,6 @@
 import logging
 
-logger = logging.getLogger('flask_assistant')
+logger = logging.getLogger("flask_assistant")
 logger.addHandler(logging.StreamHandler())
 if logger.level == logging.NOTSET:
     logger.setLevel(logging.INFO)
@@ -11,7 +11,7 @@ from flask_assistant.core import (
     context_manager,
     intent,
     request,
-    access_token
+    access_token,
 )
 
 from flask_assistant.response import ask, tell, event, build_item, permission

@@ -67,13 +67,13 @@ class _Response(object):
             {"platform": "ACTIONS_ON_GOOGLE", "suggestions": {"suggestions": chips}}
         )
 
-        # quick replies for other platforms
-        self._messages.append(
-            {
-                "platform": "ACTIONS_ON_GOOGLE",
-                "quickReplies": {"title": None, "quickReplies": replies},
-            }
-        )
+        # # quick replies for other platforms
+        # self._messages.append(
+        #     {
+        #         "platform": "ACTIONS_ON_GOOGLE",
+        #         "quickReplies": {"title": None, "quickReplies": replies},
+        #     }
+        # )
 
         return self
 
