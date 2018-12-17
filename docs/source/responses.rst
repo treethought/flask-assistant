@@ -63,7 +63,7 @@ Assuming the intent "GoOnThen" contains an event named "first_verse", triggering
 
 .. note:: The name of an intent's action function does not necessarily need to share the name of the intent's event, though it may often make sense and provide a cleaner representation of dialogue structure.
 
-        Currently, `Events`_ must be defined within an Intent in the API.AI console.
+        Currently, `Events`_ must be defined within an Intent in the Dialogflow console.
         But support for event definitions is coming soon
 
 Rich Messages
@@ -82,7 +82,7 @@ To enable Actions on Google Integration:
 
 .. code-block:: python
 
-    app.config['ASSIST_ACTIONS_ON_GOOGLE'] = True
+    app.config['INTEGRATIONS'] = ['ACTIONS_ON_GOOGLE']
 
 Displaying a Card
 -----------------
@@ -96,10 +96,10 @@ Use a `Card`_  to present the user with summaries or concise information, and to
     - Link
 
 The only information required for a card is the `text` paramter which is used to fill the text body.
-    
+
     .. code-block:: python
-    
-                
+
+
         @assist.action('ShowCard')
         def show_card():
 
@@ -117,7 +117,7 @@ Suggesting Other Intents
 ------------------------
 
 Provide the user with a `Suggestion Chip`_ to hint at responses to continue or pivot the conversation.
-The suggestion text is sent as a query to API.AI when selected and therefore should match a *User Says* phrase for the intent to be triggered.
+The suggestion text is sent as a query to Dialogflow when selected and therefore should match a *User Says* phrase for the intent to be triggered.
 
 So given the following intents:
 
@@ -127,11 +127,11 @@ So given the following intents:
           UserSays:
           - Get Help
           - help
-        
+
         Restart:
           Usersays:
           - start over
-        
+
         GetArtistInfo:
           Usersays:
           - radiohead
@@ -141,9 +141,9 @@ So given the following intents:
           Annotations:
           - radiohead: artist
           - 'the books': artist
-          
 
-        
+
+
 
 
 Provide suggestions for likely intents:
@@ -162,7 +162,7 @@ Linking to External Resources
 In addition to suggestion chips for guiding dialogue, `link_out` chips can be used to send the user to external URLS.
 
     .. code-block:: python
-    
+
         @assist.action('ShowResources')
         def link_resources():
             resp = ask('Need some external help?')
@@ -176,8 +176,8 @@ List Selectors
 Lists present the user with a vertical list of multiple items and allows the user to select a single one.
 Selecting an item from the list generates a user query (chat bubble) containing the title of the list item. This user query will be used to match an agent's intent just like any other query.
 
-.. note:: There seems to be a discrepency bewteen API.AI and Actions on Google in regards to the selection of list items.
-          Within the API.AI console, the items `key` is sent as the user query. However, Actions on Google sends the item's title.
+.. note:: There seems to be a discrepency bewteen Dialogflow and Actions on Google in regards to the selection of list items.
+          Within the Dialogflow console, the items `key` is sent as the user query. However, Actions on Google sends the item's title.
 
           For proper results within both platforms, simply provide both the item's key and title as `User Says` phrase until the issue is resolved.
 
@@ -205,13 +205,13 @@ Add items directly to list
 .. code-block:: python
 
     mylist.add_item(title="Option 1", # title sent as query for Actions
-                    key="option_1",  
+                    key="option_1",
                     img_url="http://example.com/image1.png",
                     description="Option 1's short description",
                     synonyms=['one', 'number one', 'first option'])
 
     mylist.add_item(title="Option 2",
-                    key="option_2",  # key sent as query for API.AI
+                    key="option_2",  # key sent as query for Dialogflow
                     img_url="http://example.com/image2.png",
                     description="Option 2's short description",
                     synonyms=['two', 'number two', 'second option'])
@@ -222,7 +222,7 @@ Or build items independent of list and add them to the list later
 .. code-block:: python
 
     new_item = build_item(title="Option 3",
-                          key="option_3",  # key sent as query for API.AI
+                          key="option_3",  # key sent as query for Dialogflow
                           img_url="http://example.com/image3.png",
                           description="Option 3's short description",
                           synonyms=['three', 'number three', third option'])
@@ -231,7 +231,7 @@ Or build items independent of list and add them to the list later
 
     return mylist
 
-.. WARNING:: Creating a list with `build_list` returns an instance of a new response class. Therfore the result is a serpeate object than the primary response used to call the `build_list` method. 
+.. WARNING:: Creating a list with `build_list` returns an instance of a new response class. Therfore the result is a serpeate object than the primary response used to call the `build_list` method.
 
     The original primary response (*ask*/*tell*) object will not contain the list, and so the result should likely be assigned to a variable.
 
@@ -264,12 +264,9 @@ To build a carousel:
 
 
 
-.. _`Events`: https://docs.api.ai/docs/concept-events#overview
-.. _`Rich Messages`: https://docs.api.ai/docs/rich-messages
+.. _`Events`: https://dialogflow.com/docs/events
+.. _`Rich Messages`: https://dialogflow.com/docs/intents/rich-messages
 .. _`Card`: https://developers.google.com/actions/assistant/responses#basic_card
 .. _`Suggestion Chip`: https://developers.google.com/actions/assistant/responses#suggestion-chip
 .. _`Lists`: https://developers.google.com/actions/assistant/responses#list_selector
 .. _`Carousels`: https://developers.google.com/actions/assistant/responses#carousel_selector
-
-
-
