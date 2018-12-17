@@ -53,7 +53,9 @@ class ContextManager:
         return self._assist.session_id
 
     def build_full_name(self, short_name):
-        return f"projects/{self._project_id}/agent/sessions/{self._session_id}/contexts/{short_name}"
+        return "projects/{}/agent/sessions/{}/contexts/{}".format(
+            self._project_id, self._session_id, short_name
+        )
 
     def add(self, *args, **kwargs):
         context = Context(*args, **kwargs)

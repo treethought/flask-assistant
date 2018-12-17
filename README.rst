@@ -9,11 +9,11 @@ Create Virtual Assistants with Python
 .. image:: https://travis-ci.org/treethought/flask-assistant.svg?branch=master
   :target: https://travis-ci.org/treethought/flask-assistant
 
-.. image:: https://img.shields.io/badge/python-2.7, 3.5, 3.6-blue.svg
+.. image:: https://img.shields.io/badge/python-2.7, 3.5, 3.6, 3.7-blue.svg
 
 .. image:: https://img.shields.io/badge/discord-join%20chat-green.svg
    :target: https://discord.gg/m6YHGyJ
-   
+
 .. .. image:: https://readthedocs.org/projects/flask-assistant/badge/?version=latest
 ..    :target: https://flask-assistant.readthedocs.org/en/latest
 
@@ -31,7 +31,7 @@ Flask-Assistant allows you to focus on building the core business logic of conve
    - Convenient `Home Assistant Integration`_
 
 
-.. _`Actions on Google`: https://developers.google.com/actions/develop/apiai/ 
+.. _`Actions on Google`: https://developers.google.com/actions/develop/apiai/
 .. _`fullfillment`: https://developers.google.com/actions/develop/apiai/dialogs-and-fulfillment#overview
 .. _API.AI: https://docs.api.ai/
 .. _`Home Assistant`: https://home-assistant.io/
@@ -62,7 +62,7 @@ Features
     - Define prompts for missing parameters when they are not present in the users request or past active contexts
     - A convenient syntax resembling Flask's decoratored routing
     - Internal API.AI schema generation and registration
-    
+
 
 Hello World
 ============
@@ -96,19 +96,3 @@ Documentation
 
 - Check out the `Quick Start <http://flask-assistant.readthedocs.io/en/latest/quick_start.html>`_ to jump right in
 - View the full `documentation <http://flask-assistant.readthedocs.io/en/latest/>`_
-
-
-
-
-
-
-  
-
-
-
-
-
-
-
-
-
