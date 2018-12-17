@@ -8,20 +8,20 @@
 Welcome to Flask-Assistant!
 ***************************
 
-.. _`Google Actions`: https://developers.google.com/actions/develop/apiai/ 
-.. _`fullfillment`: https://developers.google.com/actions/develop/apiai/dialogs-and-fulfillment#overview
-.. _API.AI: https://docs.api.ai/
+.. _`Google Actions`: https://developers.google.com/actions/dialogflow/
+.. _`fullfillment`: https://dialogflow.com/docs/fulfillment
+.. _Dialogflow: https://dialogflow.com/docs
 
-A flask extension serving as an `API.AI`_  SDK to provide an easy way to create virtual assistants which may be integrated with platforms such as `Google Actions`_ (Google Home).
+A flask extension serving as an `Dialogflow`_  SDK to provide an easy way to create virtual assistants which may be integrated with platforms such as `Google Actions`_ (Google Home).
 
-Flask-Assistant allows you to focus on building the core business logic of conversational user interfaces while utilizing API.AI's Natural Language Processing to interact with users.
+Flask-Assistant allows you to focus on building the core business logic of conversational user interfaces while utilizing Dialogflow's Natural Language Processing to interact with users.
 
 
 .. This framework provides the ability to:
 .. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ..     - Quickly create fullfillment_ webhooks
-..     - Define and register API.AI schema
-..     - Design a conversational flow to build contextual dialogues with API.AI's concept of contexts
+..     - Define and register Dialogflow schema
+..     - Design a conversational flow to build contextual dialogues with Dialogflow's concept of contexts
 
 
 
@@ -33,8 +33,8 @@ Features
     - Context support for crafting dialogue dependent on the user's requests
     - Define prompts for missing parameters when they are not present in the users request or past active contexs
     - A convenient syntax resembling Flask's decoratored routing
-    - Internal API.AI schema generation and registration
-      
+    - Internal Dialogflow schema generation and registration
+
 
 
 A Minimal Assistant
@@ -46,7 +46,7 @@ A Minimal Assistant
     from flask_assistant import Assistant, tell
 
     app = Flask(__name__)
-    assist = Assistant(app)
+    assist = Assistant(app, project_id='GOOGLE_CLOUD_PROJECT_ID')
 
     @assist.action('Demo')
     def hello_world():
@@ -64,7 +64,7 @@ Explanation
 1. Initialized an :class:`Assistant <flask_assistant.Assistant>` object with a Flask app and the route to your webhook URL.
 2. Used the :meth:`action <flask_assistant.Assistant.action>` decorator to map the `greetings` intent to the proper action function.
     - The action decorator accepts the name of an intent as a parameter
-    - The decorated function serves as the action view function, called when an API.AI request sent on behalf of the `send-message` intent is received
+    - The decorated function serves as the action view function, called when an Dialogflow request sent on behalf of the `send-message` intent is received
 3. The action function returns an :class:`ask <flask_assistant.ask>` response containing text/speech which prompts the user for the next intent.
 
 
@@ -79,15 +79,3 @@ Check out the :doc:`quick_start` to see how to quickly build an assistant
 .. * :ref:`genindex`
 .. * :ref:`modindex`
 .. * :ref:`search`
-
-
-  
-
-
-
-
-
-
-
-
-

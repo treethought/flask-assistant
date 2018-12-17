@@ -2,7 +2,7 @@
 Home Assistant Integration
 ************************************
 
-Flask-Assistant includes a :class:`HassRemote <flask_assistant.HassRemote>` interface to make requests to Home Assistant's `REST api <https://home-assistant.io/developers/rest_api/>`_. This allows your API.AI agent to control and retrieve data about your IoT devices. 
+Flask-Assistant includes a :class:`HassRemote <flask_assistant.HassRemote>` interface to make requests to Home Assistant's `REST api <https://home-assistant.io/developers/rest_api/>`_. This allows your Dialogflow agent to control and retrieve data about your IoT devices.
 
 
 
@@ -37,7 +37,7 @@ The HassRemote is a simple wrapper around Home Assistant's own `remote <https://
     For example:
 
     If you have a switch in your HA configuration with the name "switch.coffee_maker", the name of the parameter should be "switch". This allows your entities to be properly defined within your entities.yaml template when generating schema.
- 
+
 
 Controlling Lights
 ^^^^^^^^^^^^^^^^^^
@@ -116,26 +116,26 @@ Hass Entity Templates
 Home Assistant devices used within action functions can easily be included in your entries template, and are automatically added with the when :doc:`generating schema <generate_schema>`.
 
 
-Although Home Assistant and API.AI both use the term entities, they are used in slightly different ways.
+Although Home Assistant and Dialogflow both use the term entities, they are used in slightly different ways.
 
 Home Assistant:
     - uses the term entity to describe any device or service connected to HA.
-    - Each entity belongs to a domain (component). 
+    - Each entity belongs to a domain (component).
 
-API.AI:
+Dialogflow:
     - Uses the term entity to describe a concept that is used within actions
     - Each instance of the entity is called an entry, and may be the value of parameters required by actions
 
-Therefore, the idea of a ``HA entity`` is similar to an ``API.AI entry``. 
+Therefore, the idea of a ``HA entity`` is similar to an ``Dialogflow entry``.
 
-So HA devices can be defined as entries under their domain, with their domain serving as the API.AI entity.
-    
+So HA devices can be defined as entries under their domain, with their domain serving as the Dialogflow entity.
+
     .. code-block:: yaml
-    
+
         domain:
             - device1: [synonyms]
             - device2: [synonyms]
-              
+
 Template Examples
 -----------------
 
@@ -149,9 +149,9 @@ A Group of Lights:
       - lamp_2: ['lamp', 'desk lamp']
       - lamp_3: ['bedroom light', 'room light', 'bedroom']
       - room: ['all lights', 'lights', 'room'] # a group within home assistant
-        
+
     Within Home Assistant lamp_2 would be identified as light.lamp_2 and room as light.room
-        
+
 
 Switches
 ^^^^^^^^
@@ -178,21 +178,8 @@ Shell Commands
 
 .. code-block:: yaml
 
-    
+
     shell_command:
       - playstation_netflix_start: ['netflix', 'netflix on the ps4']
       - playstation_overwatch_start: [overwatch]
       - playstation_gtav_start: [gta five, gta]
-        
-
-
-
-        
-
-        
-
-    
-
-
-
-

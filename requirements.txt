@@ -1,0 +1,13 @@
+aniso8601==4.0.1
+certifi==2018.11.29
+chardet==3.0.4
+click==7.0
+flask==1.0.2
+idna==2.8
+itsdangerous==1.1.0
+jinja2==2.10
+markupsafe==1.1.0
+requests==2.21.0
+ruamel.yaml==0.15.81
+urllib3==1.24.1
+werkzeug==0.14.1
