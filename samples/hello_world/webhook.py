@@ -47,21 +47,5 @@ def repeat_color(color):
     return ask(speech)
 
 
-@assist.action("pizza")
-def get_pizza(size, pizza_type):
-    speech = f"Cool, I'll make you a {size} {pizza_type} pizza"
-    return ask(speech)
-
-
-@assist.prompt_for("size", "pizza")
-def prompt_size(size):
-    return ask("I need to know what size pizza")
-
-
-@assist.prompt_for("pizza_type", "pizza")
-def prompt_pizza_type(pizza_type):
-    return ask("What kind of pizza?")
-
-
 if __name__ == "__main__":
     app.run(debug=True)
