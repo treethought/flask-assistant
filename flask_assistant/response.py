@@ -82,9 +82,9 @@ class _Response(object):
         #     }
         # )
 
-        if not self._response["payload"]["google"]["richResponse"].get("suggestions"):
-            self._response["payload"]["google"]["richResponse"]["suggestions"] = []
-        self._response["payload"]["google"]["richResponse"]["suggestions"].extend(chips)
+        if not self._payload["google"]["richResponse"].get("suggestions"):
+            self._payload["google"]["richResponse"]["suggestions"] = []
+        self._payload["google"]["richResponse"]["suggestions"].extend(chips)
 
         return self
 
@@ -115,23 +115,43 @@ class _Response(object):
         link_title=None,
     ):
 
-        card_payload = {"title": title, "subtitle": subtitle, "formattedText": text}
+        # NOTE the card repsonse format differs between action and dialogflow
+        # Dialogflow expects openUriAction and uri when using the
+        # fulfillMentMessages object.
+        # using dialogflow's method returns a card in
+        # google assistant, but the button link will be missing
+
+        # Alternatively the AoG payload can be passed in
+        # the payload object of the response
+        # if using the payload object, google expects openUrlAction and url
+        # (as opposed to openUriAction and uri  - with an "i" not "l")
+        # however, this breaks the card inside dialogflow
+
+        card_payload = google_card_payload = {
+            "title": title,
+            "subtitle": subtitle,
+            "formattedText": text,
+        }
 
         if link and link_title:
             btn_payload = [{"title": link_title, "openUriAction": {"uri": link}}]
+            google_btn_payload = [{"title": link_title, "openUrlAction": {"url": link}}]
             card_payload["buttons"] = btn_payload
+            google_card_payload["buttons"] = google_btn_payload
 
         if img_url:
             img_payload = {"imageUri": img_url, "accessibilityText": img_alt or img_url}
             card_payload["image"] = img_payload
 
-        self._messages.append(
-            {"platform": "ACTIONS_ON_GOOGLE", "basicCard": card_payload}
-        )
+        # Use this format for platforms other than AoG
+        # self._messages.append(
+        #     {"platform": "ACTIONS_ON_GOOGLE", "basicCard": card_payload}
+        # )
 
-        self._payload["google"]["richResponse"]["items"].append(
-            {"basicCard": card_payload}
-        )
+        if "ACTIONS_ON_GOOGLE" in self._integrations:
+            self._payload["google"]["richResponse"]["items"].append(
+                {"basicCard": google_card_payload}
+            )
 
         return self
 
