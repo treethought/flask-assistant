@@ -4,7 +4,7 @@ from flask import json, make_response, current_app
 class _Response(object):
     """Base webhook response to be returned to Dialogflow"""
 
-    def __init__(self, speech, is_ssml=False):
+    def __init__(self, speech, display_text=None, is_ssml=False):
 
         self._speech = speech
         self._integrations = current_app.config.get("INTEGRATIONS", [])
@@ -26,29 +26,38 @@ class _Response(object):
         }
 
         if "ACTIONS_ON_GOOGLE" in self._integrations:
-            self._integrate_with_actions(speech, is_ssml)
+            self._integrate_with_actions(speech, display_text, is_ssml)
 
-    def add_msg(self, speech, is_ssml=False):
+    def add_msg(self, speech, display_text=None, is_ssml=False):
         self._messages.append({"text": {"text": [speech]}})
         if "ACTIONS_ON_GOOGLE" in self._integrations:
-            self._integrate_with_actions(speech, is_ssml)
+            self._integrate_with_actions(speech, display_text, is_ssml)
 
         return self
 
-    def _integrate_with_actions(self, speech=None, is_ssml=False):
+    def _integrate_with_actions(self, speech=None, display_text=None, is_ssml=False):
+
         if is_ssml:
-            speech = "<speak>" + speech + "</speak>"
+            ssml_speech = "<speak>" + speech + "</speak>"
             self._messages.append(
                 {
                     "platform": "ACTIONS_ON_GOOGLE",
-                    "simpleResponses": {"simpleResponses": [{"ssml": speech}]},
+                    "simpleResponses": {
+                        "simpleResponses": [
+                            {"ssml": ssml_speech, "displayText": display_text}
+                        ]
+                    },
                 }
             )
         else:
             self._messages.append(
                 {
                     "platform": "ACTIONS_ON_GOOGLE",
-                    "simpleResponses": {"simpleResponses": [{"textToSpeech": speech}]},
+                    "simpleResponses": {
+                        "simpleResponses": [
+                            {"textToSpeech": speech, "displayText": display_text}
+                        ]
+                    },
                 }
             )
 
@@ -255,20 +264,20 @@ class _CarouselCard(_ListSelector):
 
 
 class tell(_Response):
-    def __init__(self, speech, is_ssml=False):
-        super(tell, self).__init__(speech, is_ssml)
+    def __init__(self, speech, display_text=None, is_ssml=False):
+        super(tell, self).__init__(speech, display_text, is_ssml)
         self._response["payload"]["google"]["expect_user_response"] = False
 
 
 class ask(_Response):
-    def __init__(self, speech, is_ssml=False):
+    def __init__(self, speech, display_text=None, is_ssml=False):
         """Returns a response to the user and keeps the current session alive.
         Expects a response from the user.
 
         Arguments:
             speech {str} --  Text to be pronounced to the user / shown on the screen
         """
-        super(ask, self).__init__(speech, is_ssml)
+        super(ask, self).__init__(speech, display_text, is_ssml)
         self._response["payload"]["google"]["expect_user_response"] = True
 
     def reprompt(self, prompt):
