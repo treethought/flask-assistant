@@ -9,21 +9,17 @@ class _Response(object):
         self._speech = speech
         self._integrations = current_app.config.get("INTEGRATIONS", [])
         self._messages = [{"text": {"text": [speech]}}]
-        self._payload = {
-            "google": {  # TODO: may be depreciated
-                "expect_user_response": True,
-                "is_ssml": True,
-                "permissions_request": None,
-                "richResponse": {
-                    "items": [{"simpleResponse": {"textToSpeech": speech}}]
-                },
-            }
-        }
 
         self._response = {
             "fulfillmentText": speech,
             "fulfillmentMessages": self._messages,
-            "payload": self._payload,
+            "payload": {
+                "google": {  # TODO: may be depreciated
+                    "expect_user_response": True,
+                    "is_ssml": True,
+                    "permissions_request": None,
+                }
+            },
             "outputContexts": [],
             "source": "webhook",
             "followupEventInput": None,  # TODO
@@ -49,9 +45,6 @@ class _Response(object):
     def render_response(self):
         from flask_assistant import core
 
-        self._response["payload"] = self._payload
-        self._response["fulfillmentMessages"] = self._messages
-
         self._include_contexts()
         core._dbgdump(self._response)
         resp = json.dumps(self._response, indent=4)
@@ -74,17 +67,13 @@ class _Response(object):
             {"platform": "ACTIONS_ON_GOOGLE", "suggestions": {"suggestions": chips}}
         )
 
-        # quick replies for other platforms
+        # # quick replies for other platforms
         # self._messages.append(
         #     {
         #         "platform": "ACTIONS_ON_GOOGLE",
         #         "quickReplies": {"title": None, "quickReplies": replies},
         #     }
         # )
-
-        if not self._response["payload"]["google"]["richResponse"].get("suggestions"):
-            self._response["payload"]["google"]["richResponse"]["suggestions"] = []
-        self._response["payload"]["google"]["richResponse"]["suggestions"].extend(chips)
 
         return self
 
@@ -96,11 +85,6 @@ class _Response(object):
                 "linkOutSuggestion": {"destinationName": name, "uri": url},
             }
         )
-
-        self._payload["google"]["richResponse"]["linkoutSuggestion"] = {
-            "destinationName": name,
-            "uri": url,
-        }
 
         return self
 
@@ -127,10 +111,6 @@ class _Response(object):
 
         self._messages.append(
             {"platform": "ACTIONS_ON_GOOGLE", "basicCard": card_payload}
-        )
-
-        self._payload["google"]["richResponse"]["items"].append(
-            {"basicCard": card_payload}
         )
 
         return self
@@ -180,7 +160,7 @@ def build_item(
         "title": title,
         "description": description,
         "image": {
-            "imageUri": img_url,
+            "imageUri": img_url or "",
             "accessibilityText": alt_text or "{} img".format(title),
         },
     }
@@ -238,18 +218,12 @@ class _ListSelector(_CardWithItems):
         super(_ListSelector, self).__init__(speech, items)
 
     def _add_message(self):
-        list_payload = {"title": self._title, "items": self._items}
         self._messages.append(
-            {"platform": "ACTIONS_ON_GOOGLE", "listSelect": list_payload}
+            {
+                "platform": "ACTIONS_ON_GOOGLE",
+                "listSelect": {"title": self._title, "items": self._items},
+            }
         )
-
-        # self._payload["google"]["systemIntent"] = {
-        #     "intent": "actions.intent.OPTION",
-        #     "data": {
-        #         "@type": "type.googleapis.com/google.actions.v2.OptionValueSpec",
-        #         "listSelect": list_payload,
-        #     },
-        # }
 
 
 class _CarouselCard(_ListSelector):
@@ -259,18 +233,9 @@ class _CarouselCard(_ListSelector):
         super(_CarouselCard, self).__init__(speech, items=items)
 
     def _add_message(self):
-        carousel_payload = {"items": self._items}
         self._messages.append(
-            {"platform": "ACTIONS_ON_GOOGLE", "carouselSelect": carousel_payload}
+            {"platform": "ACTIONS_ON_GOOGLE", "carouselSelect": {"items": self._items}}
         )
-
-        # self._payload["google"]["systemIntent"] = {
-        #     "intent": "actions.intent.OPTION",
-        #     "data": {
-        #         "@type": "type.googleapis.com/google.actions.v2.OptionValueSpec",
-        #         "carouselSelect": carousel_payload,
-        #     },
-        # }
 
 
 class tell(_Response):
