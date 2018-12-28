@@ -28,6 +28,13 @@ class _Response(object):
         if "ACTIONS_ON_GOOGLE" in self._integrations:
             self._integrate_with_actions(speech)
 
+    def add_msg(self, speech):
+        self._messages.append({"text": {"text": [speech]}})
+        if "ACTIONS_ON_GOOGLE" in self._integrations:
+            self._integrate_with_actions(speech)
+
+        return self
+
     def _integrate_with_actions(self, speech=None):
         self._messages.append(
             {
