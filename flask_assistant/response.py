@@ -36,7 +36,8 @@ class _Response(object):
         return self
 
     def _integrate_with_actions(self, speech=None, display_text=None, is_ssml=False):
-
+        if display_text is None:
+            display_text = speech
         if is_ssml:
             ssml_speech = "<speak>" + speech + "</speak>"
             self._messages.append(
