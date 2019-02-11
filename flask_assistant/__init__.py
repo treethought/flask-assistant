@@ -1,7 +1,14 @@
 import logging
 
 logger = logging.getLogger("flask_assistant")
-logger.addHandler(logging.StreamHandler())
+handler = logging.StreamHandler()
+formatter = logging.Formatter(
+    "%(asctime)s:%(name)s:%(levelname)s: %(message)s", "%Y-%m-%d %H:%M:%S"
+)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+
 if logger.level == logging.NOTSET:
     logger.setLevel(logging.INFO)
 

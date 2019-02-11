@@ -320,12 +320,27 @@ class Assistant(object):
 
         return _dialogflow_request_payload
 
-    def _dump_view_info(self, view_func=lambda: None):
-        _infodump(
-            "Result: Matched {} intent to {} func".format(
-                self.intent, view_func.__name__
-            )
-        )
+    def _dump_request(self,):
+        summary = {
+            "Intent": self.intent,
+            "Incoming Contexts": [c.name for c in self.context_manager.active],
+            "Source": self.request["originalDetectIntentRequest"].get("source"),
+            "SessionID": self.session_id,
+            "Missing Params": self._missing_params,
+            "Received Params": self.request["queryResult"]["parameters"],
+        }
+        msg = "Request: " + json.dumps(summary, indent=2, sort_keys=True)
+        logger.info(msg)
+
+    def _dump_result(self, view_func, result):
+        summary = {
+            "Intent": self.intent,
+            "Outgoing Contexts": [c.name for c in self.context_manager.active],
+            "Matched Action": view_func.__name__,
+            "Response Speech": result._speech,
+        }
+        msg = "Result: " + json.dumps(summary, indent=2, sort_keys=True)
+        logger.info(msg)
 
     def _parse_session_id(self):
         return self.request["session"].split("/sessions/")[1]
@@ -336,7 +351,7 @@ class Assistant(object):
         else:  # called as webhook
             self.request = self._dialogflow_request(verify=False)
 
-        _dbgdump(self.request)
+        logger.debug(json.dumps(self.request, indent=2))
 
         try:
             self.intent = self.request["queryResult"]["intent"]["displayName"]
@@ -359,15 +374,23 @@ class Assistant(object):
             self.access_token = original_request["user"].get("accessToken")
 
         self._update_contexts()
+        self._dump_request()
 
         view_func = self._match_view_func()
-        _dbgdump("Matched view func - {}".format(self.intent, view_func))
+        if view_func is None:
+            logger.error("Failed to match an action function")
+            return "", 400
+
+        logger.info("Matched action function: {}".format(view_func.__name__))
         result = self._map_intent_to_view_func(view_func)()
 
         if result is not None:
             if isinstance(result, _Response):
-                return result.render_response()
+                self._dump_result(view_func, result)
+                resp = result.render_response()
+                return resp
             return result
+        logger.error("Action func returned empty response")
         return "", 400
 
     def _update_contexts(self):
@@ -386,6 +409,11 @@ class Assistant(object):
             if prompts:
                 param_choice = self._missing_params.pop()
                 view_func = prompts.get(param_choice)
+                logger.debug(
+                    "Matching prompt func {} for missing param {}".format(
+                        view_func.__name__, param_choice
+                    )
+                )
 
         if not view_func and len(self._intent_action_funcs[self.intent]) == 1:
             view_func = self._intent_action_funcs[self.intent][0]
@@ -400,7 +428,7 @@ class Assistant(object):
             msg += "Required args {}, context_in {}, matched view func {}.".format(
                 self._func_args(view_func), self.context_in, view_func.__name__
             )
-            _errordump(msg)
+            logger.error(msg)
 
         return view_func
 
@@ -525,6 +553,7 @@ class Assistant(object):
 
         for func in self._func_contexts:
             if self._context_satified(func):
+                logger.debug("{} context conditions satisified".format(func.__name__))
                 possible_views.append(func)
         return possible_views
 
@@ -532,18 +561,20 @@ class Assistant(object):
         choice = None
         for view in self._context_views:
             if view in self._intent_action_funcs[self.intent]:
+                logger.debug(
+                    "Matched {} based on active contexts".format(view.__name__)
+                )
                 choice = view
         if choice:
             return choice
         else:
-            msg = "No view matched for intent {} with contexts {}".format(
-                self.intent, self.context_in
-            )
-            msg += "(Registered context views: {}, ".format(self._context_views)
-            msg += "Intent action funcs: {})".format(
-                [f.__name__ for f in self._intent_action_funcs[self.intent]]
-            )
-            _errordump(msg)
+            active_contexts = [c.name for c in self.context_manager.active]
+            intent_actions = [
+                f.__name__ for f in self._intent_action_funcs[self.intent]
+            ]
+            msg = "No {} action func matched based on active contexts"
+
+            logger.debug(msg)
 
     @property
     def _missing_params(self):  # TODO: fill missing slot from default\
@@ -609,24 +640,9 @@ class Assistant(object):
     def _map_arg_from_context(self, arg_name):
         for context_obj in self.context_in:
             if arg_name in context_obj["parameters"]:
+                logger.debug(
+                    "Retrieved {} param value from {} context".format(
+                        arg_name, context_obj["name"]
+                    )
+                )
                 return context_obj["parameters"][arg_name]
-
-
-def _dbgdump(obj, indent=2, default=None, cls=None):
-    msg = json.dumps(obj, indent=indent, default=default, cls=cls)
-    logger.debug(msg)
-
-
-def _infodump(obj, indent=2, default=None, cls=None):
-    msg = json.dumps(obj, indent=indent, default=default, cls=cls)
-    logger.info(msg)
-
-
-def _warndump(obj, indent=2, default=None, cls=None):
-    msg = json.dumps(obj, indent=indent, default=default, cls=cls)
-    logger.warning(msg)
-
-
-def _errordump(obj, indent=2, default=None, cls=None):
-    msg = json.dumps(obj, indent=indent, default=default, cls=cls)
-    logger.error(msg)
