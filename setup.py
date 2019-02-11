@@ -5,19 +5,20 @@ Framework for Building Virtual Assistants with API.AI
 """
 from setuptools import setup
 
-with open("./README.rst", "r") as f:
+with open("./README.md", "r") as f:
     long_description = f.read()
 
 
 setup(
     name="Flask-Assistant",
-    version="0.3.4",
+    version="0.3.5",
     url="https://github.com/treethought/flask-assistant",
     license="Apache 2.0",
     author="Cam Sweeney",
     author_email="cpsweene@gmail.com",
     description="Framework for Building Virtual Assistants with API.AI",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     packages=["flask_assistant", "api_ai"],
     zip_safe=False,
     include_package_data=True,

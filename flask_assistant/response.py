@@ -1,4 +1,5 @@
 from flask import json, make_response, current_app
+from . import logger
 
 
 class _Response(object):
@@ -36,7 +37,8 @@ class _Response(object):
         return self
 
     def _integrate_with_actions(self, speech=None, display_text=None, is_ssml=False):
-
+        if display_text is None:
+            display_text = speech
         if is_ssml:
             ssml_speech = "<speak>" + speech + "</speak>"
             self._messages.append(
@@ -68,12 +70,9 @@ class _Response(object):
             self._response["outputContexts"].append(context.serialize)
 
     def render_response(self):
-        from flask_assistant import core
-
         self._include_contexts()
-        core._dbgdump(self._response)
-        resp = json.dumps(self._response, indent=4)
-        resp = make_response(resp)
+        logger.debug(json.dumps(self._response, indent=2))
+        resp = make_response(json.dumps(self._response))
         resp.headers["Content-Type"] = "application/json"
 
         return resp
