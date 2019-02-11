@@ -325,7 +325,6 @@ class Assistant(object):
             "Intent": self.intent,
             "Incoming Contexts": [c.name for c in self.context_manager.active],
             "Source": self.request["originalDetectIntentRequest"].get("source"),
-            "SessionID": self.session_id,
             "Missing Params": self._missing_params,
             "Received Params": self.request["queryResult"]["parameters"],
         }
@@ -401,6 +400,13 @@ class Assistant(object):
     def _match_view_func(self):
         view_func = None
 
+        intent_actions = self._intent_action_funcs.get(self.intent, [])
+        if len(intent_actions) == 0:
+            logger.critical(
+                "No action funcs defined for intent: {}".format(self.intent)
+            )
+            return view_func
+
         if self.has_live_context():
             view_func = self._choose_context_view()
 
@@ -415,20 +421,15 @@ class Assistant(object):
                     )
                 )
 
-        if not view_func and len(self._intent_action_funcs[self.intent]) == 1:
+        if not view_func and len(intent_actions) == 1:
             view_func = self._intent_action_funcs[self.intent][0]
 
-            # TODO: Do not match func if context not satisfied
+        # TODO: Do not match func if context not satisfied
 
-        if not view_func:
-            view_func = self._intent_action_funcs[self.intent][0]
-            msg = "No view func matched. Received intent {} with parameters {}. ".format(
-                self.intent, self.request["queryResult"]["parameters"]
-            )
-            msg += "Required args {}, context_in {}, matched view func {}.".format(
-                self._func_args(view_func), self.context_in, view_func.__name__
-            )
-            logger.error(msg)
+        if not view_func and len(intent_actions) > 1:
+            view_func = intent_actions[0]
+            msg = "Multiple actions defined but no context was applied, will use first action func"
+            logger.warning(msg)
 
         return view_func
 
