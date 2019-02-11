@@ -5,7 +5,7 @@ Framework for Building Virtual Assistants with API.AI
 """
 from setuptools import setup
 
-with open("./README.rst", "r") as f:
+with open("./README.md", "r", encoding="utf-8") as f:
     long_description = f.read()
 
 
@@ -18,6 +18,7 @@ setup(
     author_email="cpsweene@gmail.com",
     description="Framework for Building Virtual Assistants with API.AI",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     packages=["flask_assistant", "api_ai"],
     zip_safe=False,
     include_package_data=True,
