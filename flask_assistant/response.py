@@ -8,6 +8,7 @@ class _Response(object):
     def __init__(self, speech, display_text=None, is_ssml=False):
 
         self._speech = speech
+        self._display_text = display_text
         self._integrations = current_app.config.get("INTEGRATIONS", [])
         self._messages = [{"text": {"text": [speech]}}]
 
@@ -27,7 +28,7 @@ class _Response(object):
         }
 
         if "ACTIONS_ON_GOOGLE" in self._integrations:
-            self._integrate_with_actions(speech, display_text, is_ssml)
+            self._integrate_with_actions(self._speech, self._display_text, is_ssml)
 
     def add_msg(self, speech, display_text=None, is_ssml=False):
         self._messages.append({"text": {"text": [speech]}})
@@ -167,11 +168,15 @@ class _Response(object):
 
         """
 
-        list_card = _ListSelector(self._speech, title, items)
+        list_card = _ListSelector(
+            self._speech, display_text=self._display_text, title=title, items=items
+        )
         return list_card
 
     def build_carousel(self, items=None):
-        carousel = _CarouselCard(self._speech, items)
+        carousel = _CarouselCard(
+            self._speech, display_text=self._display_text, items=items
+        )
         return carousel
 
 
@@ -197,8 +202,8 @@ class _CardWithItems(_Response):
        Provides the meth:add_item method.
     """
 
-    def __init__(self, speech, items=None):
-        super(_CardWithItems, self).__init__(speech)
+    def __init__(self, speech, display_text=None, items=None):
+        super(_CardWithItems, self).__init__(speech, display_text)
         self._items = items or list()
         self._add_message()  # possibly call this later?
 
@@ -236,10 +241,10 @@ class _CardWithItems(_Response):
 class _ListSelector(_CardWithItems):
     """Subclass of basic _Response to provide an instance capable of adding items."""
 
-    def __init__(self, speech, title=None, items=None):
+    def __init__(self, speech, display_text=None, title=None, items=None):
         self._title = title
 
-        super(_ListSelector, self).__init__(speech, items)
+        super(_ListSelector, self).__init__(speech, display_text, items)
 
     def _add_message(self):
         self._messages.append(
@@ -253,8 +258,8 @@ class _ListSelector(_CardWithItems):
 class _CarouselCard(_ListSelector):
     """Subclass of _CardWithItems used to build Carousel cards."""
 
-    def __init__(self, speech, items=None):
-        super(_CarouselCard, self).__init__(speech, items=items)
+    def __init__(self, speech, display_text=None, items=None):
+        super(_CarouselCard, self).__init__(speech, display_text, items=items)
 
     def _add_message(self):
         self._messages.append(
