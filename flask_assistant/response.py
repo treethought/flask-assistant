@@ -28,6 +28,7 @@ class _Response(object):
         }
 
         if "ACTIONS_ON_GOOGLE" in self._integrations:
+            self._set_user_storage()
             self._integrate_with_actions(self._speech, self._display_text, is_ssml)
 
     def add_msg(self, speech, display_text=None, is_ssml=False):
@@ -35,7 +36,13 @@ class _Response(object):
         if "ACTIONS_ON_GOOGLE" in self._integrations:
             self._integrate_with_actions(speech, display_text, is_ssml)
 
-        return self
+    def _set_user_storage(self):
+        from flask_assistant.core import user
+
+        # If empty or unspecified,
+        # the existing persisted token will be unchanged.
+        if user.get("userStorage"):
+            self._response["payload"]["google"]["userStorage"] = user["userStorage"]
 
     def _integrate_with_actions(self, speech=None, display_text=None, is_ssml=False):
         if display_text is None:
@@ -313,16 +320,26 @@ class permission(_Response):
     Arguments:
         permissions {list} -- list of permissions to request for eg. ['DEVICE_PRECISE_LOCATION']
         context {str} -- Text explaining the reason/value for the requested permission
+        update_intent {str} -- name of the intent that the user wants to get updates from
     """
 
-    def __init__(self, permissions, context=None):
+    def __init__(self, permissions, context=None, update_intent=None):
         super(permission, self).__init__(speech=None)
         self._messages[:] = []
+
+        if isinstance(permissions, str):
+            permissions = [permissions]
+
+        if "UPDATE" in permissions and update_intent is None:
+            raise ValueError("update_intent is required to ask for UPDATE permission")
+
         self._response["payload"]["google"]["systemIntent"] = {
             "intent": "actions.intent.PERMISSION",
             "data": {
                 "@type": "type.googleapis.com/google.actions.v2.PermissionValueSpec",
                 "optContext": context,
                 "permissions": permissions,
+                "updatePermissionValueSpec": {"intent": update_intent},
             },
         }
+

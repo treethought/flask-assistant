@@ -19,6 +19,7 @@ from flask_assistant.core import (
     intent,
     request,
     access_token,
+    user,
 )
 
 from flask_assistant.response import ask, tell, event, build_item, permission
