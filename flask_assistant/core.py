@@ -378,10 +378,12 @@ class Assistant(object):
 
         
         original_request = self.request.get("originalDetectIntentRequest")
-
-
-        if original_request and original_request["payload"].get("user"):
-            self.user = original_request["payload"]["user"]
+        
+        if original_request:
+            payload = original_request.get('payload')
+            if payload and payload.get('user'):
+                self.user = original_request["payload"]["user"]
+            
 
         # Get access token from request
         if original_request and original_request.get("user"):
