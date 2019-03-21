@@ -71,3 +71,20 @@ def test_active_and_expired(manager):
     assert c1 in manager.active
     assert c2 in manager.active
     assert c3 in manager.expired
+
+
+def test_add_contexts_and_clear_all(manager):
+    c1 = manager.add("sample1", lifespan=1)
+    c2 = manager.add("sample2", lifespan=2)
+    c3 = manager.add("sample3", lifespan=3)
+    c3 = manager.add("sample4", lifespan=0)
+
+    assert len(manager._cache) == 4
+    assert len(manager.active) == 3
+    assert len(manager.expired) == 1
+
+    manager.clear_all()
+
+    assert len(manager._cache) == 4
+    assert len(manager.active) == 0
+    assert len(manager.expired) == 4

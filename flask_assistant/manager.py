@@ -1,3 +1,6 @@
+from flask_assistant import logger
+
+
 def parse_context_name(context_obj):
     """Parses context name from Dialogflow's contextsession prefixed context path"""
     return context_obj["name"].split("/contexts/")[1]
@@ -69,6 +72,7 @@ class ContextManager:
     def set(self, context_name, param, val):
         context = self.get(context_name)
         context.set(param, val)
+        self._cache[context.name] = context
         return context
 
     def get_param(self, context_name, param):
@@ -82,6 +86,15 @@ class ContextManager:
             context.lifespan = obj.get("lifespanCount", 0)
             context.parameters = obj.get("parameters", {})
             self._cache[context.name] = context
+
+    def clear_all(self):
+        logger.info("Clearing all contexts")
+        new_cache = {}
+        for name, context in self._cache.items():
+            context.lifespan = 0
+            new_cache[name] = context
+
+        self._cache = new_cache
 
     @property
     def status(self):
