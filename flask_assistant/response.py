@@ -28,6 +28,7 @@ class _Response(object):
         }
 
         if "ACTIONS_ON_GOOGLE" in self._integrations:
+            self._set_user_storage()
             self._integrate_with_actions(self._speech, self._display_text, is_ssml)
 
     def add_msg(self, speech, display_text=None, is_ssml=False):
@@ -35,7 +36,13 @@ class _Response(object):
         if "ACTIONS_ON_GOOGLE" in self._integrations:
             self._integrate_with_actions(speech, display_text, is_ssml)
 
-        return self
+    def _set_user_storage(self):
+        from flask_assistant.core import user
+
+        # If empty or unspecified,
+        # the existing persisted token will be unchanged.
+        if user.get("userStorage"):
+            self._response["payload"]["google"]["userStorage"] = user["userStorage"]
 
     def _integrate_with_actions(self, speech=None, display_text=None, is_ssml=False):
         if display_text is None:

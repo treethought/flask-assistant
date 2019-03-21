@@ -39,6 +39,7 @@ context_in = LocalProxy(lambda: find_assistant().context_in)
 context_manager = LocalProxy(lambda: find_assistant().context_manager)
 convert_errors = LocalProxy(lambda: find_assistant().convert_errors)
 session_id = LocalProxy(lambda: find_assistant().session_id)
+user = LocalProxy(lambda: find_assistant().user)
 
 # Converter shorthands for commonly used system entities
 _converter_shorthands = {
@@ -220,6 +221,14 @@ class Assistant(object):
     def session_id(self, value):
         _app_ctx_stack.top._assist_session_id = value
 
+    @property
+    def user(self):
+        return getattr(_app_ctx_stack.top, "_assist_user", {})
+
+    @user.setter
+    def user(self, value):
+        _app_ctx_stack.top._assist_user = value
+
     def _register_context_to_func(self, intent_name, context=[]):
         required = self._required_contexts.get(intent_name)
         if required:
@@ -367,8 +376,14 @@ class Assistant(object):
         # TODO: acces context_manager from assist, instead of own object
         self.context_manager._assist = self
 
-        # Get access token from request
+        
         original_request = self.request.get("originalDetectIntentRequest")
+
+
+        if original_request and original_request["payload"].get("user"):
+            self.user = original_request["payload"]["user"]
+
+        # Get access token from request
         if original_request and original_request.get("user"):
             self.access_token = original_request["user"].get("accessToken")
 
