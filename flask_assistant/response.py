@@ -313,16 +313,26 @@ class permission(_Response):
     Arguments:
         permissions {list} -- list of permissions to request for eg. ['DEVICE_PRECISE_LOCATION']
         context {str} -- Text explaining the reason/value for the requested permission
+        update_intent {str} -- name of the intent that the user wants to get updates from
     """
 
-    def __init__(self, permissions, context=None):
+    def __init__(self, permissions, context=None, update_intent=None):
         super(permission, self).__init__(speech=None)
         self._messages[:] = []
+
+        if isinstance(permissions, str):
+            permissions = [permissions]
+
+        if "UPDATE" in permissions and update_intent is None:
+            raise ValueError("update_intent is required to ask for UPDATE permission")
+
         self._response["payload"]["google"]["systemIntent"] = {
             "intent": "actions.intent.PERMISSION",
             "data": {
                 "@type": "type.googleapis.com/google.actions.v2.PermissionValueSpec",
                 "optContext": context,
                 "permissions": permissions,
+                "updatePermissionValueSpec": {"intent": update_intent},
             },
         }
+
