@@ -20,6 +20,8 @@ from flask_assistant.core import (
     request,
     access_token,
     user,
+    session_id,
+    context_in,
 )
 
 from flask_assistant.response import ask, tell, event, build_item, permission
