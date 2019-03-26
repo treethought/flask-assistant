@@ -36,6 +36,8 @@ class _Response(object):
         if "ACTIONS_ON_GOOGLE" in self._integrations:
             self._integrate_with_actions(speech, display_text, is_ssml)
 
+        return self
+
     def _set_user_storage(self):
         from flask_assistant.core import user
 
