@@ -20,6 +20,7 @@ from flask_assistant.core import (
     request,
     access_token,
     user,
+    storage,
     session_id,
     context_in,
 )
