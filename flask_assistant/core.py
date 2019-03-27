@@ -3,7 +3,6 @@ import sys
 import os
 from functools import wraps, partial
 
-
 import aniso8601
 from flask import current_app, json, request as flask_request, _app_ctx_stack
 from werkzeug.local import LocalProxy
@@ -40,6 +39,7 @@ context_manager = LocalProxy(lambda: find_assistant().context_manager)
 convert_errors = LocalProxy(lambda: find_assistant().convert_errors)
 session_id = LocalProxy(lambda: find_assistant().session_id)
 user = LocalProxy(lambda: find_assistant().user)
+storage = LocalProxy(lambda: find_assistant().storage)
 
 # Converter shorthands for commonly used system entities
 _converter_shorthands = {
@@ -227,7 +227,26 @@ class Assistant(object):
 
     @user.setter
     def user(self, value):
+        storage_data = value.get("userStorage", {})
+
+        if not isinstance(storage_data, dict):
+            storage_data = json.loads(storage_data)
+
+        value["userStorage"] = storage_data
+
         _app_ctx_stack.top._assist_user = value
+        _app_ctx_stack.top._assist_storage = storage_data
+
+    @property
+    def storage(self):
+        return self.user["userStorage"]
+
+    @storage.setter
+    def storage(self, value):
+        if not isintance(value, dict):
+            raise TypeError("Storage must be a dictionary")
+
+        self.user["userStorage"] = value
 
     def _register_context_to_func(self, intent_name, context=[]):
         required = self._required_contexts.get(intent_name)
@@ -376,14 +395,12 @@ class Assistant(object):
         # TODO: acces context_manager from assist, instead of own object
         self.context_manager._assist = self
 
-        
         original_request = self.request.get("originalDetectIntentRequest")
-        
+
         if original_request:
-            payload = original_request.get('payload')
-            if payload and payload.get('user'):
+            payload = original_request.get("payload")
+            if payload and payload.get("user"):
                 self.user = original_request["payload"]["user"]
-            
 
         # Get access token from request
         if original_request and original_request.get("user"):
