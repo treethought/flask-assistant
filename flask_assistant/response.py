@@ -43,8 +43,17 @@ class _Response(object):
 
         # If empty or unspecified,
         # the existing persisted token will be unchanged.
-        if user.get("userStorage"):
-            self._response["payload"]["google"]["userStorage"] = user["userStorage"]
+        user_storage = user.get("userStorage")
+        if user_storage is None:
+            return
+
+        if isinstance(user_storage, dict):
+            user_storage = json.dumps(user_storage)
+
+        if len(user_storage.encode("utf-8")) > 10000:
+            raise ValueError("UserStorage must not exceed 10k bytes")
+
+        self._response["payload"]["google"]["userStorage"] = user_storage
 
     def _integrate_with_actions(self, speech=None, display_text=None, is_ssml=False):
         if display_text is None:
