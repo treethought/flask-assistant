@@ -239,7 +239,7 @@ class Assistant(object):
 
     @property
     def storage(self):
-        return self.user["userStorage"]
+        return self.user.get("userStorage", {})
 
     @storage.setter
     def storage(self, value):
