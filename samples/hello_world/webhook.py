@@ -43,7 +43,6 @@ def prompt_color(color):
 @assist.action("give-color", mapping={"color": "sys.color"})
 def repeat_color(color):
     speech = "Ok, {} is an okay color I guess.".format(color)
-    speech += "\n What pizza do you want"
     return ask(speech)
 
 
