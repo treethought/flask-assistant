@@ -25,7 +25,9 @@ from flask_assistant.core import (
     context_in,
 )
 
-from flask_assistant.response import ask, tell, event, build_item, permission
+from flask_assistant.response import (
+    ask, tell, event, build_item, permission, build_button
+)
 from flask_assistant.manager import Context
 
 import flask_assistant.utils
