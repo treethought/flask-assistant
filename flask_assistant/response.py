@@ -140,13 +140,26 @@ class _Response(object):
         subtitle=None,
         link=None,
         link_title=None,
+        buttons=None,
     ):
+        """
+        :param: link and :param: link_title supports only one button per card
+        in future versions should be deleted
+        and from now deprecated
+
+        :param link:
+        :param link_title:
+        :return:
+        """
 
         card_payload = {"title": title, "subtitle": subtitle, "formattedText": text}
 
-        if link and link_title:
-            btn_payload = [{"title": link_title, "openUriAction": {"uri": link}}]
-            card_payload["buttons"] = btn_payload
+        if buttons:
+            card_payload["buttons"] = buttons
+        elif link and link_title:
+            logger.info('use button parameter instead of link and link_title')
+            buttons = [build_button(title=link_title, link=link)]
+            card_payload["buttons"] = buttons
 
         if img_url:
             img_payload = {"imageUri": img_url, "accessibilityText": img_alt or img_url}
@@ -196,6 +209,13 @@ class _Response(object):
             self._speech, display_text=self._display_text, items=items
         )
         return carousel
+
+
+def build_button(title, link):
+    return {
+        "title": title,
+        "openUriAction": {"uri": link}
+    }
 
 
 def build_item(
