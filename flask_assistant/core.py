@@ -243,7 +243,7 @@ class Assistant(object):
 
     @storage.setter
     def storage(self, value):
-        if not isintance(value, dict):
+        if not isinstance(value, dict):
             raise TypeError("Storage must be a dictionary")
 
         self.user["userStorage"] = value
