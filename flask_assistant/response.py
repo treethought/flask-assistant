@@ -206,11 +206,12 @@ def build_item(
         "info": {"key": key or title, "synonyms": synonyms or []},
         "title": title,
         "description": description,
-        "image": {
-            "imageUri": img_url or "",
-            "accessibilityText": alt_text or "{} img".format(title),
-        },
     }
+
+    if img_url:
+            img_payload = {"imageUri": img_url, "accessibilityText": alt_text or "{} img".format(title)}
+            item["image"] = img_payload
+
     return item
 
 
