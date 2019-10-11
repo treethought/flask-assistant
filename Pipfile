@@ -10,6 +10,7 @@ tox = "*"
 
 [packages]
 flask-assistant = {editable = true,path = "."}
+google-auth = "*"
 
 [pipenv]
 allow_prereleases = true
