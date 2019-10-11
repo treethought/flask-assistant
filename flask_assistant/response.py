@@ -209,8 +209,11 @@ def build_item(
     }
 
     if img_url:
-            img_payload = {"imageUri": img_url, "accessibilityText": alt_text or "{} img".format(title)}
-            item["image"] = img_payload
+        img_payload = {
+            "imageUri": img_url,
+            "accessibilityText": alt_text or "{} img".format(title),
+        }
+        item["image"] = img_payload
 
     return item
 
@@ -352,6 +355,30 @@ class permission(_Response):
                 "optContext": context,
                 "permissions": permissions,
                 "updatePermissionValueSpec": {"intent": update_intent},
+            },
+        }
+
+
+class sign_in(_Response):
+    """Initiates the  authentication flow for Account Linking
+
+    After the user authorizes the action to access their profile, a Google ID token
+    will be received and validated by the flask-assistant and expose user profile information
+    with the `user.profile` local
+
+    In order to complete the sign in process, you will need to create an intent with
+    the `actions_intent_SIGN)IN` event
+    """
+
+    def __init__(self, reason=None):
+        super(sign_in, self).__init__(speech=None)
+
+        self._messages[:] = []
+        self._response["payload"]["google"]["systemIntent"] = {
+            "intent": "actions.intent.SIGN_IN",
+            "data": {
+                "optContext": reason,
+                "@type": "type.googleapis.com/google.actions.v2.SignInValueSpec",
             },
         }
 
