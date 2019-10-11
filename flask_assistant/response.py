@@ -355,3 +355,17 @@ class permission(_Response):
             },
         }
 
+class sign_in(_Response):
+
+    def __init__(self, context=None):
+        super(sign_in, self).__init__(speech=None)
+
+
+        self._messages[:] = []
+        self._response["payload"]["google"]["systemIntent"] = {
+            "intent": "actions.intent.SIGN_IN",
+            "data": {
+                "optContext": context,
+                "@type": "type.googleapis.com/google.actions.v2.SignInValueSpec",
+            }
+        }
