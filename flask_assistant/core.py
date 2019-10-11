@@ -65,6 +65,7 @@ class Assistant(object):
         blueprint {Flask Blueprint} -- Flask Blueprint instance to initialize (Default: {None})
         route {str} -- entry point to which initial Alexa Requests are forwarded (default: {None})
         project_id {str} -- Google Cloud Project ID, required to manage contexts from flask-assistant
+        client_id {Str} -- Actions on Google client ID used for account linking
         dev_token {str} - Dialogflow dev access token used to register and retrieve agent resources
         client_token {str} - Dialogflow client access token required for querying agent
     """
@@ -77,12 +78,14 @@ class Assistant(object):
         project_id=None,
         dev_token=None,
         client_token=None,
+        client_id=None,
     ):
 
         self.app = app
         self.blueprint = blueprint
         self._route = route
         self.project_id = project_id
+        self.client_id = client_id
         self._intent_action_funcs = {}
         self._intent_mappings = {}
         self._intent_converts = {}
@@ -107,6 +110,9 @@ class Assistant(object):
             raise ValueError(
                 "Assistant object must be intialized with either an app or blueprint"
             )
+
+        if self.client_id is None:
+            self.client_id = self.app.config.get("AOG_CLIENT_ID")
 
         if project_id is None:
             import warnings
@@ -243,7 +249,7 @@ class Assistant(object):
 
     @storage.setter
     def storage(self, value):
-        if not isintance(value, dict):
+        if not isinstance(value, dict):
             raise TypeError("Storage must be a dictionary")
 
         self.user["userStorage"] = value
