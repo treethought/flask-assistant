@@ -387,7 +387,23 @@ class Assistant(object):
     def _parse_session_id(self):
         return self.request["session"].split("/sessions/")[1]
 
+    def _set_user_profile(self):
+        if self.client_id is None:
+            return
 
+        if self.user.get("idToken") is not None:
+            from flask_assistant.utils import decode_token
+
+            token = self.user["idToken"]
+            profile_payload = decode_token(token, self.client_id)
+            for k in ["sub", "iss", "aud", "iat", "exp"]:
+                profile_payload.pop(k)
+
+            self.profile = profile_payload
+
+
+
+    
     def _flask_assitant_view_func(self, nlp_result=None, *args, **kwargs):
         if nlp_result:  # pass API query result directly
             self.request = nlp_result
@@ -417,15 +433,7 @@ class Assistant(object):
             payload = original_request.get("payload")
             if payload and payload.get("user"):
                 self.user = original_request["payload"]["user"]
-                if self.user.get("idToken") is not None:
-
-                    from flask_assistant.utils import decode_token
-
-                    token = self.user["idToken"]
-                    profile_payload = decode_token(token, self.client_id)
-                    for k in ["sub", "iss", "aud", "iat", "exp"]:
-                        profile_payload.pop(k)
-                    self.profile = profile_payload
+                self._set_user_profile()
 
         # Get access token from request
         if original_request and original_request.get("user"):
