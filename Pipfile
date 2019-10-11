@@ -7,9 +7,27 @@ verify_ssl = true
 pytest = "*"
 pytest-cov = "*"
 tox = "*"
+black = "*"
+flask-assistant = {editable = true,path = "."}
 
 [packages]
-flask-assistant = {editable = true,path = "."}
+aniso8601 = "==4.0.1"
+certifi = "==2018.11.29"
+chardet = "==3.0.4"
+click = "==7.0"
+idna = "==2.8"
+itsdangerous = "==1.1.0"
+requests = "==2.21.0"
+urllib3 = "==1.24.1"
+Flask = "==1.0.2"
+Jinja2 = "==2.10"
+MarkupSafe = "==1.1.0"
+"ruamel.yaml" = "==0.15.81"
+Werkzeug = "==0.14.1"
+google-auth = "*"
+
+[requires]
+python_version = "3.7"
 
 [pipenv]
 allow_prereleases = true

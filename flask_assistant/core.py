@@ -40,6 +40,7 @@ convert_errors = LocalProxy(lambda: find_assistant().convert_errors)
 session_id = LocalProxy(lambda: find_assistant().session_id)
 user = LocalProxy(lambda: find_assistant().user)
 storage = LocalProxy(lambda: find_assistant().storage)
+profile = LocalProxy(lambda: find_assistant().profile)
 
 # Converter shorthands for commonly used system entities
 _converter_shorthands = {
@@ -65,6 +66,7 @@ class Assistant(object):
         blueprint {Flask Blueprint} -- Flask Blueprint instance to initialize (Default: {None})
         route {str} -- entry point to which initial Alexa Requests are forwarded (default: {None})
         project_id {str} -- Google Cloud Project ID, required to manage contexts from flask-assistant
+        client_id {Str} -- Actions on Google client ID used for account linking
         dev_token {str} - Dialogflow dev access token used to register and retrieve agent resources
         client_token {str} - Dialogflow client access token required for querying agent
     """
@@ -77,12 +79,14 @@ class Assistant(object):
         project_id=None,
         dev_token=None,
         client_token=None,
+        client_id=None,
     ):
 
         self.app = app
         self.blueprint = blueprint
         self._route = route
         self.project_id = project_id
+        self.client_id = client_id
         self._intent_action_funcs = {}
         self._intent_mappings = {}
         self._intent_converts = {}
@@ -107,6 +111,9 @@ class Assistant(object):
             raise ValueError(
                 "Assistant object must be intialized with either an app or blueprint"
             )
+
+        if self.client_id is None:
+            self.client_id = self.app.config.get("AOG_CLIENT_ID")
 
         if project_id is None:
             import warnings
@@ -243,10 +250,18 @@ class Assistant(object):
 
     @storage.setter
     def storage(self, value):
-        if not isintance(value, dict):
+        if not isinstance(value, dict):
             raise TypeError("Storage must be a dictionary")
 
         self.user["userStorage"] = value
+
+    @property
+    def profile(self):
+        return getattr(_app_ctx_stack.top, "_assist_profile", None)
+
+    @profile.setter
+    def profile(self, value):
+        _app_ctx_stack.top._assist_profile = value
 
     def _register_context_to_func(self, intent_name, context=[]):
         required = self._required_contexts.get(intent_name)
@@ -372,6 +387,23 @@ class Assistant(object):
     def _parse_session_id(self):
         return self.request["session"].split("/sessions/")[1]
 
+    def _set_user_profile(self):
+        if self.client_id is None:
+            return
+
+        if self.user.get("idToken") is not None:
+            from flask_assistant.utils import decode_token
+
+            token = self.user["idToken"]
+            profile_payload = decode_token(token, self.client_id)
+            for k in ["sub", "iss", "aud", "iat", "exp"]:
+                profile_payload.pop(k)
+
+            self.profile = profile_payload
+
+
+
+    
     def _flask_assitant_view_func(self, nlp_result=None, *args, **kwargs):
         if nlp_result:  # pass API query result directly
             self.request = nlp_result
@@ -401,6 +433,7 @@ class Assistant(object):
             payload = original_request.get("payload")
             if payload and payload.get("user"):
                 self.user = original_request["payload"]["user"]
+                self._set_user_profile()
 
         # Get access token from request
         if original_request and original_request.get("user"):

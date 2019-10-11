@@ -23,7 +23,7 @@ setup(
     zip_safe=False,
     include_package_data=True,
     platforms="any",
-    install_requires=["Flask", "requests", "ruamel.yaml", "aniso8601"],
+    install_requires=["Flask", "requests", "ruamel.yaml", "aniso8601", "google-auth"],
     setup_requires=["pytest-runner"],
     tests_require=["pytest"],
     test_suite="tests",
