@@ -7,7 +7,6 @@ verify_ssl = true
 pytest = "*"
 pytest-cov = "*"
 tox = "*"
-black = "*"
 flask-assistant = {editable = true,path = "."}
 
 [packages]
@@ -18,12 +17,12 @@ click = "==7.0"
 idna = "==2.8"
 itsdangerous = "==1.1.0"
 requests = "==2.21.0"
-urllib3 = "==1.24.1"
+urllib3 = "==1.24.2"
 Flask = "==1.0.2"
 Jinja2 = "==2.10"
 MarkupSafe = "==1.1.0"
 "ruamel.yaml" = "==0.15.81"
-Werkzeug = "==0.14.1"
+Werkzeug = "==0.15.3"
 google-auth = "*"
 
 [requires]
