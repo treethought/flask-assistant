@@ -2,7 +2,7 @@ Create Virtual Assistants with Python
 =====================================
 
 [![image](https://img.shields.io/pypi/v/flask-assistant.svg)](https://pypi.python.org/pypi/flask-assistant)
-[![image](https://travis-ci.org/treethought/flask-assistant.svg?branch=master)](https://travis-ci.org/treethought/flask-assistant) ![image](https://img.shields.io/badge/%203.5,%203.6,%203.7-blue.svg) [![image](https://img.shields.io/badge/discord-join%20chat-green.svg)](https://discord.gg/m6YHGyJ)
+[![image](https://travis-ci.org/treethought/flask-assistant.svg?branch=master)](https://travis-ci.org/treethought/flask-assistant) ![image](https://img.shields.io/badge/python-3.5,%203.6,%203.7-blue.svg) [![image](https://img.shields.io/badge/discord-join%20chat-green.svg)](https://discord.gg/m6YHGyJ)
 
 A flask extension serving as a framework to easily create virtual assistants using [Dialogflow](https://dialogflow.com/docs) which may be integrated
 with platforms such as [Actions on
