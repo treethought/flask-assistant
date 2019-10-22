@@ -24,6 +24,7 @@ MarkupSafe = "==1.1.0"
 "ruamel.yaml" = "==0.15.81"
 Werkzeug = "==0.15.3"
 google-auth = "*"
+PyYAML==5.1.2
 
 [requires]
 python_version = "3.7"

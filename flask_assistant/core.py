@@ -1,6 +1,7 @@
 import inspect
 import sys
 import os
+import yaml
 from functools import wraps, partial
 
 import aniso8601
@@ -13,6 +14,8 @@ from flask_assistant.manager import ContextManager, parse_context_name
 from api_ai.api import ApiAi
 from io import StringIO
 
+
+from jinja2 import BaseLoader, ChoiceLoader, TemplateNotFound
 
 def find_assistant():  # Taken from Flask-ask courtesy of @voutilad
     """
@@ -80,6 +83,7 @@ class Assistant(object):
         dev_token=None,
         client_token=None,
         client_id=None,
+        path="templates.yaml"
     ):
 
         self.app = app
@@ -104,9 +108,9 @@ class Assistant(object):
             self._route = "/"
 
         if app is not None:
-            self.init_app(app)
+            self.init_app(app, path)
         elif blueprint is not None:
-            self.init_blueprint(blueprint)
+            self.init_blueprint(blueprint, path)
         else:
             raise ValueError(
                 "Assistant object must be intialized with either an app or blueprint"
@@ -125,7 +129,7 @@ class Assistant(object):
                 stacklevel=2,
             )
 
-    def init_app(self, app):
+    def init_app(self, app, path):
 
         if self._route is None:
             raise TypeError("route is a required argument when app is not None")
@@ -134,6 +138,7 @@ class Assistant(object):
         app.add_url_rule(
             self._route, view_func=self._flask_assitant_view_func, methods=["POST"]
         )
+        app.jinja_loader = ChoiceLoader([app.jinja_loader, YamlLoader(app, path)])
 
     # Taken from Flask-ask courtesy of @voutilad
     def init_blueprint(self, blueprint, path="templates.yaml"):
@@ -160,7 +165,7 @@ class Assistant(object):
         blueprint.add_url_rule(
             "", view_func=self._flask_assitant_view_func, methods=["POST"]
         )
-        # blueprint.jinja_loader = ChoiceLoader([YamlLoader(blueprint, path)])
+        blueprint.jinja_loader = ChoiceLoader([YamlLoader(blueprint, path)])
 
     @property
     def request(self):
@@ -403,7 +408,7 @@ class Assistant(object):
 
 
 
-    
+
     def _flask_assitant_view_func(self, nlp_result=None, *args, **kwargs):
         if nlp_result:  # pass API query result directly
             self.request = nlp_result
@@ -714,3 +719,26 @@ class Assistant(object):
                     )
                 )
                 return context_obj["parameters"][arg_name]
+
+class YamlLoader(BaseLoader):
+
+    def __init__(self, app, path):
+        self.path = app.root_path + os.path.sep + path
+        self.mapping = {}
+        self._reload_mapping()
+
+    def _reload_mapping(self):
+        if os.path.isfile(self.path):
+            self.last_mtime = os.path.getmtime(self.path)
+            with open(self.path) as f:
+                self.mapping = yaml.safe_load(f.read())
+
+    def get_source(self, environment, template):
+        if not os.path.isfile(self.path):
+            return None, None, None
+        if self.last_mtime != os.path.getmtime(self.path):
+            self._reload_mapping()
+        if template in self.mapping:
+            source = self.mapping[template]
+            return source, None, lambda: source == self.mapping.get(template)
+        raise TemplateNotFound(template)
