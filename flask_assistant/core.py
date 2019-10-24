@@ -43,6 +43,7 @@ convert_errors = LocalProxy(lambda: find_assistant().convert_errors)
 session_id = LocalProxy(lambda: find_assistant().session_id)
 user = LocalProxy(lambda: find_assistant().user)
 storage = LocalProxy(lambda: find_assistant().storage)
+conversation_token = LocalProxy(lambda: find_assistant().conversation_token)
 profile = LocalProxy(lambda: find_assistant().profile)
 
 # Converter shorthands for commonly used system entities
@@ -240,14 +241,20 @@ class Assistant(object):
     @user.setter
     def user(self, value):
         storage_data = value.get("userStorage", {})
+        conversation_token_data = value.get("conversationToken", {})
 
         if not isinstance(storage_data, dict):
             storage_data = json.loads(storage_data)
 
+        if not isinstance(conversation_token_data, dict):
+            conversation_token_data = json.loads(conversation_token_data)
+
         value["userStorage"] = storage_data
+        value["conversationToken"] = conversation_token_data
 
         _app_ctx_stack.top._assist_user = value
         _app_ctx_stack.top._assist_storage = storage_data
+        _app_ctx_stack.top._assist_conversation_token = conversation_token_data
 
     @property
     def storage(self):
@@ -259,6 +266,17 @@ class Assistant(object):
             raise TypeError("Storage must be a dictionary")
 
         self.user["userStorage"] = value
+
+    @property
+    def conversation_token(self):
+        return self.user.get("conversationToken", {})
+
+    @conversation_token.setter
+    def conversation_token(self, value):
+        if not isinstance(value, dict):
+            raise TypeError("Conversation Token must be a dictionary")
+
+        self.user["conversationToken"] = value
 
     @property
     def profile(self):
