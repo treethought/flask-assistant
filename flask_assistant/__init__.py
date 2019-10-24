@@ -21,6 +21,7 @@ from flask_assistant.core import (
     access_token,
     user,
     storage,
+    conversation_token,
     session_id,
     context_in,
     profile
