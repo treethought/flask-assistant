@@ -29,6 +29,7 @@ class _Response(object):
 
         if "ACTIONS_ON_GOOGLE" in self._integrations:
             self._set_user_storage()
+            self._set_conversation_token()
             self._integrate_with_actions(self._speech, self._display_text, is_ssml)
 
     def add_msg(self, speech, display_text=None, is_ssml=False):
@@ -54,6 +55,19 @@ class _Response(object):
             raise ValueError("UserStorage must not exceed 10k bytes")
 
         self._response["payload"]["google"]["userStorage"] = user_storage
+
+    def _set_conversation_token(self):
+        from flask_assistant.core import user
+        conversation_token_data = user.get("conversationToken")
+        if conversation_token_data is None:
+            return
+        if isinstance(conversation_token_data, dict):
+            conversation_token_data = json.dumps(conversation_token_data)
+
+        if len(conversation_token_data.encode("utf-8")) > 10000:
+            raise ValueError("UserStorage must not exceed 10k bytes")
+
+        self._response["payload"]["google"]["conversationToken"] = conversation_token_data
 
     def _integrate_with_actions(self, speech=None, display_text=None, is_ssml=False):
         if display_text is None:
@@ -381,4 +395,3 @@ class sign_in(_Response):
                 "@type": "type.googleapis.com/google.actions.v2.SignInValueSpec",
             },
         }
-
