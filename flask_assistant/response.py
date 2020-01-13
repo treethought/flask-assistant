@@ -11,7 +11,7 @@ class _Response(object):
         self._display_text = display_text
         self._integrations = current_app.config.get("INTEGRATIONS", [])
         self._messages = [{"text": {"text": [speech]}}]
-
+        self._is_ssml = is_ssml
         self._response = {
             "fulfillmentText": speech,
             "fulfillmentMessages": self._messages,
@@ -307,10 +307,12 @@ class ask(_Response):
         self._response["payload"]["google"]["expect_user_response"] = True
 
     def reprompt(self, prompt):
-        self._response["payload"]["google"]["no_input_prompts"] = [
-            {"text_to_speech": prompt}
-        ]
-
+        repromtKey = "text_to_speech"
+        if self._is_ssml:
+            repromtKey = "ssml"
+        repromtResponse = {}
+        repromtResponse[repromtKey] = prompt
+        self._response["payload"]["google"]["no_input_prompts"] = [repromtResponse]
         return self
 
 

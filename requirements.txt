@@ -3,7 +3,7 @@ cachetools==3.1.1
 certifi==2018.11.29
 chardet==3.0.4
 click==7.0
-flask==1.0.2
+flask==1.1.1
 google-auth==1.6.3
 idna==2.8
 itsdangerous==1.1.0
