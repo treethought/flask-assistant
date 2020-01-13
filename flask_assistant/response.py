@@ -404,3 +404,45 @@ class sign_in(_Response):
             },
         }
 
+# Media responses let your Actions play audio content with a 
+# playback duration longer than the 240-second limit of SSML.
+class MediaResponse(_Response):
+    def __init__(self, speech, url, description=None, name=None, icon_url=None, icon_accessibilityText=None):
+        super(MediaResponse,self).__init__(speech)
+        self._response = {
+             "payload": {
+                "google": {
+                  "expectUserResponse": False,
+                  "richResponse": {
+                    "items": [
+                      {
+                        "simpleResponse": {
+                          "textToSpeech": speech
+                        }
+                      },
+                      {
+                        "mediaResponse": {
+                          "mediaType": "AUDIO",
+                          "mediaObjects": [
+                            {
+                              "contentUrl": url
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "suggestions": []
+                  }
+                }
+              },
+            "outputContexts":[]
+            }
+        if description!=None:
+            self._response ["payload"]["google"]["richResponse"]["items"][1]["mediaResponse"]["mediaObjects"][0]["description"]=description
+        if name!=None:
+            self._response ["payload"]["google"]["richResponse"]["items"][1]["mediaResponse"]["mediaObjects"][0]["name"]=name
+        if icon_url!=None:
+            self._response ["payload"]["google"]["richResponse"]["items"][1]["mediaResponse"]["mediaObjects"][0]["icon"]={}
+            self._response ["payload"]["google"]["richResponse"]["items"][1]["mediaResponse"]["mediaObjects"][0]["icon"]["url"]=icon_url
+            if icon_accessibilityText!=None:
+                self._response ["payload"]["google"]["richResponse"]["items"][1]["mediaResponse"]["mediaObjects"][0]["icon"]["accessibilityText"]=icon_accessibilityText
