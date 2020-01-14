@@ -389,26 +389,34 @@ class sign_in(_Response):
     with the `user.profile` local
 
     In order to complete the sign in process, you will need to create an intent with
-    the `actions_intent_SIGN)IN` event
+    the `actions_intent_SIGN_IN` event
     """
 
+    # Payload according to https://developers.google.com/assistant/conversational/helpers#account_sign-in
     def __init__(self, reason=None):
         super(sign_in, self).__init__(speech=None)
 
         self._messages[:] = []
-        self._response["payload"]["google"]["systemIntent"] = {
-            "intent": "actions.intent.SIGN_IN",
-            "data": {
-                "optContext": reason,
-                "@type": "type.googleapis.com/google.actions.v2.SignInValueSpec",
-            },
+        self._response = {
+            "payload": {
+                "google": {
+                    "expectUserResponse": True,
+                    "systemIntent": {
+                        "intent": "actions.intent.SIGN_IN",
+                        "data": {
+                            "@type": "type.googleapis.com/google.actions.v2.SignInValueSpec"
+                        }
+                    }
+                }
+            }
         }
+        
 
 # Media responses let your Actions play audio content with a 
 # playback duration longer than the 240-second limit of SSML.
-class MediaResponse(_Response):
+class media_response(_Response):
     def __init__(self, speech, url, description=None, name=None, icon_url=None, icon_accessibilityText=None):
-        super(MediaResponse,self).__init__(speech)
+        super(media_response,self).__init__(speech)
         self._response = {
              "payload": {
                 "google": {
