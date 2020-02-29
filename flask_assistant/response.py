@@ -210,6 +210,49 @@ class _Response(object):
         )
         return carousel
 
+    def add_media(self, url, name, description=None, icon_url=None, icon_alt=None):
+        """Adds a Media Card Response
+
+        Media responses let your Actions play audio content with a
+        playback duration longer than the 240-second limit of SSML.
+
+        Can be included with ask and tell responses.
+        If added to an `ask` response, suggestion chips
+
+         Arguments:
+            url {str} -- Required. Url where the media is stored
+            name {str} -- Name of media card.
+
+        Optional:
+            description {str} -- A description of the item (default: {None})
+            icon_url {str} -- Url of icon image
+            icon_alt {str} -- Accessibility text for icon image
+
+        example usage:
+
+            resp = ask("Check out this tune")
+            resp = resp.add_media(url, "Jazzy Tune")
+            return resp_with_media.suggest("Next Song", "Done")
+
+
+        """
+        media_object = {"contentUrl": url, "name": name}
+        if description:
+            media_object["description"] = description
+
+        if icon_url:
+            media_object["largeImage"] = {}
+            media_object["largeImage"]["imageUri"] = icon_url
+            media_object["largeImage"]["accessibilityText"] = icon_alt or name
+
+        self._messages.append(
+            {
+                "platform": "ACTIONS_ON_GOOGLE",
+                "mediaContent": {"mediaObjects": [media_object], "mediaType": "AUDIO",},
+            }
+        )
+        return self
+
 
 def build_button(title, link):
     return {
@@ -405,52 +448,10 @@ class sign_in(_Response):
                         "intent": "actions.intent.SIGN_IN",
                         "data": {
                             "@type": "type.googleapis.com/google.actions.v2.SignInValueSpec"
-                        }
-                    }
+                        },
+                    },
                 }
             }
         }
-        
 
-# Media responses let your Actions play audio content with a 
-# playback duration longer than the 240-second limit of SSML.
-class media_response(_Response):
-    def __init__(self, speech, url, description=None, name=None, icon_url=None, icon_accessibilityText=None):
-        super(media_response,self).__init__(speech)
-        self._response = {
-             "payload": {
-                "google": {
-                  "expectUserResponse": False,
-                  "richResponse": {
-                    "items": [
-                      {
-                        "simpleResponse": {
-                          "textToSpeech": speech
-                        }
-                      },
-                      {
-                        "mediaResponse": {
-                          "mediaType": "AUDIO",
-                          "mediaObjects": [
-                            {
-                              "contentUrl": url
-                            }
-                          ]
-                        }
-                      }
-                    ],
-                    "suggestions": []
-                  }
-                }
-              },
-            "outputContexts":[]
-            }
-        if description!=None:
-            self._response ["payload"]["google"]["richResponse"]["items"][1]["mediaResponse"]["mediaObjects"][0]["description"]=description
-        if name!=None:
-            self._response ["payload"]["google"]["richResponse"]["items"][1]["mediaResponse"]["mediaObjects"][0]["name"]=name
-        if icon_url!=None:
-            self._response ["payload"]["google"]["richResponse"]["items"][1]["mediaResponse"]["mediaObjects"][0]["icon"]={}
-            self._response ["payload"]["google"]["richResponse"]["items"][1]["mediaResponse"]["mediaObjects"][0]["icon"]["url"]=icon_url
-            if icon_accessibilityText!=None:
-                self._response ["payload"]["google"]["richResponse"]["items"][1]["mediaResponse"]["mediaObjects"][0]["icon"]["accessibilityText"]=icon_accessibilityText
+
