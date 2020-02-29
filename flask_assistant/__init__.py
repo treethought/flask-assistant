@@ -26,7 +26,7 @@ from flask_assistant.core import (
     profile
 )
 
-from flask_assistant.response import ask, tell, event, build_item, permission, sign_in, media_response
+from flask_assistant.response import ask, tell, event, build_item, permission, sign_in
 from flask_assistant.manager import Context
 
 import flask_assistant.utils
