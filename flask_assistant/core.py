@@ -395,7 +395,11 @@ class Assistant(object):
             from flask_assistant.utils import decode_token
 
             token = self.user["idToken"]
-            profile_payload = decode_token(token, self.client_id)
+            decode_resp = decode_token(token, self.client_id)
+            if decode_resp["status"]=="BAD":
+                return
+            else: #decode_resp["status"]=="OK"
+                profile_payload = decode_resp["output"]
             for k in ["sub", "iss", "aud", "iat", "exp"]:
                 profile_payload.pop(k)
 

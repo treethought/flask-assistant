@@ -11,7 +11,7 @@ class _Response(object):
         self._display_text = display_text
         self._integrations = current_app.config.get("INTEGRATIONS", [])
         self._messages = [{"text": {"text": [speech]}}]
-
+        self._is_ssml = is_ssml
         self._response = {
             "fulfillmentText": speech,
             "fulfillmentMessages": self._messages,
@@ -197,6 +197,49 @@ class _Response(object):
         )
         return carousel
 
+    def add_media(self, url, name, description=None, icon_url=None, icon_alt=None):
+        """Adds a Media Card Response
+
+        Media responses let your Actions play audio content with a
+        playback duration longer than the 240-second limit of SSML.
+
+        Can be included with ask and tell responses.
+        If added to an `ask` response, suggestion chips
+
+         Arguments:
+            url {str} -- Required. Url where the media is stored
+            name {str} -- Name of media card.
+
+        Optional:
+            description {str} -- A description of the item (default: {None})
+            icon_url {str} -- Url of icon image
+            icon_alt {str} -- Accessibility text for icon image
+
+        example usage:
+
+            resp = ask("Check out this tune")
+            resp = resp.add_media(url, "Jazzy Tune")
+            return resp_with_media.suggest("Next Song", "Done")
+
+
+        """
+        media_object = {"contentUrl": url, "name": name}
+        if description:
+            media_object["description"] = description
+
+        if icon_url:
+            media_object["largeImage"] = {}
+            media_object["largeImage"]["imageUri"] = icon_url
+            media_object["largeImage"]["accessibilityText"] = icon_alt or name
+
+        self._messages.append(
+            {
+                "platform": "ACTIONS_ON_GOOGLE",
+                "mediaContent": {"mediaObjects": [media_object], "mediaType": "AUDIO",},
+            }
+        )
+        return self
+
 
 def build_item(
     title, key=None, synonyms=None, description=None, img_url=None, alt_text=None
@@ -307,10 +350,12 @@ class ask(_Response):
         self._response["payload"]["google"]["expect_user_response"] = True
 
     def reprompt(self, prompt):
-        self._response["payload"]["google"]["no_input_prompts"] = [
-            {"text_to_speech": prompt}
-        ]
-
+        repromtKey = "text_to_speech"
+        if self._is_ssml:
+            repromtKey = "ssml"
+        repromtResponse = {}
+        repromtResponse[repromtKey] = prompt
+        self._response["payload"]["google"]["no_input_prompts"] = [repromtResponse]
         return self
 
 
@@ -367,18 +412,26 @@ class sign_in(_Response):
     with the `user.profile` local
 
     In order to complete the sign in process, you will need to create an intent with
-    the `actions_intent_SIGN)IN` event
+    the `actions_intent_SIGN_IN` event
     """
 
+    # Payload according to https://developers.google.com/assistant/conversational/helpers#account_sign-in
     def __init__(self, reason=None):
         super(sign_in, self).__init__(speech=None)
 
         self._messages[:] = []
-        self._response["payload"]["google"]["systemIntent"] = {
-            "intent": "actions.intent.SIGN_IN",
-            "data": {
-                "optContext": reason,
-                "@type": "type.googleapis.com/google.actions.v2.SignInValueSpec",
-            },
+        self._response = {
+            "payload": {
+                "google": {
+                    "expectUserResponse": True,
+                    "systemIntent": {
+                        "intent": "actions.intent.SIGN_IN",
+                        "data": {
+                            "@type": "type.googleapis.com/google.actions.v2.SignInValueSpec"
+                        },
+                    },
+                }
+            }
         }
+
 
