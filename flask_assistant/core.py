@@ -13,6 +13,8 @@ from flask_assistant.manager import ContextManager, parse_context_name
 from api_ai.api import ApiAi
 from io import StringIO
 
+from injector import Injector
+
 
 def find_assistant():  # Taken from Flask-ask courtesy of @voutilad
     """
@@ -80,6 +82,7 @@ class Assistant(object):
         dev_token=None,
         client_token=None,
         client_id=None,
+        injector=None,
     ):
 
         self.app = app
@@ -97,6 +100,11 @@ class Assistant(object):
         self._required_contexts = {}
         self._context_funcs = {}
         self._func_contexts = {}
+
+        if not injector:
+            injector = Injector()
+
+        self.injector = injector
 
         self.api = ApiAi(dev_token, client_token)
 
@@ -398,8 +406,6 @@ class Assistant(object):
 
             self.profile = profile_payload
 
-
-
     
     def _flask_assitant_view_func(self, nlp_result=None, *args, **kwargs):
         if nlp_result:  # pass API query result directly
@@ -445,7 +451,18 @@ class Assistant(object):
             return "", 400
 
         logger.info("Matched action function: {}".format(view_func.__name__))
-        result = self._map_intent_to_view_func(view_func)()
+
+        arg_names = self._func_args(view_func)
+        arg_values = self._map_params_to_view_args(arg_names)
+        dargs = {}
+        for (n,v) in zip(arg_names,arg_values):
+            if v is not None:
+                dargs[n] = v
+                
+        logger.info("Injector: ")
+        logger.info(dargs)
+        result = self.injector.call_with_injection(callable=view_func ,kwargs=dargs)
+
 
         if result is not None:
             if isinstance(result, _Response):
