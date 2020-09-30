@@ -36,14 +36,14 @@ from flask import Flask
 from flask_assistant import Assistant, ask
 
 app = Flask(__name__)
-assist = Assistant(app, project_id='GOOGLE_CLOUD_PROJECT_ID')
+assist = Assistant(app, project_id="GOOGLE_CLOUD_PROJECT_ID")
 
-@assist.action('Demo')
+@assist.action("Demo")
 def hello_world():
-    speech = 'Microphone check 1, 2 what is this?'
+    speech = "Microphone check 1, 2 what is this?"
     return ask(speech)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
 ```
 
