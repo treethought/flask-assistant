@@ -11,7 +11,7 @@ with open("./README.md", "r") as f:
 
 setup(
     name="Flask-Assistant",
-    version="0.3.91",
+    version="0.5.0",
     url="https://github.com/treethought/flask-assistant",
     license="Apache 2.0",
     author="Cam Sweeney",
@@ -23,7 +23,7 @@ setup(
     zip_safe=False,
     include_package_data=True,
     platforms="any",
-    install_requires=["Flask", "requests", "ruamel.yaml", "aniso8601"],
+    install_requires=["Flask", "requests", "ruamel.yaml", "aniso8601", "google-auth"],
     setup_requires=["pytest-runner"],
     tests_require=["pytest"],
     test_suite="tests",
