@@ -23,7 +23,7 @@ from flask_assistant.core import (
     storage,
     session_id,
     context_in,
-    profile
+    profile,
 )
 
 from flask_assistant.response import (

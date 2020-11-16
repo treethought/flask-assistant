@@ -1,5 +1,6 @@
 from flask import json, make_response, current_app
-from . import logger
+from flask_assistant import logger
+from flask_assistant.response import actions, dialogflow, hangouts, df_messenger
 
 
 class _Response(object):
@@ -11,6 +12,7 @@ class _Response(object):
         self._display_text = display_text
         self._integrations = current_app.config.get("INTEGRATIONS", [])
         self._messages = [{"text": {"text": [speech]}}]
+        self._platform_messages = {}
         self._is_ssml = is_ssml
         self._response = {
             "fulfillmentText": speech,
@@ -27,12 +29,16 @@ class _Response(object):
             "followupEventInput": None,  # TODO
         }
 
+        for i in self._integrations:
+            self._platform_messages[i] = []
+
         if "ACTIONS_ON_GOOGLE" in self._integrations:
             self._set_user_storage()
             self._integrate_with_actions(self._speech, self._display_text, is_ssml)
 
     def add_msg(self, speech, display_text=None, is_ssml=False):
         self._messages.append({"text": {"text": [speech]}})
+
         if "ACTIONS_ON_GOOGLE" in self._integrations:
             self._integrate_with_actions(speech, display_text, is_ssml)
 
@@ -55,9 +61,33 @@ class _Response(object):
 
         self._response["payload"]["google"]["userStorage"] = user_storage
 
-    def _integrate_with_actions(self, speech=None, display_text=None, is_ssml=False):
+    def _integrate_with_df_messenger(self, speech=None, display_text=None):
+
+        logger.debug("Integrating with dialogflow messenger")
+
+        content = {"richContent": [[]]}
+        for m in self._platform_messages.get("DIALOGFLOW_MESSENGER", []):
+            content["richContent"][0].append(m)
+
+        payload = {"payload": content}
+
+        self._messages.append(payload)
+
+    def _integrate_with_hangouts(self, speech=None, display_text=None, is_ssml=False):
         if display_text is None:
             display_text = speech
+
+        self._messages.append(
+            {"platform": "GOOGLE_HANGOUTS", "text": {"text": [display_text]},}
+        )
+        for m in self._platform_messages.get("GOOGLE_HANGOUTS", []):
+            self._messages.append(m)
+
+    def _integrate_with_actions(self, speech=None, display_text=None, is_ssml=False):
+        return
+        if display_text is None:
+            display_text = speech
+
         if is_ssml:
             ssml_speech = "<speak>" + speech + "</speak>"
             self._messages.append(
@@ -90,6 +120,8 @@ class _Response(object):
 
     def render_response(self):
         self._include_contexts()
+        self._integrate_with_df_messenger()
+        self._integrate_with_hangouts(self._speech, self._display_text)
         logger.debug(json.dumps(self._response, indent=2))
         resp = make_response(json.dumps(self._response))
         resp.headers["Content-Type"] = "application/json"
@@ -140,34 +172,30 @@ class _Response(object):
         subtitle=None,
         link=None,
         link_title=None,
-        buttons=None,
     ):
-        """
-        :param: link and :param: link_title supports only one button per card
-        in future versions should be deleted
-        and from now deprecated
-
-        :param link:
-        :param link_title:
-        :return:
-        """
-
-        card_payload = {"title": title, "subtitle": subtitle, "formattedText": text}
-
-        if buttons:
-            card_payload["buttons"] = buttons
-        elif link and link_title:
-            logger.info('use button parameter instead of link and link_title')
-            buttons = [build_button(title=link_title, link=link)]
-            card_payload["buttons"] = buttons
-
-        if img_url:
-            img_payload = {"imageUri": img_url, "accessibilityText": img_alt or img_url}
-            card_payload["image"] = img_payload
-
-        self._messages.append(
-            {"platform": "ACTIONS_ON_GOOGLE", "basicCard": card_payload}
+        df_card = dialogflow.build_card(
+            text, title, img_url, img_alt, subtitle, link, link_title
         )
+        self._messages.append(df_card)
+
+        if "DIALOGFLOW_MESSENGER" in self._integrations:
+            df_msg_card = df_messenger.build_card(
+                text, title, img_url, img_alt, subtitle, link, link_title
+            )
+            self._platform_messages["DIALOGFLOW_MESSENGER"].append(df_msg_card)
+
+        if "GOOGLE_HANGOUTS" in self._integrations:
+            hangouts_card = hangouts.build_card(
+                text, title, img_url, img_alt, subtitle, link, link_title
+            )
+            self._platform_messages["GOOGLE_HANGOUTS"].append(hangouts_card)
+
+        if "ACTIONS_ON_GOOGLE" in self._integrations:
+            actions_card = actions.build_card(
+                text, title, img_url, img_alt, subtitle, link, link_title
+            )
+
+            self._messages.append(actions_card)
 
         return self
 
@@ -252,13 +280,6 @@ class _Response(object):
             }
         )
         return self
-
-
-def build_button(title, link):
-    return {
-        "title": title,
-        "openUriAction": {"uri": link}
-    }
 
 
 def build_item(
@@ -453,5 +474,3 @@ class sign_in(_Response):
                 }
             }
         }
-
-
