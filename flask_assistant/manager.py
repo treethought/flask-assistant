@@ -7,7 +7,7 @@ def parse_context_name(context_obj):
 
 
 class Context(dict):
-    """docstring for _Context"""
+    """This is a docstring for _Context"""
 
     def __init__(self, name, parameters={}, lifespan=5):
 

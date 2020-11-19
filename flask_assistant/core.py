@@ -100,20 +100,10 @@ class Assistant(object):
 
         self.api = ApiAi(dev_token, client_token)
 
-        if route is None and app is not None:
-            self._route = "/"
-
         if app is not None:
             self.init_app(app)
         elif blueprint is not None:
             self.init_blueprint(blueprint)
-        else:
-            raise ValueError(
-                "Assistant object must be intialized with either an app or blueprint"
-            )
-
-        if self.client_id is None:
-            self.client_id = self.app.config.get("AOG_CLIENT_ID")
 
         if project_id is None:
             import warnings
@@ -126,14 +116,18 @@ class Assistant(object):
             )
 
     def init_app(self, app):
+        self.app = app
 
         if self._route is None:
-            raise TypeError("route is a required argument when app is not None")
+            self._route = "/"
 
         app.assist = self
         app.add_url_rule(
             self._route, view_func=self._flask_assitant_view_func, methods=["POST"]
         )
+        if self.client_id is None:
+            self.client_id = self.app.config.get("AOG_CLIENT_ID")
+
 
     # Taken from Flask-ask courtesy of @voutilad
     def init_blueprint(self, blueprint, path="templates.yaml"):
@@ -161,6 +155,9 @@ class Assistant(object):
             "", view_func=self._flask_assitant_view_func, methods=["POST"]
         )
         # blueprint.jinja_loader = ChoiceLoader([YamlLoader(blueprint, path)])
+        if self.client_id is None:
+            self.client_id = self.app.config.get("AOG_CLIENT_ID")
+
 
     @property
     def request(self):

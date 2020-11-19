@@ -7,7 +7,7 @@ flask==1.1.1
 google-auth==1.6.3
 idna==2.8
 itsdangerous==1.1.0
-jinja2==2.10
+jinja2==2.10.1
 markupsafe==1.1.0
 pyasn1-modules==0.2.7
 pyasn1==0.4.7
@@ -15,5 +15,5 @@ requests==2.21.0
 rsa==4.0
 ruamel.yaml==0.15.81
 six==1.12.0
-urllib3==1.24.2
+urllib3==1.24.3
 werkzeug==0.15.3
