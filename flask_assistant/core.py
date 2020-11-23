@@ -100,19 +100,13 @@ class Assistant(object):
 
         self.api = ApiAi(dev_token, client_token)
 
-        if route is None and app is not None:
-            self._route = "/"
-
         if app is not None:
             self.init_app(app)
+
         elif blueprint is not None:
             self.init_blueprint(blueprint)
-        else:
-            raise ValueError(
-                "Assistant object must be intialized with either an app or blueprint"
-            )
 
-        if self.client_id is None:
+        if self.client_id is None and self.app is not None:
             self.client_id = self.app.config.get("AOG_CLIENT_ID")
 
         if project_id is None:
@@ -126,14 +120,17 @@ class Assistant(object):
             )
 
     def init_app(self, app):
+        self.app = app
 
         if self._route is None:
-            raise TypeError("route is a required argument when app is not None")
+            self._route = "/"
 
         app.assist = self
         app.add_url_rule(
             self._route, view_func=self._flask_assitant_view_func, methods=["POST"]
         )
+        if self.client_id is None and self.app is not None:
+            self.client_id = self.app.config.get("AOG_CLIENT_ID")
 
     # Taken from Flask-ask courtesy of @voutilad
     def init_blueprint(self, blueprint, path="templates.yaml"):
@@ -160,7 +157,10 @@ class Assistant(object):
         blueprint.add_url_rule(
             "", view_func=self._flask_assitant_view_func, methods=["POST"]
         )
+
         # blueprint.jinja_loader = ChoiceLoader([YamlLoader(blueprint, path)])
+        if self.client_id is None and self.app is not None:
+            self.client_id = self.app.config.get("AOG_CLIENT_ID")
 
     @property
     def request(self):
@@ -396,18 +396,15 @@ class Assistant(object):
 
             token = self.user["idToken"]
             decode_resp = decode_token(token, self.client_id)
-            if decode_resp["status"]=="BAD":
+            if decode_resp["status"] == "BAD":
                 return
-            else: #decode_resp["status"]=="OK"
+            else:  # decode_resp["status"]=="OK"
                 profile_payload = decode_resp["output"]
             for k in ["sub", "iss", "aud", "iat", "exp"]:
                 profile_payload.pop(k)
 
             self.profile = profile_payload
 
-
-
-    
     def _flask_assitant_view_func(self, nlp_result=None, *args, **kwargs):
         if nlp_result:  # pass API query result directly
             self.request = nlp_result
