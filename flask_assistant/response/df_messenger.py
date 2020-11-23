@@ -1,7 +1,3 @@
-import dialogflow_v2beta1 as df
-from google.protobuf.json_format import MessageToDict
-
-
 def _build_info_response(
     text, title, img_url=None, img_alt=None, subtitle=None, link=None, link_title=None,
 ):

@@ -85,7 +85,6 @@ class _Response(object):
             self._messages.append(m)
 
     def _integrate_with_actions(self, speech=None, display_text=None, is_ssml=False):
-        return
         if display_text is None:
             display_text = speech
 
@@ -354,6 +353,7 @@ class _ListSelector(_CardWithItems):
         super(_ListSelector, self).__init__(speech, display_text, items)
 
     def _add_message(self):
+
         self._messages.append(
             {
                 "platform": "ACTIONS_ON_GOOGLE",
