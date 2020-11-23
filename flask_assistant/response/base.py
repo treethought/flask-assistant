@@ -13,6 +13,7 @@ class _Response(object):
         self._integrations = current_app.config.get("INTEGRATIONS", [])
         self._messages = [{"text": {"text": [speech]}}]
         self._platform_messages = {}
+        self._render_func = None
         self._is_ssml = is_ssml
         self._response = {
             "fulfillmentText": speech,
@@ -120,6 +121,9 @@ class _Response(object):
 
     def render_response(self):
         self._include_contexts()
+        if self._render_func:
+            self._render_func()
+
         self._integrate_with_df_messenger()
         self._integrate_with_hangouts(self._speech, self._display_text)
         logger.debug(json.dumps(self._response, indent=2))
@@ -308,7 +312,7 @@ class _CardWithItems(_Response):
     def __init__(self, speech, display_text=None, items=None):
         super(_CardWithItems, self).__init__(speech, display_text)
         self._items = items or list()
-        self._add_message()  # possibly call this later?
+        self._render_func = self._add_message
 
     def _add_message(self):
         raise NotImplementedError
