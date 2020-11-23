@@ -11,7 +11,10 @@ def build_card(
 
     card_payload = {"title": title, "subtitle": subtitle, "formattedText": text}
 
-    if link and link_title:
+    if buttons:
+        card_payload["buttons"] = buttons
+
+    elif link and link_title:
         btn_payload = [{"title": link_title, "openUriAction": {"uri": link}}]
         card_payload["buttons"] = btn_payload
 

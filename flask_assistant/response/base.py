@@ -168,6 +168,7 @@ class _Response(object):
         subtitle=None,
         link=None,
         link_title=None,
+        buttons=None,
     ):
         df_card = dialogflow.build_card(
             text, title, img_url, img_alt, subtitle, link, link_title
@@ -192,7 +193,7 @@ class _Response(object):
 
         if "ACTIONS_ON_GOOGLE" in self._integrations:
             actions_card = actions.build_card(
-                text, title, img_url, img_alt, subtitle, link, link_title
+                text, title, img_url, img_alt, subtitle, link, link_title, buttons
             )
 
             self._messages.append(actions_card)
@@ -280,6 +281,10 @@ class _Response(object):
             }
         )
         return self
+
+
+def build_button(title, link):
+    return {"title": title, "openUriAction": {"uri": link}}
 
 
 def build_item(

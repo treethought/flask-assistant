@@ -129,9 +129,8 @@ class Assistant(object):
         app.add_url_rule(
             self._route, view_func=self._flask_assitant_view_func, methods=["POST"]
         )
-        if self.client_id is None:
+        if self.client_id is None and self.app is not None:
             self.client_id = self.app.config.get("AOG_CLIENT_ID")
-
 
     # Taken from Flask-ask courtesy of @voutilad
     def init_blueprint(self, blueprint, path="templates.yaml"):
@@ -158,10 +157,10 @@ class Assistant(object):
         blueprint.add_url_rule(
             "", view_func=self._flask_assitant_view_func, methods=["POST"]
         )
-        # blueprint.jinja_loader = ChoiceLoader([YamlLoader(blueprint, path)])
-        if self.client_id is None:
-            self.client_id = self.app.config.get("AOG_CLIENT_ID")
 
+        # blueprint.jinja_loader = ChoiceLoader([YamlLoader(blueprint, path)])
+        if self.client_id is None and self.app is not None:
+            self.client_id = self.app.config.get("AOG_CLIENT_ID")
 
     @property
     def request(self):
