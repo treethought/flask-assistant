@@ -32,3 +32,17 @@ def _build_button(link, link_title):
         "link": link,
     }
     return btn
+
+
+def _build_list(title, items):
+    list_responses = []
+    for i in items:
+        item = {
+            "type": "list",
+            "title": i["title"],
+            "subtitle": i["description"],
+            "event": {"name": "", "languageCode": "", "parameters": {}},
+        }
+        list_responses.append(item)
+
+    return list_responses
