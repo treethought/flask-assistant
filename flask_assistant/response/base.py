@@ -178,11 +178,15 @@ class _Response(object):
         )
         self._messages.append(df_card)
 
+        # df_messengar car is a combo of description + button
         if "DIALOGFLOW_MESSENGER" in self._integrations:
-            df_msg_card = df_messenger.build_card(
-                text, title, img_url, img_alt, subtitle, link, link_title
-            )
-            self._platform_messages["DIALOGFLOW_MESSENGER"].append(df_msg_card)
+
+            description = df_messenger._build_description_response(text, title)
+            self._platform_messages["DIALOGFLOW_MESSENGER"].append(description)
+
+            if link:
+                btn = df_messenger._build_button(link, link_title)
+                self._platform_messages["DIALOGFLOW_MESSENGER"].append(btn)
 
         if "GOOGLE_HANGOUTS" in self._integrations:
             hangouts_card = hangouts.build_card(
