@@ -363,6 +363,13 @@ class _ListSelector(_CardWithItems):
                 "listSelect": {"title": self._title, "items": self._items},
             }
         )
+        self._add_platform_msgs()
+
+    def _add_platform_msgs(self):
+
+        if "DIALOGFLOW_MESSENGER" in self._integrations:
+            list_resp = df_messenger._build_list(self._title, self._items)
+            self._platform_messages["DIALOGFLOW_MESSENGER"].extend(list_resp)
 
 
 class _CarouselCard(_ListSelector):
