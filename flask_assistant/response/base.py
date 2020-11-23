@@ -134,21 +134,14 @@ class _Response(object):
         for r in replies:
             chips.append({"title": r})
 
-        # NOTE: both of these formats work in the dialogflow console,
-        # but only the first (suggestions) appears in actual Google Assistant
-
         # native chips for GA
         self._messages.append(
             {"platform": "ACTIONS_ON_GOOGLE", "suggestions": {"suggestions": chips}}
         )
 
-        # # quick replies for other platforms
-        # self._messages.append(
-        #     {
-        #         "platform": "ACTIONS_ON_GOOGLE",
-        #         "quickReplies": {"title": None, "quickReplies": replies},
-        #     }
-        # )
+        if "DIALOGFLOW_MESSENGER" in self._integrations:
+            chip_resp = df_messenger._build_suggestions(*replies)
+            self._platform_messages["DIALOGFLOW_MESSENGER"].append(chip_resp)
 
         return self
 

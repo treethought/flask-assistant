@@ -46,3 +46,11 @@ def _build_list(title, items):
         list_responses.append(item)
 
     return list_responses
+
+
+def _build_suggestions(*replies):
+    chips = {"type": "chips", "options": []}
+    for i in replies:
+        chips["options"].append({"text": i})
+
+    return chips
