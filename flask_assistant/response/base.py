@@ -1,5 +1,6 @@
 from flask import json, make_response, current_app
-from . import logger
+from flask_assistant import logger
+from flask_assistant.response import actions, dialogflow, hangouts, df_messenger
 
 
 class _Response(object):
@@ -11,7 +12,9 @@ class _Response(object):
         self._display_text = display_text
         self._integrations = current_app.config.get("INTEGRATIONS", [])
         self._messages = [{"text": {"text": [speech]}}]
-
+        self._platform_messages = {}
+        self._render_func = None
+        self._is_ssml = is_ssml
         self._response = {
             "fulfillmentText": speech,
             "fulfillmentMessages": self._messages,
@@ -27,12 +30,16 @@ class _Response(object):
             "followupEventInput": None,  # TODO
         }
 
+        for i in self._integrations:
+            self._platform_messages[i] = []
+
         if "ACTIONS_ON_GOOGLE" in self._integrations:
             self._set_user_storage()
             self._integrate_with_actions(self._speech, self._display_text, is_ssml)
 
     def add_msg(self, speech, display_text=None, is_ssml=False):
         self._messages.append({"text": {"text": [speech]}})
+
         if "ACTIONS_ON_GOOGLE" in self._integrations:
             self._integrate_with_actions(speech, display_text, is_ssml)
 
@@ -55,9 +62,32 @@ class _Response(object):
 
         self._response["payload"]["google"]["userStorage"] = user_storage
 
+    def _integrate_with_df_messenger(self, speech=None, display_text=None):
+
+        logger.debug("Integrating with dialogflow messenger")
+
+        content = {"richContent": [[]]}
+        for m in self._platform_messages.get("DIALOGFLOW_MESSENGER", []):
+            content["richContent"][0].append(m)
+
+        payload = {"payload": content}
+
+        self._messages.append(payload)
+
+    def _integrate_with_hangouts(self, speech=None, display_text=None, is_ssml=False):
+        if display_text is None:
+            display_text = speech
+
+        self._messages.append(
+            {"platform": "GOOGLE_HANGOUTS", "text": {"text": [display_text]},}
+        )
+        for m in self._platform_messages.get("GOOGLE_HANGOUTS", []):
+            self._messages.append(m)
+
     def _integrate_with_actions(self, speech=None, display_text=None, is_ssml=False):
         if display_text is None:
             display_text = speech
+
         if is_ssml:
             ssml_speech = "<speak>" + speech + "</speak>"
             self._messages.append(
@@ -90,6 +120,11 @@ class _Response(object):
 
     def render_response(self):
         self._include_contexts()
+        if self._render_func:
+            self._render_func()
+
+        self._integrate_with_df_messenger()
+        self._integrate_with_hangouts(self._speech, self._display_text)
         logger.debug(json.dumps(self._response, indent=2))
         resp = make_response(json.dumps(self._response))
         resp.headers["Content-Type"] = "application/json"
@@ -102,21 +137,14 @@ class _Response(object):
         for r in replies:
             chips.append({"title": r})
 
-        # NOTE: both of these formats work in the dialogflow console,
-        # but only the first (suggestions) appears in actual Google Assistant
-
         # native chips for GA
         self._messages.append(
             {"platform": "ACTIONS_ON_GOOGLE", "suggestions": {"suggestions": chips}}
         )
 
-        # # quick replies for other platforms
-        # self._messages.append(
-        #     {
-        #         "platform": "ACTIONS_ON_GOOGLE",
-        #         "quickReplies": {"title": None, "quickReplies": replies},
-        #     }
-        # )
+        if "DIALOGFLOW_MESSENGER" in self._integrations:
+            chip_resp = df_messenger._build_suggestions(*replies)
+            self._platform_messages["DIALOGFLOW_MESSENGER"].append(chip_resp)
 
         return self
 
@@ -140,21 +168,35 @@ class _Response(object):
         subtitle=None,
         link=None,
         link_title=None,
+        buttons=None,
     ):
-
-        card_payload = {"title": title, "subtitle": subtitle, "formattedText": text}
-
-        if link and link_title:
-            btn_payload = [{"title": link_title, "openUriAction": {"uri": link}}]
-            card_payload["buttons"] = btn_payload
-
-        if img_url:
-            img_payload = {"imageUri": img_url, "accessibilityText": img_alt or img_url}
-            card_payload["image"] = img_payload
-
-        self._messages.append(
-            {"platform": "ACTIONS_ON_GOOGLE", "basicCard": card_payload}
+        df_card = dialogflow.build_card(
+            text, title, img_url, img_alt, subtitle, link, link_title
         )
+        self._messages.append(df_card)
+
+        # df_messengar car is a combo of description + button
+        if "DIALOGFLOW_MESSENGER" in self._integrations:
+
+            description = df_messenger._build_description_response(text, title)
+            self._platform_messages["DIALOGFLOW_MESSENGER"].append(description)
+
+            if link:
+                btn = df_messenger._build_button(link, link_title)
+                self._platform_messages["DIALOGFLOW_MESSENGER"].append(btn)
+
+        if "GOOGLE_HANGOUTS" in self._integrations:
+            hangouts_card = hangouts.build_card(
+                text, title, img_url, img_alt, subtitle, link, link_title
+            )
+            self._platform_messages["GOOGLE_HANGOUTS"].append(hangouts_card)
+
+        if "ACTIONS_ON_GOOGLE" in self._integrations:
+            actions_card = actions.build_card(
+                text, title, img_url, img_alt, subtitle, link, link_title, buttons
+            )
+
+            self._messages.append(actions_card)
 
         return self
 
@@ -197,6 +239,53 @@ class _Response(object):
         )
         return carousel
 
+    def add_media(self, url, name, description=None, icon_url=None, icon_alt=None):
+        """Adds a Media Card Response
+
+        Media responses let your Actions play audio content with a
+        playback duration longer than the 240-second limit of SSML.
+
+        Can be included with ask and tell responses.
+        If added to an `ask` response, suggestion chips
+
+         Arguments:
+            url {str} -- Required. Url where the media is stored
+            name {str} -- Name of media card.
+
+        Optional:
+            description {str} -- A description of the item (default: {None})
+            icon_url {str} -- Url of icon image
+            icon_alt {str} -- Accessibility text for icon image
+
+        example usage:
+
+            resp = ask("Check out this tune")
+            resp = resp.add_media(url, "Jazzy Tune")
+            return resp_with_media.suggest("Next Song", "Done")
+
+
+        """
+        media_object = {"contentUrl": url, "name": name}
+        if description:
+            media_object["description"] = description
+
+        if icon_url:
+            media_object["largeImage"] = {}
+            media_object["largeImage"]["imageUri"] = icon_url
+            media_object["largeImage"]["accessibilityText"] = icon_alt or name
+
+        self._messages.append(
+            {
+                "platform": "ACTIONS_ON_GOOGLE",
+                "mediaContent": {"mediaObjects": [media_object], "mediaType": "AUDIO",},
+            }
+        )
+        return self
+
+
+def build_button(title, link):
+    return {"title": title, "openUriAction": {"uri": link}}
+
 
 def build_item(
     title, key=None, synonyms=None, description=None, img_url=None, alt_text=None
@@ -227,7 +316,7 @@ class _CardWithItems(_Response):
     def __init__(self, speech, display_text=None, items=None):
         super(_CardWithItems, self).__init__(speech, display_text)
         self._items = items or list()
-        self._add_message()  # possibly call this later?
+        self._render_func = self._add_message
 
     def _add_message(self):
         raise NotImplementedError
@@ -269,12 +358,20 @@ class _ListSelector(_CardWithItems):
         super(_ListSelector, self).__init__(speech, display_text, items)
 
     def _add_message(self):
+
         self._messages.append(
             {
                 "platform": "ACTIONS_ON_GOOGLE",
                 "listSelect": {"title": self._title, "items": self._items},
             }
         )
+        self._add_platform_msgs()
+
+    def _add_platform_msgs(self):
+
+        if "DIALOGFLOW_MESSENGER" in self._integrations:
+            list_resp = df_messenger._build_list(self._title, self._items)
+            self._platform_messages["DIALOGFLOW_MESSENGER"].extend(list_resp)
 
 
 class _CarouselCard(_ListSelector):
@@ -307,10 +404,12 @@ class ask(_Response):
         self._response["payload"]["google"]["expect_user_response"] = True
 
     def reprompt(self, prompt):
-        self._response["payload"]["google"]["no_input_prompts"] = [
-            {"text_to_speech": prompt}
-        ]
-
+        repromtKey = "text_to_speech"
+        if self._is_ssml:
+            repromtKey = "ssml"
+        repromtResponse = {}
+        repromtResponse[repromtKey] = prompt
+        self._response["payload"]["google"]["no_input_prompts"] = [repromtResponse]
         return self
 
 
@@ -367,18 +466,24 @@ class sign_in(_Response):
     with the `user.profile` local
 
     In order to complete the sign in process, you will need to create an intent with
-    the `actions_intent_SIGN)IN` event
+    the `actions_intent_SIGN_IN` event
     """
 
+    # Payload according to https://developers.google.com/assistant/conversational/helpers#account_sign-in
     def __init__(self, reason=None):
         super(sign_in, self).__init__(speech=None)
 
         self._messages[:] = []
-        self._response["payload"]["google"]["systemIntent"] = {
-            "intent": "actions.intent.SIGN_IN",
-            "data": {
-                "optContext": reason,
-                "@type": "type.googleapis.com/google.actions.v2.SignInValueSpec",
-            },
+        self._response = {
+            "payload": {
+                "google": {
+                    "expectUserResponse": True,
+                    "systemIntent": {
+                        "intent": "actions.intent.SIGN_IN",
+                        "data": {
+                            "@type": "type.googleapis.com/google.actions.v2.SignInValueSpec"
+                        },
+                    },
+                }
+            }
         }
-
