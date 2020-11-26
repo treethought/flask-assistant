@@ -1,0 +1,37 @@
+stages:
+  - test
+  - publish
+
+
+# base test job
+.test:
+  stage: test
+  before_script:
+    - pip install pipenv
+    - pipenv install --dev --skip-lock
+  script:
+    - pipenv run pytest tests/
+
+  only:
+    refs:
+      - merge_requests
+      - master
+      - main
+
+
+test:3.5:
+  extends: .test
+  image: python:3.5-buster
+
+
+test:3.6:
+  extends: .test
+  image: python:3.6-buster
+
+test:3.7:
+  extends: .test
+  image: python:3.7-buster
+
+test:3.8:
+  extends: .test
+  image: python:3.8-buster
