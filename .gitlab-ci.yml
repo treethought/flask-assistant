@@ -17,6 +17,7 @@ stages:
       - merge_requests
       - master
       - main
+      - external_pull_requests
 
 
 test:3.5:
