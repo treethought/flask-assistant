@@ -1,0 +1,64 @@
+stages:
+  - test
+  - publish
+
+
+# base test job
+.test:
+  stage: test
+  before_script:
+    - pip install pipenv
+    - pipenv install --dev --skip-lock
+  script:
+    - pipenv run pytest tests/
+
+  only:
+    refs:
+      - merge_requests
+      - master
+      - main
+      - external_pull_requests
+
+
+test:3.5:
+  extends: .test
+  image: python:3.5-buster
+
+
+test:3.6:
+  extends: .test
+  image: python:3.6-buster
+
+test:3.7:
+  extends: .test
+  image: python:3.7-buster
+
+test:3.8:
+  extends: .test
+  image: python:3.8-buster
+
+.publish:
+  stage: publish
+  image: python:3.7-buster
+  before_script:
+    - pip install setuptools wheel twine
+    - python setup.py sdist bdist_wheel
+    - twine check dist/*
+
+
+publish:staging:
+  extends: .publish
+  script:
+    - twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+  only:
+    refs:
+      - /^v[0-9]+\.[0-9]+\.[0-9]-rc\.[1-9]+$/
+
+publish:prod:
+  extends: .publish
+  when: manual
+  script:
+    - twine upload dist/*
+  only:
+    refs:
+      - /^v[0-9]+\.[0-9]+\.[0-9]$/
