@@ -288,13 +288,47 @@ def build_button(title, link):
 
 
 def build_item(
-    title, key=None, synonyms=None, description=None, img_url=None, alt_text=None
+    title,
+    key=None,
+    synonyms=None,
+    description=None,
+    img_url=None,
+    alt_text=None,
+    event=None,
 ):
-    """Builds an item that may be added to List or Carousel"""
+    """
+    Builds an item that may be added to List or Carousel
+
+    "event" represents the Dialogflow event to be triggered on click for Dialogflow Messenger
+
+    Arguments:
+        title {str} -- Name of the item object
+
+    Keyword Arguments:
+        key {str} -- Key refering to the item.
+                    This string will be used to send a query to your app if selected
+        synonyms {list} -- Words and phrases the user may send to select the item
+                            (default: {None})
+        description {str} -- A description of the item (default: {None})
+        img_url {str} -- URL of the image to represent the item (default: {None})
+        event {dict} -- Dialogflow event to be triggered on click (DF_MESSENGER only)
+
+    Example:
+
+    item = build_item(
+        "My item 1",
+        key="my_item_1",
+        synonyms=["number one"],
+        description="The first item in the list",
+        event={"name": "my-select-event", parameters={"item": "my_item_1"}, languageCode: "en-US"}
+    )
+
+    """
     item = {
         "info": {"key": key or title, "synonyms": synonyms or []},
         "title": title,
         "description": description,
+        "event": event,
     }
 
     if img_url:
@@ -321,7 +355,9 @@ class _CardWithItems(_Response):
     def _add_message(self):
         raise NotImplementedError
 
-    def add_item(self, title, key, synonyms=None, description=None, img_url=None):
+    def add_item(
+        self, title, key, synonyms=None, description=None, img_url=None, event=None
+    ):
         """Adds item to a list or carousel card.
 
         A list must contain at least 2 items, each requiring a title and object key.
@@ -336,8 +372,11 @@ class _CardWithItems(_Response):
                               (default: {None})
             description {str} -- A description of the item (default: {None})
             img_url {str} -- URL of the image to represent the item (default: {None})
+            event {str} -- Dialogflow event to be triggered on click (DF_MESSENGER only)
+            event_param {str} -- Event parameter name sent on click
+
         """
-        item = build_item(title, key, synonyms, description, img_url)
+        item = build_item(title, key, synonyms, description, img_url, event=event)
         self._items.append(item)
         return self
 
