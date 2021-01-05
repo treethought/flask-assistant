@@ -169,7 +169,45 @@ class _Response(object):
         link=None,
         link_title=None,
         buttons=None,
+        btn_icon=None,
+        btn_icon_color=None,
     ):
+        """Presents the user with a card response
+
+        Cards may contain a title, body text, subtitle, an optional image,
+        and a external link in the form of a button
+
+        The only information required for a card are the text and title.
+
+        example usage:
+
+            resp = ask("Here's an example of a card")
+            resp.card(
+                text='The text to display',
+                title='Card Title',
+                img_url='http://example.com/image.png'
+                link='https://google.com',
+                link_title="Google it"
+            )
+
+            return resp
+
+
+        Arguments:
+            text {str} -- The boody text of the card
+            title {str} -- The card title shown in header
+
+        Keyword Arguments:
+            img_url {str} -- URL of the image to represent the item (default: {None})
+            img_alt {str} -- Accessibility text for the image
+            subtitle {str} -- The subtitle displaye dbelow the title
+            link {str} -- The https external URL to link to
+            link_title {str} -- The text of the link button
+            btn_icon {str} -- Icon from Material Icon library (DF_MESSENGER only) (default: chevron_right)
+            btn_icon_color {str} -- Icon color hexcode (DF_MESSENGER only) (default: #FF9800)
+
+
+        """
         df_card = dialogflow.build_card(
             text, title, img_url, img_alt, subtitle, link, link_title
         )
@@ -182,7 +220,9 @@ class _Response(object):
             self._platform_messages["DIALOGFLOW_MESSENGER"].append(description)
 
             if link:
-                btn = df_messenger._build_button(link, link_title)
+                btn = df_messenger._build_button(
+                    link, link_title, btn_icon, btn_icon_color
+                )
                 self._platform_messages["DIALOGFLOW_MESSENGER"].append(btn)
 
         if "GOOGLE_HANGOUTS" in self._integrations:
@@ -222,6 +262,7 @@ class _Response(object):
 
         Arguments:
             title {str} -- Title displayed at top of list card
+            items {items} -- List of list items
 
         Returns:
             _ListSelector -- [_Response object exposing the add_item method]
@@ -356,7 +397,7 @@ class _CardWithItems(_Response):
         raise NotImplementedError
 
     def add_item(
-        self, title, key, synonyms=None, description=None, img_url=None, event=None
+        self, title, key, synonyms=None, description=None, img_url=None, event=None,
     ):
         """Adds item to a list or carousel card.
 
@@ -372,8 +413,7 @@ class _CardWithItems(_Response):
                               (default: {None})
             description {str} -- A description of the item (default: {None})
             img_url {str} -- URL of the image to represent the item (default: {None})
-            event {str} -- Dialogflow event to be triggered on click (DF_MESSENGER only)
-            event_param {str} -- Event parameter name sent on click
+            event {dict} -- Dialogflow event to be triggered on click (DF_MESSENGER only)
 
         """
         item = build_item(title, key, synonyms, description, img_url, event=event)

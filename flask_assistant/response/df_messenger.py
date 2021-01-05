@@ -20,13 +20,21 @@ def _build_description_response(text, title):
     return descr_resp
 
 
-def _build_button(link, link_title):
+def _build_button(link, link_title, icon=None, icon_color=None):
     btn = {
         "type": "button",
-        "icon": {"type": "chevron_right", "color": "#FF9800"},
         "text": link_title,
         "link": link,
     }
+
+    if icon is None:
+        icon = "chevron_right"
+
+    if icon_color is None:
+        icon_color = "#FF9800"
+
+    btn["icon"] = {"type": icon, "color": icon_color}
+
     return btn
 
 
