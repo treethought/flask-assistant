@@ -20,24 +20,34 @@ def _build_description_response(text, title):
     return descr_resp
 
 
-def _build_button(link, link_title):
+def _build_button(link, link_title, icon=None, icon_color=None):
     btn = {
         "type": "button",
-        "icon": {"type": "chevron_right", "color": "#FF9800"},
         "text": link_title,
         "link": link,
     }
+
+    if icon is None:
+        icon = "chevron_right"
+
+    if icon_color is None:
+        icon_color = "#FF9800"
+
+    btn["icon"] = {"type": icon, "color": icon_color}
+
     return btn
 
 
 def _build_list(title, items):
     list_responses = []
+    empty_event = {"name": "", "languageCode": "", "parameters": {}}
     for i in items:
+
         item = {
             "type": "list",
             "title": i["title"],
             "subtitle": i["description"],
-            "event": {"name": "", "languageCode": "", "parameters": {}},
+            "event": i.get("event", empty_event),
         }
         list_responses.append(item)
 
