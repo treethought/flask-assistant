@@ -54,9 +54,21 @@ def _build_list(title, items):
     return list_responses
 
 
+def _build_chip(text, img=None, url=None):
+    c = {"text": text}
+    if img:
+        c["image"] = {"src": {"rawUrl": img}}
+
+    if url:
+        c["link"] = url
+
+    return c
+
+
 def _build_suggestions(*replies):
     chips = {"type": "chips", "options": []}
     for i in replies:
-        chips["options"].append({"text": i})
+        c = _build_chip(i)
+        chips["options"].append(c)
 
     return chips
