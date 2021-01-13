@@ -143,8 +143,26 @@ class _Response(object):
         )
 
         if "DIALOGFLOW_MESSENGER" in self._integrations:
-            chip_resp = df_messenger._build_suggestions(*replies)
-            self._platform_messages["DIALOGFLOW_MESSENGER"].append(chip_resp)
+            existing_chips = False
+            for m in self._platform_messages["DIALOGFLOW_MESSENGER"]:
+                # already has chips, need to add to same object
+                if m.get("type") == "chips":
+                    existing_chips = True
+                    break
+
+            if not existing_chips:
+                chip_resp = df_messenger._build_suggestions(*replies)
+                self._platform_messages["DIALOGFLOW_MESSENGER"].append(chip_resp)
+
+            else:
+                df_chips = []
+                for i in replies:
+                    chip = df_messenger._build_chip(i)
+                    df_chips.append(chip)
+
+                for m in self._platform_messages["DIALOGFLOW_MESSENGER"]:
+                    if m.get("type") == "chips":
+                        m["options"].append(df_chips)
 
         return self
 
