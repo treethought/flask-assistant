@@ -175,6 +175,25 @@ class _Response(object):
             }
         )
 
+        if "DIALOGFLOW_MESSENGER" in self._integrations:
+            existing_chips = None
+            for m in self._platform_messages["DIALOGFLOW_MESSENGER"]:
+                # already has chips, need to add to same object
+                if m.get("type") == "chips":
+                    existing_chips = True
+                    break
+
+            link_chip = df_messenger._build_chip(name, url=url)
+
+            if not existing_chips:
+                chip_resp = {"type": "chips", "options": [link_chip]}
+                self._platform_messages["DIALOGFLOW_MESSENGER"].append(chip_resp)
+
+            else:
+                for m in self._platform_messages["DIALOGFLOW_MESSENGER"]:
+                    if m.get("type") == "chips":
+                        m["options"].append(link_chip)
+
         return self
 
     def card(
