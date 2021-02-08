@@ -253,7 +253,14 @@ class _Response(object):
         # df_messengar car is a combo of description + button
         if "DIALOGFLOW_MESSENGER" in self._integrations:
 
-            description = df_messenger._build_description_response(text, title)
+            if img_url is not None:
+                description = df_messenger._build_info_response(
+                    text, title, img_url, img_alt
+                )
+
+            else:
+                description = df_messenger._build_description_response(text, title)
+
             self._platform_messages["DIALOGFLOW_MESSENGER"].append(description)
 
             if link:
