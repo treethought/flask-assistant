@@ -2,10 +2,10 @@ def _build_info_response(
     text, title, img_url=None, img_alt=None, subtitle=None, link=None, link_title=None,
 ):
 
-    info_resp = {"type": "info", "title": title, "subtitle": subtitle}
+    info_resp = {"type": "info", "title": title, "subtitle": text}
 
     if img_url:
-        info_resp["image"] = {"src": {"rawlUrl": img_url}}
+        info_resp["image"] = {"src": {"rawUrl": img_url}}
 
     if link:
         info_resp["actionLink"] = link
