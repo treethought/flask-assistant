@@ -19,7 +19,7 @@ pyasn1-modules==0.2.8
 pyasn1==0.4.8
 pytz==2020.5
 requests==2.25.1
-rsa==4.6 ; python_version >= '3.6'
+rsa==4.7 ; python_version >= '3.6'
 ruamel.yaml.clib==0.2.2 ; platform_python_implementation == 'CPython' and python_version < '3.9'
 ruamel.yaml==0.16.12
 six==1.15.0
