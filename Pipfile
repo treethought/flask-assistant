@@ -23,7 +23,7 @@ MarkupSafe = "*"
 "ruamel.yaml" = "*"
 Werkzeug = "*"
 google-auth = "*"
-dialogflow = "*"
+google-cloud-dialogflow = "*"
 
 [requires]
 python_version = "3.7"

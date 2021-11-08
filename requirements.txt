@@ -4,10 +4,10 @@ cachetools==4.2.0
 certifi==2020.12.5
 chardet==4.0.0
 click==8.0.0a1
-dialogflow==1.1.0
+google-cloud-dialogflow==2.9.1
 flask==1.1.2
-google-api-core[grpc]==1.24.1
-google-auth==1.24.0
+google-api-core[grpc]==1.28.0
+google-auth==1.25.0
 googleapis-common-protos==1.52.0
 grpcio==1.34.0
 idna==2.10
