@@ -29,7 +29,7 @@ setup(
         "ruamel.yaml",
         "aniso8601",
         "google-auth",
-        "dialogflow",
+        "google-cloud-dialogflow",
     ],
     setup_requires=["pytest-runner"],
     tests_require=["pytest"],

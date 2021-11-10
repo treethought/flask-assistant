@@ -1,5 +1,4 @@
-import dialogflow_v2beta1 as df
-from google.protobuf.json_format import MessageToDict
+from google.cloud import dialogflow_v2 as df
 import logging
 
 
@@ -15,11 +14,11 @@ def build_card(
     if link_title is None:
         link_title = "Learn More"
 
-    button = df.types.intent_pb2.Intent.Message.Card.Button(
+    button = df.Intent.Message.Card.Button(
         text=link_title, postback=link
     )
-    card = df.types.intent_pb2.Intent.Message.Card(title=title, subtitle=text)
+    card = df.Intent.Message.Card(title=title, subtitle=text)
     card.buttons.append(button)
 
-    payload = MessageToDict(card)
+    payload = df.Intent.Message.Card.to_dict(card)
     return {"card": payload, "platform": "GOOGLE_HANGOUTS", "lang": "en"}
