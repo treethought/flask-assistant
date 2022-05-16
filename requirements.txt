@@ -23,5 +23,5 @@ rsa==4.7 ; python_version >= '3.6'
 ruamel.yaml.clib==0.2.2 ; platform_python_implementation == 'CPython' and python_version < '3.9'
 ruamel.yaml==0.16.12
 six==1.15.0
-urllib3==1.26.2
+urllib3==1.26.5
 werkzeug==1.0.1
