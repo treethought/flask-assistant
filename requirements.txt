@@ -24,4 +24,4 @@ ruamel.yaml.clib==0.2.2 ; platform_python_implementation == 'CPython' and python
 ruamel.yaml==0.16.12
 six==1.15.0
 urllib3==1.26.2
-werkzeug==1.0.1
+werkzeug==2.2.3
